@@ -17,9 +17,9 @@
 
  WHAT IS DIFFERENT IN THE OUTPUT
  -------------------------------
-   * links between pages lose the .php extension (index.php -> index.html), so
-     the output works from any base path — a project page at
-     /website/ or a user page at the domain root, with no configuration
+   * links between pages lose the .php extension (index.php -> index.html) and
+     stay relative, so the output works from any base path — a project page
+     under /reponame/ or a user page at the domain root — with no configuration
    * preview.php is NOT built. It needs PHP at request time, and it is an
      officer tool, not a public page
    * sitemap.php is rendered to sitemap.xml and its <loc> values are rewritten
@@ -27,7 +27,7 @@
 
  Usage:
    python tools/build_static.py                       # -> _site/
-   python tools/build_static.py --base-url https://caltech-alpine.github.io/website
+   python tools/build_static.py --base-url https://caltech-alpine.github.io
 """
 
 import argparse

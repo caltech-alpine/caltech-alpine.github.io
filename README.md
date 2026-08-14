@@ -2,6 +2,13 @@
 
 The code behind [alpine.caltech.edu](https://alpine.caltech.edu).
 
+**A live pilot of this rebuild is at <https://caltech-alpine.github.io/>.** It is a
+static render of this repository, published by `.github/workflows/pages.yml` and
+rebuilt every 30 minutes so the calendar stays current. It is marked `noindex` so
+it cannot compete with the club's real site in search results. What the pilot
+gives up, and what running the dynamic PHP version on Caltech hosting would take,
+are both in [docs/HOSTING.md](docs/HOSTING.md).
+
 Plain HTML, CSS, JavaScript and a small amount of PHP. There is **no build step,
 no npm, no database and no CMS**. If you can edit a text file and copy it to a
 server, you can maintain this site.
