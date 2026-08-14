@@ -1,0 +1,93 @@
+# =============================================================================
+#  Publish the site to GitHub Pages
+# =============================================================================
+#  GitHub Pages does not execute PHP, and this site is server-rendered PHP. So
+#  the workflow runs the site against PHP's own dev server, saves every page as
+#  HTML, and publishes that. tools/build_static.py does the rendering and
+#  explains what changes in the output.
+#
+#  WHY THE SCHEDULE. The only live data on the site is the club's Google
+#  Calendar, which the PHP layer already caches for 30 minutes. Rebuilding on
+#  the same 30-minute cadence gives a visitor the same freshness the dynamic
+#  site does. Two caveats worth knowing:
+#    * GitHub runs scheduled workflows late when the fleet is busy. Minutes,
+#      occasionally longer. Nothing here is time-critical enough to care.
+#    * GitHub DISABLES scheduled workflows in a repository with no activity for
+#      60 days, and only emails the last person who touched it. If events stop
+#      updating months from now, look here first.
+#
+#  This publishes a PILOT: --noindex keeps it out of search results so it
+#  cannot compete with the club's real site. Remove that flag if Pages ever
+#  becomes the production home. See docs/HOSTING.md.
+# =============================================================================
+
+name: Publish to Pages
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "*/30 * * * *"      # keep the calendar current
+  workflow_dispatch:             # a "rebuild now" button in the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race. Queue instead of cancelling, so a scheduled
+# rebuild cannot discard a push that is mid-flight.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show the PHP we are building with
+        run: php -v
+
+      - name: Configure Pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Render the site
+        run: |
+          python3 tools/build_static.py \
+            --base-url "${{ steps.pages.outputs.base_url }}" \
+            --noindex
+
+      # Cheap insurance: the build is only as good as the pages it produced, and
+      # a PHP fatal error still returns a 200-byte page rather than failing.
+      - name: Sanity-check the output
+        run: |
+          set -e
+          for f in index events join gear about support 404; do
+            test -s "_site/$f.html" || { echo "missing _site/$f.html"; exit 1; }
+            if grep -qiE "Fatal error|Parse error|Warning:</b>" "_site/$f.html"; then
+              echo "PHP error inside _site/$f.html"; exit 1
+            fi
+            if [ "$(wc -c < "_site/$f.html")" -lt 4000 ]; then
+              echo "_site/$f.html is suspiciously small"; exit 1
+            fi
+          done
+          test -s _site/assets/css/style.css
+          test -f _site/.nojekyll
+          echo "built $(find _site -type f | wc -l) files"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

@@ -1,0 +1,12 @@
+User-agent: *
+Allow: /
+
+# preview.php is deliberately NOT listed here. A Disallow line is a public
+# index of what exists, and the page already sends noindex in its own <head>,
+# which is what actually keeps it out of search results.
+
+# Command-line tools and the calendar cache.
+Disallow: /tools/
+Disallow: /cache/
+
+Sitemap: https://alpine.caltech.edu/sitemap.php

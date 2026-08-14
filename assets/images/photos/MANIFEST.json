@@ -1,0 +1,533 @@
+{
+  "note": "Imported from the old alpine.caltech.edu by tools/import_photos.py. Club's own photographs, moved to the club's new site.",
+  "images": [
+    {
+      "file": "0901201249-hdr.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 277409,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/0901201249_HDR.2e16d0ba.fill-3200x1800-c100.jpg"
+    },
+    {
+      "file": "11380803-694752174003698-1183.jpg",
+      "width": 640,
+      "height": 640,
+      "bytes": 131588,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/climbing",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/11380803_694752174003698_1183.2e16d0ba.fill-850x850-c100.jpg"
+    },
+    {
+      "file": "119192191-934171117070719-22.jpg",
+      "width": 750,
+      "height": 422,
+      "bytes": 86824,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/119192191_934171117070719_2.2546ff05.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "119192191-934171117070719-223.jpg",
+      "width": 750,
+      "height": 422,
+      "bytes": 87229,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/119192191_934171117070719_22.2546ff05.fill-1440x810-c100.jpg"
+    },
+    {
+      "file": "119483697-1019466991832615-3.jpg",
+      "width": 750,
+      "height": 423,
+      "bytes": 81080,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/119483697_1019466991832615_.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "119483697-1019466991832615-33.jpg",
+      "width": 750,
+      "height": 423,
+      "bytes": 81497,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/119483697_1019466991832615_3.2e16d0ba.fill-1440x810-c100.jpg"
+    },
+    {
+      "file": "15539011-1943776002524679-2129162910948130816.jpg",
+      "width": 640,
+      "height": 640,
+      "bytes": 135951,
+      "source_page": "https://alpine.caltech.edu/explore/climbs",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/15539011_1943776002524679_2129162910948130816.width-1980.jpg"
+    },
+    {
+      "file": "82360134-487418791975434-2990.jpg",
+      "width": 1536,
+      "height": 864,
+      "bytes": 179702,
+      "source_page": "https://alpine.caltech.edu/",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/82360134_487418791975434_299.2e16d0ba.fill-1536x864-c100.jpg"
+    },
+    {
+      "file": "alpineclub-davidangel.png",
+      "width": 1428,
+      "height": 804,
+      "bytes": 1453916,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Alpineclub-DavidAngel.2e16d0ba.fill-2880x1620-c100.png"
+    },
+    {
+      "file": "ashish.jpg",
+      "width": 1420,
+      "height": 800,
+      "bytes": 213490,
+      "source_page": "https://alpine.caltech.edu/news",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Ashish_langley.2e16d0ba.fill-1420x800-c100.jpg"
+    },
+    {
+      "file": "baldy-1.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 338623,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/hiking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/baldy_1.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "brownmtsaddle.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 263124,
+      "source_page": "https://alpine.caltech.edu/explore/trail-runs",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/BrownMtSaddle.width-1980.jpg"
+    },
+    {
+      "file": "cac-mammoth-from-sujung.jpg",
+      "width": 1536,
+      "height": 864,
+      "bytes": 268748,
+      "source_page": "https://alpine.caltech.edu/about-us/events/club-trips",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/CAC_Mammoth_from_Sujung.2e16d0ba.fill-1536x864-c100.jpg"
+    },
+    {
+      "file": "cac-red-rocks-turtlehead-suju.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 262899,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/CAC_Red_Rocks_Turtlehead_Su.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "climb.jpg",
+      "width": 299,
+      "height": 168,
+      "bytes": 13814,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Climb.width-878.jpg"
+    },
+    {
+      "file": "cucamonga.jpg",
+      "width": 482,
+      "height": 273,
+      "bytes": 47660,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Cucamonga.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "dawnmine-1.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 455914,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/hiking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/dawnmine_1.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "dsc02582.jpg",
+      "width": 1600,
+      "height": 1065,
+      "bytes": 164353,
+      "source_page": "https://alpine.caltech.edu/about-us/events/stewardship",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/DSC02582.width-1980.jpg"
+    },
+    {
+      "file": "dsc03355-pano-copy.jpg",
+      "width": 1600,
+      "height": 719,
+      "bytes": 183905,
+      "source_page": "https://alpine.caltech.edu/join",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/DSC03355-Pano_copy.width-1980.jpg"
+    },
+    {
+      "file": "eaton-canyon.png",
+      "width": 552,
+      "height": 312,
+      "bytes": 410528,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Eaton_canyon.2e16d0ba.fill-2880x1620-c100.png"
+    },
+    {
+      "file": "elp.jpg",
+      "width": 300,
+      "height": 168,
+      "bytes": 11853,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/ElP.width-878.jpg"
+    },
+    {
+      "file": "elpfun.jpg",
+      "width": 268,
+      "height": 188,
+      "bytes": 18987,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/ElPfun.width-878.jpg"
+    },
+    {
+      "file": "heman.jpg",
+      "width": 640,
+      "height": 362,
+      "bytes": 85849,
+      "source_page": "https://alpine.caltech.edu/news",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/HeMan.2e16d0ba.fill-1420x800-c100.jpg"
+    },
+    {
+      "file": "hine-miller-bike-proj.jpg",
+      "width": 1420,
+      "height": 800,
+      "bytes": 220466,
+      "source_page": "https://alpine.caltech.edu/news",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Hine_Miller_Bike_Proj.2e16d0ba.fill-1420x800-c100.jpg"
+    },
+    {
+      "file": "img-0559.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 495261,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_0559.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "img-20200822-133229.jpg",
+      "width": 1600,
+      "height": 808,
+      "bytes": 286890,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/climbing",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_20200822_133229.2e16d0ba.fill-1980x1000-c100.jpg"
+    },
+    {
+      "file": "img-4526.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 311377,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_4526.6e64b1ff.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "img-4565.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 334501,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_4565.3cd3ff5c.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "img-6251.png",
+      "width": 750,
+      "height": 422,
+      "bytes": 376351,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_6251.2e16d0ba.fill-2880x1620-c100.png"
+    },
+    {
+      "file": "img-6453.png",
+      "width": 750,
+      "height": 422,
+      "bytes": 499849,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_6453.2e16d0ba.fill-2880x1620-c100.png"
+    },
+    {
+      "file": "img-6659.jpg",
+      "width": 750,
+      "height": 423,
+      "bytes": 50685,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_6659.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "img-6666-2.jpg",
+      "width": 1305,
+      "height": 733,
+      "bytes": 184810,
+      "source_page": "https://alpine.caltech.edu/",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_6666_2.2e16d0ba.fill-1536x864-c100.jpg"
+    },
+    {
+      "file": "img-6669.jpg",
+      "width": 948,
+      "height": 535,
+      "bytes": 107619,
+      "source_page": "https://alpine.caltech.edu/",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_6669.2e16d0ba.fill-1536x864-c100.jpg"
+    },
+    {
+      "file": "img-6669-2.jpg",
+      "width": 1086,
+      "height": 611,
+      "bytes": 149332,
+      "source_page": "https://alpine.caltech.edu/",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_6669_2.2e16d0ba.fill-1536x864-c100.jpg"
+    },
+    {
+      "file": "img-7115.jpg",
+      "width": 850,
+      "height": 850,
+      "bytes": 146950,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/climbing",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/IMG_7115.2e16d0ba.fill-850x850-c100.jpg"
+    },
+    {
+      "file": "islip-1.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 437700,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/hiking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/islip_1.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "islip-2.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 314567,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/hiking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/islip_2.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "justinbarham.jpg",
+      "width": 1240,
+      "height": 698,
+      "bytes": 237566,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/JustinBarham.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "kb.jpg",
+      "width": 300,
+      "height": 168,
+      "bytes": 15966,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/KB.width-878.jpg"
+    },
+    {
+      "file": "kb-2.jpg",
+      "width": 275,
+      "height": 183,
+      "bytes": 16823,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/KB_2.width-878.jpg"
+    },
+    {
+      "file": "lake-tahoe-resort.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 420036,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/snow-sports",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/lake-tahoe-resort.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "lower-gab.jpg",
+      "width": 878,
+      "height": 583,
+      "bytes": 111647,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Lower_Gab.width-878.jpg"
+    },
+    {
+      "file": "lower-gab-drop.jpg",
+      "width": 750,
+      "height": 1000,
+      "bytes": 264083,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Lower_Gab_Drop_JVkSzh1.width-878.jpg"
+    },
+    {
+      "file": "lower-sam-tech.jpg",
+      "width": 300,
+      "height": 168,
+      "bytes": 11648,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Lower_Sam_Tech.width-878.jpg"
+    },
+    {
+      "file": "mammoth-mountain-backcountry.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 346456,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/snow-sports",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/mammoth-mountain-backcountr.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "mammoth-mountain-deep.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 87764,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/snow-sports",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/mammoth-mountain-deep.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "mammoth-mountain-resort.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 397095,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/snow-sports",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/mammoth-mountain-resort.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "middle-gab.jpg",
+      "width": 640,
+      "height": 457,
+      "bytes": 88843,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Middle_Gab.width-878.jpg"
+    },
+    {
+      "file": "mtwilson-1.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 312036,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/hiking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/mtwilson_1.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "mvimg-20181123-120659-2.jpg",
+      "width": 850,
+      "height": 850,
+      "bytes": 250020,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/climbing",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/MVIMG_20181123_120659_2.2e16d0ba.fill-850x850-c100.jpg"
+    },
+    {
+      "file": "newcombpass.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 355142,
+      "source_page": "https://alpine.caltech.edu/explore/trail-runs",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/NewcombPass.width-1980.jpg"
+    },
+    {
+      "file": "p7080701.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 300603,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/P7080701.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "sang2012.jpg",
+      "width": 1536,
+      "height": 864,
+      "bytes": 295933,
+      "source_page": "https://alpine.caltech.edu/",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/SanG2012.2e16d0ba.fill-1536x864-c100.jpg"
+    },
+    {
+      "file": "sj-horseflats.jpg",
+      "width": 1600,
+      "height": 1200,
+      "bytes": 687536,
+      "source_page": "https://alpine.caltech.edu/explore/climbs",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/sj_horseflats.width-1980.jpg"
+    },
+    {
+      "file": "strawberry-peak.jpg",
+      "width": 1600,
+      "height": 900,
+      "bytes": 267903,
+      "source_page": "https://alpine.caltech.edu/explore/hikes",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Strawberry_Peak.2e16d0ba.fill-2880x1620-c100.png"
+    },
+    {
+      "file": "sunset-ridge.jpg",
+      "width": 284,
+      "height": 178,
+      "bytes": 8126,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Sunset_ridge.width-878.jpg"
+    },
+    {
+      "file": "talk.jpg",
+      "width": 1072,
+      "height": 603,
+      "bytes": 110793,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/talk_burkett.2229dfd2.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "talk-kelvin.jpg",
+      "width": 1600,
+      "height": 901,
+      "bytes": 234978,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/talk_kelvin.2e16d0ba.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "talk-lecas.jpg",
+      "width": 1160,
+      "height": 653,
+      "bytes": 124284,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/talk_lecas.2ded2c97.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "talk-muscarella.jpg",
+      "width": 1072,
+      "height": 604,
+      "bytes": 111050,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/talk_muscarella.ccdad72f.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "talk-nguyen.jpg",
+      "width": 1370,
+      "height": 771,
+      "bytes": 175674,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/talk_nguyen.0521ffd2.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "talk-owen-miller.jpg",
+      "width": 1059,
+      "height": 596,
+      "bytes": 159921,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/talk_owen_miller.3e501724.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "talk-zinn.jpg",
+      "width": 1125,
+      "height": 634,
+      "bytes": 121531,
+      "source_page": "https://alpine.caltech.edu/about-us/events/talks",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/talk_zinn.e6795734.fill-2880x1620-c100.jpg"
+    },
+    {
+      "file": "top.jpg",
+      "width": 878,
+      "height": 658,
+      "bytes": 193087,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Top.width-878.jpg"
+    },
+    {
+      "file": "trail.jpg",
+      "width": 878,
+      "height": 658,
+      "bytes": 130196,
+      "source_page": "https://alpine.caltech.edu/about-us/activities/mountain-biking",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Trail.width-878.jpg"
+    },
+    {
+      "file": "vito.jpg",
+      "width": 640,
+      "height": 362,
+      "bytes": 86602,
+      "source_page": "https://alpine.caltech.edu/news",
+      "source_url": "https://caltechsites-prod-assets.resources.caltech.edu/alpine/images/Vito.2e16d0ba.fill-1420x800-c100.jpg"
+    }
+  ]
+}

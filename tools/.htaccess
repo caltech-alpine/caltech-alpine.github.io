@@ -1,0 +1,9 @@
+# Command-line maintenance scripts. check.php refuses to run over HTTP anyway,
+# but there is no reason for these to be reachable at all.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

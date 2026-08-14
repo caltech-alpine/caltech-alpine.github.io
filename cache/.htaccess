@@ -1,0 +1,9 @@
+# The cached copy of the public calendar feed. Written by the site, never read
+# over HTTP.
+<IfModule mod_authz_core.c>
+  Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+  Order allow,deny
+  Deny from all
+</IfModule>

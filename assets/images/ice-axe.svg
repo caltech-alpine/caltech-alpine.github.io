@@ -1,0 +1,27 @@
+<!--
+  Placeholder club mark: a single ice axe.
+  Swap this file (or point site.logo in includes/config.php at a new one)
+  when the real logo is ready.
+
+  The shaft runs the full height of the head so the three pieces merge into one
+  solid silhouette. An earlier version started the shaft below the head, which
+  left a notch at the top that read as a broken shape at small sizes.
+
+  The colour is hardcoded rather than currentColor because this file is loaded
+  with <img>, and an SVG used as an image has no parent to inherit from —
+  currentColor there resolves to black, not to the page's accent. If you change
+  the alpenglow token in style.css, change this to match.
+
+  Do NOT paste a CSS custom property name into this comment. A doubled hyphen is
+  illegal inside an XML comment, and a browser parses an SVG loaded through <img>
+  strictly: one of them anywhere in the file makes the whole mark fail to render.
+  Check with: python -c "import xml.etree.ElementTree as E;E.parse('ice-axe.svg')"
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="#c0522d" aria-hidden="true">
+  <!-- shaft, running through the head and tapering to a spike -->
+  <path d="M29.1 12h5.8v36.4l-2.9 11.6-2.9-11.6z"/>
+  <!-- adze -->
+  <path d="M29.1 13.6 12.6 17.7c-2.2.6-2.2 3.8 0 4.4l16.5 4.1z"/>
+  <!-- pick: droops away to the right, as a real one does -->
+  <path d="M34.9 12.8c10.2 1 18.9 5.8 26 14.1l-4.6 3.4C50.3 23.5 43.1 19.5 34.9 18.5z"/>
+</svg>

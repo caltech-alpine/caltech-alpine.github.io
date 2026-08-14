@@ -1,0 +1,67 @@
+# =============================================================================
+#  Caltech Alpine Club — Apache configuration
+# =============================================================================
+#  This file is read by Apache, which is what most Caltech shared hosting runs.
+#  If the site is ever moved to nginx this file is ignored and the equivalent
+#  rules have to be set in the server config instead. Nothing here is required
+#  for the site to work; it is error handling, caching and tidiness.
+# =============================================================================
+
+DirectoryIndex index.php index.html
+
+# Show our own 404 page rather than the server's.
+ErrorDocument 404 /404.php
+
+# Never list the contents of a directory that has no index file.
+Options -Indexes
+
+# ----------------------------------------------------------------- caching --
+# CSS and JS carry a ?v= stamp from the file's modification time (see the
+# asset() helper), so they can be cached hard without going stale.
+<IfModule mod_expires.c>
+  ExpiresActive On
+  ExpiresByType text/css            "access plus 1 year"
+  ExpiresByType application/javascript "access plus 1 year"
+  ExpiresByType image/svg+xml       "access plus 1 month"
+  ExpiresByType image/jpeg          "access plus 1 month"
+  ExpiresByType image/png           "access plus 1 month"
+  ExpiresByType image/webp          "access plus 1 month"
+  # Pages themselves must not be cached: they carry live calendar data.
+  ExpiresByType text/html           "access plus 0 seconds"
+</IfModule>
+
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css text/plain text/xml \
+                                application/javascript application/json image/svg+xml
+</IfModule>
+
+# ----------------------------------------------------------------- headers --
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+  Header set X-Frame-Options "SAMEORIGIN"
+</IfModule>
+
+# ------------------------------------------------------------------- files --
+# The cached calendar copy is public data, but there is no reason to serve it.
+<FilesMatch "\.(cache|ics|log|md|json)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</FilesMatch>
+
+# Local configuration may hold a key. It is a .php file so it would never be
+# served as source, but deny it explicitly anyway.
+<Files "config.local.php">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+  <IfModule !mod_authz_core.c>
+    Order allow,deny
+    Deny from all
+  </IfModule>
+</Files>
