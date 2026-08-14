@@ -12,7 +12,7 @@ require __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'About',
-    'description' => 'The Caltech Alpine Club: founded in 1987, hundreds of members, outdoor '
+    'description' => 'The Caltech Alpine Club: founded in 1987, 200+ active members, outdoor '
                    . 'trips and film screenings for the Caltech community. Officers and how '
                    . 'to reach them.',
     'nav'         => 'about.php',
@@ -89,8 +89,20 @@ require __DIR__ . '/includes/header.php';
             <div class="stat__label">founded by <?= e(cfg('facts.founder')) ?></div>
           </div>
           <div class="stat">
-            <div class="stat__num"><?= e(cfg('facts.banff_since')) ?></div>
-            <div class="stat__label">first year the club hosted the Banff Mountain Film Festival</div>
+            <div class="stat__num"><?= date('Y') - (int) cfg('facts.banff_since') ?></div>
+            <div class="stat__label">
+              years hosting the Banff Mountain Film Festival, since
+              <?= e(cfg('facts.banff_since')) ?>
+            </div>
+          </div>
+          <?php /* The count comes from facts.festivals so this cannot drift out
+                   of step with the same figure on the Support page. */ ?>
+          <div class="stat">
+            <div class="stat__num"><?= count(cfg('facts.festivals')) ?></div>
+            <div class="stat__label">
+              mountain film festivals the club runs:
+              <?= e(implode(', ', array_keys(cfg('facts.festivals')))) ?>
+            </div>
           </div>
         </div>
       </div>

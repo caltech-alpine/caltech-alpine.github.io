@@ -70,18 +70,36 @@ require __DIR__ . '/includes/header.php';
       </div>
 
       <div class="stack">
+        <?php /* Four numbers, four different questions a sponsor actually asks:
+                 how many people, for how long, how visible is the flagship
+                 event, and how much of it is there. Every one is derived from
+                 config rather than typed here, so none of them can go stale
+                 quietly. */ ?>
         <div class="stats">
           <div class="stat">
             <div class="stat__num"><?= e(cfg('facts.members')) ?></div>
-            <div class="stat__label">members across Caltech, JPL, and the local community</div>
+            <div class="stat__label">
+              active members across Caltech, JPL and the local community, about
+              <?= e(cfg('facts.grad_share')) ?> of them graduate students
+            </div>
           </div>
           <div class="stat">
             <div class="stat__num"><?= date('Y') - (int) cfg('facts.founded') ?></div>
             <div class="stat__label">years since the club was founded</div>
           </div>
           <div class="stat">
-            <div class="stat__num"><?= e(cfg('facts.banff_since')) ?></div>
-            <div class="stat__label">first year the club hosted the Banff Mountain Film Festival</div>
+            <div class="stat__num"><?= date('Y') - (int) cfg('facts.banff_since') ?></div>
+            <div class="stat__label">
+              years hosting the Banff Mountain Film Festival, since
+              <?= e(cfg('facts.banff_since')) ?>
+            </div>
+          </div>
+          <div class="stat">
+            <div class="stat__num"><?= count(cfg('facts.festivals')) ?></div>
+            <div class="stat__label">
+              mountain film festivals the club runs:
+              <?= e(implode(', ', array_keys(cfg('facts.festivals')))) ?>
+            </div>
           </div>
         </div>
       </div>

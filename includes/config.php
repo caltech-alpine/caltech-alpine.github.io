@@ -161,10 +161,28 @@ return array(
     'facts' => array(
         'founded'      => 1987,
         'founder'      => 'Fritz Nordby',
-        /* Deliberately not a number. An exact count goes stale the moment
-           somebody graduates, and nobody recounts it. */
-        'members'      => 'Hundreds',
+
+        /* "200+", not "Hundreds". The old site's About page put it at "around
+           200 active members, with approximately 50% grad students, 10%
+           undergrads, plus postdocs, faculty, staff, and JPL and community
+           members" — so "hundreds" was rounding ~200 up into the plural, which
+           is the kind of claim a sponsor can check. The "+" is what lets this
+           stay true without anybody recounting. */
+        'members'      => '200+',
+        'grad_share'   => '50%',
+
+        /* The film festivals the club runs, and the year each started. Kept as
+           data because the COUNT is quoted on two pages: adding one here
+           updates both, and neither page hardcodes "three". Banff has run every
+           year since 2001 except 2019/20, when campus closed three days before
+           the event. Source: the old site's About and Film Festivals pages. */
+        'festivals'    => array(
+            'Banff Mountain Film Festival' => 2001,
+            'Reel Rock'                    => 2010,
+            "No Man's Land"                => 2020,
+        ),
         'banff_since'  => 2001,
+
         'mission'      => 'To foster the Caltech outdoor community by encouraging '
                         . 'mentorship, responsibility, inclusivity, and radness.',
     ),
