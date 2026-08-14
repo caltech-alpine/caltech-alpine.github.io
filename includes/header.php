@@ -163,6 +163,20 @@ $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
       <span class="sr-only">Menu</span>
     </button>
 
+    <?php /* The mobile panel below ships `hidden` and only site.js can reveal
+             it, so with JavaScript blocked a phone had a menu button that did
+             nothing and NO other way to reach another page — the desktop nav is
+             display:none at that width. This unhides the panel and removes the
+             dead button for those visitors. Cheaper than a CSS-only toggle, and
+             unlike shipping the panel open it cannot flash before site.js
+             runs. */ ?>
+    <noscript>
+      <style>
+        #mobile-nav[hidden] { display: block; }
+        .masthead__toggle { display: none; }
+      </style>
+    </noscript>
+
   </div>
 
   <nav class="mobile-nav" id="mobile-nav" aria-label="Main (mobile)" hidden>

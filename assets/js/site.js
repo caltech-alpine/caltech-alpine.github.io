@@ -144,6 +144,29 @@
       var shown = link.textContent.trim();
       if (shown.indexOf('@') === -1) { return; }   // a labelled button, leave it
 
+      /* A link carrying a pre-filled subject is one of the "write to us"
+         blocks, and that prefill is the whole point of it — it is what stands
+         in for a contact form. Replacing it with a copy button threw the
+         subject and body away before anyone could use them, and left the page
+         with no mailto link at all. Keep the link; add a copy button beside
+         it, so the address can be copied AND the prefill still works for
+         whoever does have a mail client. */
+      if (link.search.indexOf('subject=') !== -1) {
+        var beside = document.createElement('button');
+        beside.type = 'button';
+        beside.className = 'copy copy--beside';
+        beside.setAttribute('aria-label', 'Copy ' + shown + ' to the clipboard');
+        beside.title = 'Copy to clipboard';
+        beside.addEventListener('click', function () {
+          navigator.clipboard.writeText(shown).then(function () {
+            beside.classList.add('is-copied');
+            window.setTimeout(function () { beside.classList.remove('is-copied'); }, 1600);
+          });
+        });
+        link.parentNode.insertBefore(beside, link.nextSibling);
+        return;
+      }
+
       var button = document.createElement('button');
       button.type = 'button';
       button.className = 'copy';

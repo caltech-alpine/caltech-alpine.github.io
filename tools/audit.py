@@ -12,10 +12,14 @@
  Then:                      python tools/audit.py http://127.0.0.1:8800
 """
 
+import colorsys
+import os
 import re
 import sys
 import urllib.error
 import urllib.request
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 PAGES = ["index.php", "events.php", "join.php", "gear.php", "about.php",
          "support.php", "404.php"]
@@ -97,8 +101,72 @@ def check(page, html):
         warns.append("%s: missing or very short meta description" % page)
 
 
+# ---------------------------------------------------------------- contrast --
+# The stylesheet documents which token may be used for accent TEXT and which may
+# not. That rule was stated in a comment and then broken in four hover rules, so
+# it is checked here instead. Anything that fails is a WCAG AA failure, not a
+# matter of taste.
+CONTRAST = [
+    ("text",            "paper",   "body text on the page"),
+    ("text",            "paper-2", "body text on the tinted band"),
+    ("text",            "white",   "body text on a card"),
+    ("text-mute",       "paper",   "muted text on the page"),
+    ("text-mute",       "paper-2", "muted text on the tinted band"),
+    ("text-mute",       "white",   "muted text on a card"),
+    ("alpenglow-dark",  "paper",   "--accent-text on the page"),
+    ("alpenglow-dark",  "paper-2", "--accent-text on the tinted band"),
+    ("alpenglow-dark",  "white",   "--accent-text on a card"),
+    ("alpenglow-hover", "paper",   "--alpenglow-hover on the page"),
+    ("alpenglow-hover", "paper-2", "--alpenglow-hover on the tinted band"),
+    ("alpenglow-hover", "white",   "--alpenglow-hover on a card"),
+    ("on-dark",         "ink",     "text on a dark section"),
+    ("on-dark-mute",    "ink",     "muted text on a dark section"),
+    ("accent-on-dark",  "ink",     "accent text on a dark section"),
+    ("white",           "alpenglow", "button label on the accent fill"),
+    ("glacier",         "paper",   "glacier text on the page"),
+]
+
+
+def _lum(rgb):
+    def f(c):
+        return c / 12.92 if c <= 0.03928 else ((c + 0.055) / 1.055) ** 2.4
+    r, g, b = [f(c) for c in rgb]
+    return 0.2126 * r + 0.7152 * g + 0.0722 * b
+
+
+def contrast_check():
+    css_path = os.path.join(ROOT, "assets", "css", "style.css")
+    css = open(css_path, encoding="utf-8").read()
+
+    tokens = {}
+    for m in re.finditer(r"--([a-z0-9-]+):\s*hsl\(\s*([\d.]+)\s+([\d.]+)%\s+([\d.]+)%\s*\)", css):
+        tokens[m.group(1)] = colorsys.hls_to_rgb(
+            float(m.group(2)) / 360.0, float(m.group(4)) / 100.0, float(m.group(3)) / 100.0)
+
+    for fg, bg, label in CONTRAST:
+        if fg not in tokens or bg not in tokens:
+            warns.append("contrast: token --%s or --%s is gone" % (fg, bg))
+            continue
+        la, lb = _lum(tokens[fg]), _lum(tokens[bg])
+        r = (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+        if r < 4.5:
+            fails.append("contrast: %s is %.2f:1, under the AA floor of 4.5" % (label, r))
+
+    # And the rule the tokens exist to enforce: the bright accent is for fills,
+    # icons and large display type. It must never be a plain text colour.
+    for m in re.finditer(r"([^{}]+)\{([^}]*)\}", css):
+        sel, body = " ".join(m.group(1).split()), m.group(2)
+        if re.search(r"(?<!-)\bcolor:\s*var\(--alpenglow\)\s*;", body) \
+                and "hero__title" not in sel and "::marker" not in sel \
+                and "__icon" not in sel:
+            fails.append("contrast: %s colours text with --alpenglow "
+                         "(4.43:1 on paper, 4.07:1 on tint) — use --accent-text "
+                         "or --alpenglow-hover" % sel)
+
+
 def main():
     base = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8800").rstrip("/")
+    contrast_check()
     for page in PAGES:
         html = get(base, page)
         print("  %-12s %6d bytes" % (page, len(html)))
