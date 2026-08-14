@@ -60,7 +60,7 @@ require __DIR__ . '/includes/header.php';
         <p class="step__same">Join the mailing list</p>
         <h2>If you are Caltech or JPL</h2>
         <p>
-          Sign up on the list yourself. It carries trips, film festivals, socials
+          Sign up on the list yourself. It carries trips, film festivals, socials,
           and club elections.
         </p>
         <p class="step__hint">
@@ -104,7 +104,7 @@ require __DIR__ . '/includes/header.php';
         <h2>Join Slack</h2>
         <p>
           Not required, but it is where most of the week to week happens: finding
-          partners, asking questions and organising informal outings, with a separate
+          partners, asking questions, and organising informal outings, with a separate
           channel per activity.
         </p>
         <?php if ($slack): ?>
@@ -249,9 +249,9 @@ require __DIR__ . '/includes/header.php';
         ),
         array(
             'q' => 'How does the club handle safety?',
-            'a' => '<p>Trip organisers state the experience, fitness and equipment a trip '
+            'a' => '<p>Trip organisers state the experience, fitness, and equipment a trip '
                  . 'requires before people sign up, and deciding a trip is not for you is a '
-                 . 'normal outcome. Avalanche beacons, shovels, probes, helmets and satellite '
+                 . 'normal outcome. Avalanche beacons, shovels, probes, helmets, and satellite '
                  . 'messengers are all available from the club or the Caltech Y. The club follows and teaches Leave '
                  . 'No Trace practice.</p>',
         ),

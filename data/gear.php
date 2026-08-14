@@ -31,7 +31,7 @@ return array(
         'groups' => array(
 
             'Camping and backpacking' => array(
-                'Tents, sleeping bags and stoves',
+                'Tents, sleeping bags, and stoves',
                 'Bear canisters',
             ),
 
@@ -39,10 +39,10 @@ return array(
                 'Snowshoes',
                 'Ice axes',
                 'Crampons (strap-on)',
-                'Avalanche beacons, shovels and probes',
+                'Avalanche beacons, shovels, and probes',
                 'Snow pickets and a snow saw',
-                'Touring skis and a splitboard, with skins, bindings and poles',
-                'Ski wax kits, including iron, edge tuner, scraper and brush',
+                'Touring skis and a splitboard, with skins, bindings, and poles',
+                'Ski wax kits, including iron, edge tuner, scraper, and brush',
             ),
 
             'Climbing' => array(
@@ -68,21 +68,21 @@ return array(
         'groups' => array(
 
             'Trad climbing' => array(
-                'Two trad racks — Black Diamond C4 doubles, nuts, nut tool, prusik and an ATC Guide',
+                'Two trad racks — Black Diamond C4 doubles, nuts, nut tool, prusik, and an ATC Guide',
                 'Wide gear — Black Diamond C4 #5 and #6',
                 'Small gear — Black Diamond C3 #00 to #1',
             ),
 
             'Ice and alpine' => array(
                 'Automatic crampons',
-                'Ice tools (Petzl Quark, hammer and adze)',
+                'Ice tools (Petzl Quark, hammer, and adze)',
                 'Ice screws',
-                'Crevasse rescue kits — Microtraxion, pulley, Tibloc and locking carabiners',
+                'Crevasse rescue kits — Microtraxion, pulley, Tibloc, and locking carabiners',
                 'Four-season tents',
             ),
 
             'Packrafting' => array(
-                'Kokopelli packrafts with paddles, PFDs, a helmet and a pump',
+                'Kokopelli packrafts with paddles, PFDs, a helmet, and a pump',
             ),
         ),
     ),

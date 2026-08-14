@@ -29,7 +29,7 @@ require __DIR__ . '/includes/header.php';
     <p class="eyebrow"><?= icon('heart', 'icon icon--xs') ?>Support</p>
     <h1 class="h1">Support the Alpine Club</h1>
     <p class="lede">
-      Sponsorship and donations support club trips, shared equipment and the
+      Sponsorship and donations support club trips, shared equipment, and the
       club's film festivals.
     </p>
   </div>
@@ -79,7 +79,7 @@ require __DIR__ . '/includes/header.php';
           <div class="stat">
             <div class="stat__num"><?= e(cfg('facts.members')) ?></div>
             <div class="stat__label">
-              active members across Caltech, JPL and the local community, about
+              active members across Caltech, JPL, and the local community, about
               <?= e(cfg('facts.grad_share')) ?> of them graduate students
             </div>
           </div>
@@ -173,7 +173,7 @@ require __DIR__ . '/includes/header.php';
         <div class="prose mt-lg">
           <h3>Donating equipment</h3>
           <p>
-            Much of the club's own stock was donated. Tents, packs, ropes, hardware, skis
+            Much of the club's own stock was donated. Tents, packs, ropes, hardware, skis,
             and snow gear are all useful, and equipment that is worn but still serviceable
             is worth offering.
           </p>

@@ -46,7 +46,7 @@ require __DIR__ . '/includes/header.php';
         <h2 class="h2">Getting people outside</h2>
         <div class="prose mt-lg">
           <p>
-            The club organises hiking, backpacking, trail running, climbing and
+            The club organises hiking, backpacking, trail running, climbing, and
             other outdoor trips, and keeps a stock of equipment members can borrow.
             What runs in a given year depends on who is leading it, so the
             <a href="<?= e(url('events.php')) ?>">calendar</a> is the best guide to
@@ -58,7 +58,7 @@ require __DIR__ . '/includes/header.php';
             climbers.
           </p>
           <p>
-            Members are graduate students, undergraduates, postdocs, faculty, staff and
+            Members are graduate students, undergraduates, postdocs, faculty, staff, and
             JPL employees, and range from experienced mountaineers to people on their
             first outdoor trip.
           </p>
@@ -82,7 +82,7 @@ require __DIR__ . '/includes/header.php';
         <div class="stats stats--light">
           <div class="stat">
             <div class="stat__num"><?= e(cfg('facts.members')) ?></div>
-            <div class="stat__label">members across Caltech, JPL and the local community</div>
+            <div class="stat__label">members across Caltech, JPL, and the local community</div>
           </div>
           <div class="stat">
             <div class="stat__num"><?= e(cfg('facts.founded')) ?></div>

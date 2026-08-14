@@ -16,7 +16,7 @@ require __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'Events & Trips',
-    'description' => 'Upcoming Caltech Alpine Club hikes, trips, talks and socials, straight '
+    'description' => 'Upcoming Caltech Alpine Club hikes, trips, talks, and socials, straight '
                    . 'from the club calendar, plus an archive of where the club has been.',
     'nav'         => 'events.php',
 );
@@ -66,7 +66,7 @@ echo json_encode(count($ld) === 1 ? $ld[0] : $ld, JSON_UNESCAPED_SLASHES);
     <p class="eyebrow"><?= icon('calendar', 'icon icon--xs') ?>Events</p>
     <h1 class="h1">Events and trips</h1>
     <p class="lede">
-      Hikes, trips, talks, socials and film screenings.
+      Hikes, trips, talks, socials, and film screenings.
     </p>
   </div>
 </header>

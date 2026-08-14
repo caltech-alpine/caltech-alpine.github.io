@@ -96,13 +96,16 @@ require __DIR__ . '/includes/header.php';
         <div class="prose mt-lg">
           <p>
             Tents, sleeping bags, stoves, crampons, ice axes, avalanche equipment,
-            touring skis, splitboards and satellite messengers, for about $1 per day
+            touring skis, splitboards, and satellite messengers, for about $1 per day
             through the Caltech&nbsp;Y. Specialist climbing and packrafting equipment
             is held by the club directly.
           </p>
         </div>
         <div class="btn-row mt-lg">
-          <a class="btn btn--primary" href="<?= e(url('gear.php#rental')) ?>">Borrow gear</a>
+          <a class="btn btn--primary btn--gated" href="<?= e(url('gear.php#rental')) ?>">
+            <span class="btn__label">Borrow gear</span>
+            <span class="btn__gate">Caltech / JPL only</span>
+          </a>
           <a class="btn btn--ghost" href="<?= e(url('support.php#donate')) ?>">Donate gear</a>
         </div>
       </div>
@@ -137,7 +140,7 @@ require __DIR__ . '/includes/header.php';
           </p>
           <p>
             Members are graduate students, undergraduates, postdocs, faculty, staff,
-            JPL employees and people from the wider community, and range from
+            JPL employees, and people from the wider community, and range from
             experienced climbers and mountaineers to people on their first outdoor
             trip.
           </p>
@@ -160,7 +163,7 @@ require __DIR__ . '/includes/header.php';
         <?= icon('hike', 'icon icon--lg pillar__icon') ?>
         <h3>Trips</h3>
         <p>
-          Hikes, trail runs, climbing days and longer trips, organised by officers
+          Hikes, trail runs, climbing days, and longer trips, organised by officers
           and announced on the
           <a href="<?= e(url('join.php')) ?>">mailing list</a>.
         </p>
@@ -262,8 +265,8 @@ require __DIR__ . '/includes/header.php';
         <p class="eyebrow"><?= icon('heart', 'icon icon--xs') ?>Support</p>
         <h3 class="h3">Support the club</h3>
         <p class="lede mt-lg">
-          Sponsorship, donations and donated equipment pay for club trips, shared
-          gear and the film festivals.
+          Sponsorship, donations, and donated equipment pay for club trips, shared
+          gear, and the film festivals.
         </p>
         <div class="btn-row mt-lg">
           <a class="btn btn--light" href="<?= e(url('support.php#sponsor')) ?>">Sponsorship</a>

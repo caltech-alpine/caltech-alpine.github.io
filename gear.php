@@ -12,7 +12,7 @@ require __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'Gear',
-    'description' => 'Borrow club tents, crampons, avalanche equipment, touring skis and '
+    'description' => 'Borrow club tents, crampons, avalanche equipment, touring skis, and '
                    . 'satellite messengers from the Caltech Alpine Club. Equipment is '
                    . 'available to Caltech and JPL affiliates.',
     'nav'         => 'gear.php',
@@ -51,32 +51,36 @@ require __DIR__ . '/includes/header.php';
     <div class="split split--wide-left">
       <div>
         <h2 class="h2">Renting and borrowing</h2>
-        <div class="prose mt-lg">
-          <?php /* THE ELIGIBILITY RULE COVERS BOTH POOLS. It reads as a Caltech Y
-                   rule because the Y administers the general kit, but it applies to
-                   the club's own specialist gear too — so it is stated once, up
-                   front, before either subsection, and never scoped to one of
-                   them. Club MEMBERSHIP is the thing that is open to anyone; that
-                   distinction is the one worth keeping straight here. */ ?>
-          <p>
-            <strong>Equipment is available to Caltech and JPL affiliates only</strong>,
-            whether it comes from the Caltech Y or from the club. Club membership
-            itself is open to anyone — non-affiliates are welcome on trips, but need
-            their own kit.
+        <?php /* THE ELIGIBILITY RULE COVERS BOTH POOLS, and it is the one fact on
+                 this page that decides whether any of the rest applies to you. It
+                 was a sentence inside a paragraph, which is where a scanning
+                 reader misses it, so it is a callout — and it is repeated on both
+                 booking buttons below, because the people who need it most are
+                 the ones who read only the buttons. Club MEMBERSHIP is open to
+                 anyone; that is the distinction worth keeping straight. */ ?>
+        <div class="gate mt-lg">
+          <p class="gate__headline">
+            Equipment is for Caltech and JPL affiliates only.
+          </p>
+          <p class="gate__detail">
+            That covers both the Caltech Y's general kit and the club's own specialist
+            gear. Club membership is open to anyone — non-affiliates are welcome in the
+            club, on trips, and at events, but need to bring their own equipment.
           </p>
         </div>
 
         <div class="prose mt-lg">
           <h3>General kit — rented from the Caltech Y</h3>
           <p>
-            Tents, sleeping bags, stoves, snowshoes and the rest are booked through the
+            Tents, sleeping bags, stoves, snowshoes, and the rest are booked through the
             <strong>Caltech Y</strong>, which handles pickup and return during business
             hours. Most items cost about $1 per day.
           </p>
         </div>
         <div class="btn-row mt-lg">
-          <a class="btn btn--primary" href="<?= e(cfg('links.gear_rental')) ?>" rel="noopener">
-            Book through the Caltech Y <?= icon('external', 'icon icon--xs') ?>
+          <a class="btn btn--primary btn--gated" href="<?= e(cfg('links.gear_rental')) ?>" rel="noopener">
+            <span class="btn__label">Rent from the Caltech Y <?= icon('external', 'icon icon--xs') ?></span>
+            <span class="btn__gate">Caltech / JPL only</span>
           </a>
         </div>
 
@@ -88,7 +92,7 @@ require __DIR__ . '/includes/header.php';
                      they are. Degrades in two steps — no email drops the brackets,
                      no officer at all drops the name and leaves the role linked to
                      the roster. */ ?>
-            Rock, ice and packrafting equipment belongs to the club rather than the Y,
+            Rock, ice, and packrafting equipment belongs to the club rather than the Y,
             and members borrow it. Submit the reservation form and our
             <a href="<?= e(url('about.php#officers')) ?>">Gear Officer</a><?php
               if ($gearOfficer):
@@ -102,8 +106,9 @@ require __DIR__ . '/includes/header.php';
         </div>
         <?php if (cfg('links.gear_form')): ?>
           <div class="btn-row mt-lg">
-            <a class="btn btn--primary" href="<?= e(cfg('links.gear_form')) ?>" rel="noopener">
-              Reserve club gear <?= icon('external', 'icon icon--xs') ?>
+            <a class="btn btn--primary btn--gated" href="<?= e(cfg('links.gear_form')) ?>" rel="noopener">
+              <span class="btn__label">Borrow from the club <?= icon('external', 'icon icon--xs') ?></span>
+              <span class="btn__gate">Caltech / JPL only</span>
             </a>
           </div>
         <?php endif; ?>
@@ -125,7 +130,7 @@ require __DIR__ . '/includes/header.php';
 
         <div class="note">
           <?= icon('heart', 'icon icon--xs') ?>
-          <p>You provide your own consumables, including batteries, fuel and ski
+          <p>You provide your own consumables, including batteries, fuel, and ski
              wax, and are responsible for returning equipment in working order. inReach
              devices charge for features beyond basic SOS and preset messages, and any
              backcountry rescue is charged to whoever triggers it.</p>

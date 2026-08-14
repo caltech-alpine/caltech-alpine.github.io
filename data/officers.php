@@ -108,7 +108,7 @@ return array(
         'handles' => 'Hiking and backpacking trips',
         'email'   => 'mpfreema@caltech.edu',
         'group'   => 'Activity Leaders',
-        'photo'   => '',
+        'photo'   => 'max-freeman.jpg',
     ),
 
     array(
