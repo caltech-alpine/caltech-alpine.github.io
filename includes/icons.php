@@ -4,7 +4,7 @@
  *  Icon sprite — printed once per page, referenced with icon('name').
  * ============================================================================
  *  Inline rather than an icon font or an external library: no extra request,
- *  no dependency, and every icon inherits the surrounding text colour.
+ *  no dependency, and every icon inherits the surrounding text color.
  *
  *  To add one, copy a <symbol>, give it a new id, keep the 24x24 viewBox and
  *  the stroke style so it matches the rest.

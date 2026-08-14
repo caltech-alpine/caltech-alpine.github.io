@@ -228,7 +228,7 @@ lib/calendar/        The Google Calendar integration. You should never need to
   Tags.php
 
 assets/
-  css/style.css      One stylesheet. All colours and sizes are tokens at the top.
+  css/style.css      One stylesheet. All colors and sizes are tokens at the top.
   js/site.js         Menu, dropdowns, FAQ. The site works without it.
   images/
 
@@ -412,9 +412,9 @@ Do not put deploy credentials in this repository under any circumstances.
 
 ## Editing the design
 
-All colours, type sizes and spacing are CSS custom properties in the `:root`
+All colors, type sizes and spacing are CSS custom properties in the `:root`
 block at the top of `assets/css/style.css`. Change a value there and it updates
-consistently across the whole site. The rest of the file is organised into
+consistently across the whole site. The rest of the file is organized into
 numbered sections with a table of contents at the top.
 
 The site loads one webfont (Archivo) from Google Fonts. To remove it, delete the

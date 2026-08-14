@@ -104,7 +104,7 @@ require __DIR__ . '/includes/header.php';
         <h2>Join Slack</h2>
         <p>
           Not required, but it is where most of the week to week happens: finding
-          partners, asking questions, and organising informal outings, with a separate
+          partners, asking questions, and organizing informal outings, with a separate
           channel per activity.
         </p>
         <?php if ($slack): ?>
@@ -229,7 +229,7 @@ require __DIR__ . '/includes/header.php';
         array(
             'q' => 'Do I need prior experience?',
             'a' => '<p>Not for most club events. Hikes, socials, talks, and film screenings '
-                 . 'assume no experience. Climbing and snow trips vary, and trip organisers '
+                 . 'assume no experience. Climbing and snow trips vary, and trip organizers '
                  . 'state the experience and fitness a given trip requires.</p>',
         ),
         array(
@@ -243,13 +243,13 @@ require __DIR__ . '/includes/header.php';
         array(
             'q' => 'How do I find people to go with?',
             'a' => '<p>Most coordination happens on Slack: post what you want to do and when. '
-                 . 'The club\'s activity leaders also organise outings that members can join — '
+                 . 'The club\'s activity leaders also organize outings that members can join — '
                  . 'see <a href="' . e(url('about.php#officers')) . '">who currently leads '
                  . 'what</a>.</p>',
         ),
         array(
             'q' => 'How does the club handle safety?',
-            'a' => '<p>Trip organisers state the experience, fitness, and equipment a trip '
+            'a' => '<p>Trip organizers state the experience, fitness, and equipment a trip '
                  . 'requires before people sign up, and deciding a trip is not for you is a '
                  . 'normal outcome. Avalanche beacons, shovels, probes, helmets, and satellite '
                  . 'messengers are all available from the club or the Caltech Y. The club follows and teaches Leave '

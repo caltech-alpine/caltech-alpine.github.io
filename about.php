@@ -30,7 +30,7 @@ require __DIR__ . '/includes/header.php';
     <p class="eyebrow"><?= icon('mountain', 'icon icon--xs') ?>About</p>
     <h1 class="h1">About the Alpine Club</h1>
     <p class="lede">
-      The Caltech Alpine Club organises outdoor trips and film screenings for the
+      The Caltech Alpine Club organizes outdoor trips and film screenings for the
       Caltech community.
     </p>
   </div>
@@ -46,7 +46,7 @@ require __DIR__ . '/includes/header.php';
         <h2 class="h2">Getting people outside</h2>
         <div class="prose mt-lg">
           <p>
-            The club organises hiking, backpacking, trail running, climbing, and
+            The club organizes hiking, backpacking, trail running, climbing, and
             other outdoor trips, and keeps a stock of equipment members can borrow.
             What runs in a given year depends on who is leading it, so the
             <a href="<?= e(url('events.php')) ?>">calendar</a> is the best guide to

@@ -33,6 +33,20 @@ LIST_ADDRESS = "alpineclub@caltech.edu"
 PLACEHOLDERS = ("lorem ipsum", "TODO", "FIXME", "placeholder text",
                 "REPLACE ME", "your text here")
 
+# AMERICAN ENGLISH, everywhere. This is a Caltech club writing for a Caltech
+# audience, and the site had drifted into British spelling ("organised",
+# "colour", "behaviour"). Checked rather than remembered, because one page
+# written by one officer is all it takes to mix the two.
+BRITISH = {
+    "organis": "organiz", "colour": "color", "behaviour": "behavior",
+    "recognis": "recogniz", "apologis": "apologiz", "analyse": "analyze",
+    "favourite": "favorite", "travelling": "traveling", "neighbour": "neighbor",
+    "centre": "center", "licence": "license", "defence": "defense",
+    "programme": "program", "catalogue": "catalog", "grey": "gray",
+    "whilst": "while", "learnt": "learned", "towards": "toward",
+    "cancelled": "canceled", "modelling": "modeling", "practise": "practice",
+}
+
 fails, warns = [], []
 
 
@@ -90,6 +104,13 @@ def check(page, html):
     for p in PLACEHOLDERS:
         if p.lower() in text.lower():
             fails.append("%s: placeholder text %r still on the page" % (page, p))
+
+    # --- American English ----------------------------------------------------
+    low = text.lower()
+    for brit, amer in BRITISH.items():
+        if re.search(r"\b%s" % re.escape(brit), low):
+            fails.append("%s: British spelling %r on the page — use %r"
+                         % (page, brit, amer))
 
     # --- head ----------------------------------------------------------------
     if '<meta name="viewport"' not in html:

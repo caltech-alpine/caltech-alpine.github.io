@@ -1,8 +1,8 @@
 /* ==========================================================================
    CALTECH ALPINE CLUB
-   One stylesheet, organised top to bottom. No framework, no build step.
+   One stylesheet, organized top to bottom. No framework, no build step.
 
-     1. Design tokens        the colours, type sizes and spacing, all in one
+     1. Design tokens        the colors, type sizes and spacing, all in one
      2. Reset and base       sensible defaults
      3. Typography           headings, lede, prose
      4. Layout               wrap, section, grids
@@ -26,7 +26,7 @@
    ========================================================================== */
 
 :root {
-  /* --- Colour ------------------------------------------------------------
+  /* --- Color ------------------------------------------------------------
      Written in HSL rather than hex so the shades are readable and derivable:
      same hue, walk the lightness. Granite and warm paper, with alpenglow
      doing all the pointing. Used sparingly on purpose — when everything is
@@ -228,7 +228,7 @@ h1, h2, h3, h4 {
   text-wrap: pretty;
 }
 /* Any dark ground. This used to key off `.on-dark`, which left every .lede
-   inside a .section--dark at 3.3:1 — grey text on near-black, under the AA
+   inside a .section--dark at 3.3:1 — gray text on near-black, under the AA
    floor. `.on-dark` is gone now: no template ever set it. */
 .section--dark .lede,
 .section--dark .step__hint { color: var(--on-dark-mute); }
@@ -569,7 +569,7 @@ h1, h2, h3, h4 {
   padding-block: .55rem;
 }
 .brand__logo { width: 2.1rem; height: 2.1rem; }
-/* The mark's colour lives in assets/images/ice-axe.svg, not here: it is loaded
+/* The mark's color lives in assets/images/ice-axe.svg, not here: it is loaded
    with <img>, so it cannot inherit anything from this stylesheet. */
 .brand__logo--placeholder { opacity: .95; }
 .brand__text { display: grid; line-height: 1.05; }

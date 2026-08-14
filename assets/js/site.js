@@ -1,5 +1,5 @@
 /* ==========================================================================
-   CALTECH ALPINE CLUB — site behaviour
+   CALTECH ALPINE CLUB — site behavior
    --------------------------------------------------------------------------
    Vanilla JavaScript, no libraries, no build step.
 
@@ -113,7 +113,7 @@
 
   Array.prototype.forEach.call(cards, function (card) {
     card.addEventListener('click', function (event) {
-      // Anything that is already interactive keeps its own behaviour.
+      // Anything that is already interactive keeps its own behavior.
       if (event.target.closest('a, button')) { return; }
       var opener = card.querySelector('[data-open]');
       openDialog(card.getAttribute('data-dialog'), opener);
@@ -127,7 +127,7 @@
      tab where a mailto link does nothing useful.
 
      Only links whose visible text IS an address are converted — the action
-     buttons ("Contact the officers") keep their mailto behaviour, since
+     buttons ("Contact the officers") keep their mailto behavior, since
      those carry a pre-filled subject and body worth opening a client for.
 
      Writing to the clipboard needs no permission prompt; it does need a

@@ -53,7 +53,7 @@ class AlpineEvent
     /** True for date-only events ("all day" in Google Calendar). */
     public $allDay = false;
 
-    /** True when the organiser cancelled it but it is still in the feed. */
+    /** True when the organizer cancelled it but it is still in the feed. */
     public $cancelled = false;
 
     /** May be an empty string — templates must cope. */

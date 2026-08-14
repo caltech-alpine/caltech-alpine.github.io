@@ -286,7 +286,7 @@ require __DIR__ . '/includes/header.php';
     <div class="prose mt-lg">
       <ul>
         <li><code>[HIKE] Test hike</code> — the tag becomes a label and the prefix is removed</li>
-        <li><code>[NONSENSE] Test</code> — unrecognised tag, should not break the card</li>
+        <li><code>[NONSENSE] Test</code> — unrecognized tag, should not break the card</li>
         <li>A title with no prefix, such as <em>Ski waxing party</em> — should be guessed as SNOW</li>
         <li>An all-day event — should show "All day" rather than a time</li>
         <li>A multi-day event — should show a date range, and the end date must not be a day late</li>

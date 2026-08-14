@@ -2,7 +2,7 @@
 /**
  * Homepage.
  *
- * Answers, in order: what the club is, what is coming up, what it organises,
+ * Answers, in order: what the club is, what is coming up, what it organizes,
  * what members can borrow, who runs it, and how to join.
  */
 
@@ -163,7 +163,7 @@ require __DIR__ . '/includes/header.php';
         <?= icon('hike', 'icon icon--lg pillar__icon') ?>
         <h3>Trips</h3>
         <p>
-          Hikes, trail runs, climbing days, and longer trips, organised by officers
+          Hikes, trail runs, climbing days, and longer trips, organized by officers
           and announced on the
           <a href="<?= e(url('join.php')) ?>">mailing list</a>.
         </p>
@@ -189,7 +189,7 @@ require __DIR__ . '/includes/header.php';
         <?= icon('social', 'icon icon--lg pillar__icon') ?>
         <h3>Finding partners</h3>
         <p>
-          Members use Slack to find partners and organise informal outings between
+          Members use Slack to find partners and organize informal outings between
           the scheduled trips.
         </p>
       </div>

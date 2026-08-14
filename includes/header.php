@@ -73,7 +73,7 @@ $navItems = require __DIR__ . '/nav.php';
 <meta property="og:url" content="<?= e($canonicalUrl) ?>">
 <?php
 /* Link-preview image. A real photo at assets/images/social.jpg wins; the
-   generated fallback keeps Slack and iMessage from showing a bare grey box,
+   generated fallback keeps Slack and iMessage from showing a bare gray box,
    which is how most people will first meet this site. */
 $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
          : (alpine_has_image('social-default.png') ? 'images/social-default.png' : '');

@@ -313,7 +313,7 @@ function alpine_events_empty($dark = false)
       <h3>No upcoming events</h3>
       <p>
         There are no events on the club calendar at the moment. Informal trips are
-        often organised on Slack at short notice.
+        often organized on Slack at short notice.
       </p>
       <div class="btn-row">
         <a class="btn <?= $dark ? 'btn--light' : 'btn--primary' ?>" href="<?= e(url('join.php')) ?>">
