@@ -112,7 +112,7 @@ return array(
     ),
 
     array(
-        'name'    => 'Julian F. Schmitt',
+        'name'    => 'Julian Schmitt',
         'role'    => 'Trail Run Tyrant',
         'handles' => 'The weekly trail run',
         'email'   => 'jschmitt@caltech.edu',
