@@ -25,9 +25,12 @@ return array(
         'name'        => 'Caltech Alpine Club',
         'short'       => 'Alpine Club',
         'tagline'     => 'Less lab. More mountains.',
-        'description' => 'Hiking, backpacking, climbing, and more, to get Caltech and JPL '
-                       . 'outdoors. The Alpine Club has been running trips since 1987, and '
-                       . 'anyone can join.',
+        /* Search results and link previews only. Deliberately NOT the same as the
+           hero line: this one has to carry the activity words somebody would
+           actually type into a search box. */
+        'description' => 'Hiking, backpacking, climbing and skiing with the Caltech Alpine '
+                       . 'Club: trips, shared gear and people to go with, since 1987. '
+                       . 'Anyone can join.',
         'url'         => 'https://alpine.caltech.edu',
 
         // Drop a logo file in assets/images/ and put its name here. Leave it

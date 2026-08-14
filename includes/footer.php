@@ -9,7 +9,7 @@
       <img class="site-footer__mark" src="<?= e(asset('images/ice-axe.svg')) ?>"
            alt="" width="32" height="32" aria-hidden="true">
       <p class="site-footer__blurb">
-        Hiking, backpacking, climbing, and more, to get Caltech and JPL outdoors.
+        Trips, shared gear, and people to go with.
         Founded <?= e(cfg('facts.founded')) ?>. Caltech affiliation is not required
         to join.
       </p>

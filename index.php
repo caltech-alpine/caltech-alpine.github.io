@@ -40,7 +40,7 @@ require __DIR__ . '/includes/header.php';
       </h1>
 
       <p class="hero__text">
-        Hiking, backpacking, climbing, and more, to get Caltech and JPL outdoors.
+        Trips, shared gear, and people to go with.
       </p>
 
       <div class="btn-row hero__actions">
