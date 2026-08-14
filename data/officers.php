@@ -70,7 +70,7 @@ return array(
         'handles' => 'Borrowing club equipment, including specialist gear',
         'email'   => 'fmccann@caltech.edu',
         'group'   => 'Steering Committee',
-        'photo'   => '',
+        'photo'   => 'forrest-mccann.jpg',
     ),
 
     array(

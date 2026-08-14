@@ -56,9 +56,14 @@ $GLOBALS['ALPINE_CONFIG'] = $ALPINE_CONFIG;
 /* -------------------------------------------------------------------------- */
 
 require_once __DIR__ . '/helpers.php';
+require_once __DIR__ . '/activity.php';
 require_once ALPINE_ROOT . '/lib/calendar/Calendar.php';
 
 AlpineCalendar::configure($ALPINE_CONFIG['calendar']);
+
+/* One line per page view. Silently does nothing when logging is off, when
+   the static builder is running, or on the command line. */
+alpine_activity_page();
 
 /**
  * Recursive array merge where the override wins for scalars but nested arrays

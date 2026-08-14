@@ -78,7 +78,7 @@ require __DIR__ . '/includes/header.php';
           </p>
         </div>
         <div class="btn-row mt-lg">
-          <a class="btn btn--primary btn--gated" href="<?= e(cfg('links.gear_rental')) ?>" rel="noopener">
+          <a class="btn btn--primary btn--gated" href="<?= e(alpine_outbound('gear_rental')) ?>" rel="noopener">
             <span class="btn__label">Rent from the Caltech Y <?= icon('external', 'icon icon--xs') ?></span>
             <span class="btn__gate">Caltech / JPL only</span>
           </a>
@@ -106,7 +106,7 @@ require __DIR__ . '/includes/header.php';
         </div>
         <?php if (cfg('links.gear_form')): ?>
           <div class="btn-row mt-lg">
-            <a class="btn btn--primary btn--gated" href="<?= e(cfg('links.gear_form')) ?>" rel="noopener">
+            <a class="btn btn--primary btn--gated" href="<?= e(alpine_outbound('gear_form')) ?>" rel="noopener">
               <span class="btn__label">Borrow from the club <?= icon('external', 'icon icon--xs') ?></span>
               <span class="btn__gate">Caltech / JPL only</span>
             </a>

@@ -148,7 +148,7 @@ require __DIR__ . '/includes/header.php';
         </div>
         <?php if ($donate): ?>
           <div class="btn-row mt-lg">
-            <a class="btn btn--primary" href="<?= e($donate) ?>" rel="noopener">
+            <a class="btn btn--primary" href="<?= e(alpine_outbound('donate')) ?>" rel="noopener">
               Donate to the Alpine Club <?= icon('external', 'icon icon--xs') ?>
             </a>
           </div>

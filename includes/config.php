@@ -155,6 +155,26 @@ return array(
         'privacy'      => 'https://www.caltech.edu/privacy-notice',
     ),
 
+    /* ----------------------------------------------------------- activity */
+    /*  Usage counting. No cookies, no JavaScript, no third party, nothing that
+        leaves this server. How it counts people without identifying them is
+        explained at the top of includes/activity.php — read that before
+        changing anything here.
+
+        Reading the numbers: stats.php?key=<calendar.preview_key>. That page
+        REQUIRES a key and 404s without one, so set calendar.preview_key in
+        includes/config.local.php on the server.
+
+        This does nothing on GitHub Pages. Pages serves files and runs no PHP,
+        so there is no request for it to see.                                  */
+    'activity' => array(
+        'enabled'      => true,
+        'dir'          => dirname(__DIR__) . '/logs',
+        // Raw per-day files older than this are deleted. Long enough to see a
+        // term start, short enough that nothing accumulates quietly.
+        'retain_days'  => 60,
+    ),
+
     /* ------------------------------------------------------------ the club */
     /*  Facts used on the homepage and About page. Update when they change —
         which is rarely, which is the point.                                  */

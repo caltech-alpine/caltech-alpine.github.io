@@ -57,9 +57,14 @@ HOST, PORT = "127.0.0.1", 8899
 
 def start_server():
     """PHP's built-in server, which is enough to render the site once."""
+    # ALPINE_STATIC switches off the activity log (includes/activity.php).
+    # Without it the build would log its own crawl as if it were visitors,
+    # and every outbound link would come out as go.php?to=..., which a
+    # static host cannot serve.
+    env = dict(os.environ, ALPINE_STATIC="1")
     proc = subprocess.Popen(
         [os.environ.get("PHP", "php"), "-S", "%s:%d" % (HOST, PORT), "-t", ROOT],
-        cwd=ROOT, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        cwd=ROOT, env=env, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     base = "http://%s:%d" % (HOST, PORT)
     for _ in range(50):                       # up to ~10s for it to come up
         try:

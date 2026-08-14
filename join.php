@@ -69,7 +69,7 @@ require __DIR__ . '/includes/header.php';
             e(cfg('links.secretary')) ?></a>.
         </p>
         <div class="step__action">
-          <a class="btn btn--primary btn--block" href="<?= e($mailing) ?>" rel="noopener">
+          <a class="btn btn--primary btn--block" href="<?= e(alpine_outbound('mailing_list')) ?>" rel="noopener">
             <?= icon('mail', 'icon icon--xs') ?> Sign up directly
           </a>
         </div>
@@ -109,7 +109,7 @@ require __DIR__ . '/includes/header.php';
         </p>
         <?php if ($slack): ?>
           <div class="step__action">
-            <a class="btn btn--ghost btn--block" href="<?= e($slack) ?>" rel="noopener">
+            <a class="btn btn--ghost btn--block" href="<?= e(alpine_outbound('slack')) ?>" rel="noopener">
               <?= icon('chat', 'icon icon--xs') ?> Join Slack
             </a>
           </div>
