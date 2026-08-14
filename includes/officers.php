@@ -4,7 +4,7 @@
  *  Officers: current, past, and the order they appear in.
  * ============================================================================
  *
- *  The roster is data/officers.php. Everything here is presentation:
+ *  The roster is data/officers.csv. Everything here is presentation:
  *
  *    - anyone with an 'until' year is automatically a past officer. You never
  *      move an entry between lists or delete anybody — you add one line when
@@ -153,7 +153,7 @@ function alpine_officers()
 /**
  * The person currently holding a role, or null if nobody does.
  *
- * Matching is on the role title exactly as written in data/officers.php, case
+ * Matching is on the role title exactly as written in data/officers.csv, case
  * insensitively. Past officers are never returned — an alumnus is not the
  * person to email.
  */

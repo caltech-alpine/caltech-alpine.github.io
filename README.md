@@ -66,7 +66,7 @@ entry there and you can start using a new tag the same day.
 
 ### To change an officer
 
-Edit [`data/officers.php`](data/officers.php). One block per person:
+Edit [`data/officers.csv`](data/officers.csv). One row per person:
 
 ```php
 array(
@@ -131,7 +131,8 @@ for them:
 |---|---|
 | `hero.jpg` | The big homepage banner. Wide, high quality, people visible. |
 | `social.jpg` | The preview image when the site is shared on Slack or social media |
-| `officers/*.jpg` | Officer headshots, named in `data/officers.php` |
+| `officers/*.jpg` | Officer headshots, named in `data/officers.csv` |
+| `officers/raw/` | The ORIGINAL photos. Kept so a crop can be redone |
 | `sponsors/*.svg` | Sponsor logos, named in `data/sponsors.php` |
 
 **Every one of these is optional.** Where a photo is missing the site falls back
@@ -181,7 +182,7 @@ See [Deployment](#deployment) below.
 
 Run the health check (see [Health check](#health-check)) and then:
 
-- [ ] Update `data/officers.php` after elections
+- [ ] Update `data/officers.csv` after elections
 - [ ] Update `data/sponsors.php`
 - [ ] Check the mailing list and Slack links still work
 - [ ] Check the gear information is still accurate (prices, notice period, what is on the shelves)
@@ -215,7 +216,7 @@ includes/
   icons.php          Inline SVG icon sprite
 
 data/                >>> The files officers actually edit
-  officers.php
+  officers.csv
   sponsors.php
   activities.php     The [TAG] labels understood on calendar event titles
 

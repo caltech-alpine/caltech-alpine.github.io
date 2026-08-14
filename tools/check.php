@@ -173,7 +173,7 @@ line('Content');
 
 $officers = alpine_data('officers');
 $sponsors = alpine_data('sponsors');
-count($officers) ? ok(count($officers) . ' officers listed') : warn('no officers in data/officers.php');
+count($officers) ? ok(count($officers) . ' officers listed') : warn('no officers in data/officers.csv');
 count($sponsors) ? ok(count($sponsors) . ' sponsors listed') : line('  --    no sponsors yet (data/sponsors.php)');
 
 
@@ -206,7 +206,7 @@ if ($missingEmail === 0 && $serving > 0) {
     ok('every serving officer has an email address');
 } elseif ($serving > 0) {
     warn($missingEmail . ' of ' . $serving . ' serving officers have no email address '
-       . '(data/officers.php) — visitors can only reach them via ' . cfg('links.officers'));
+       . '(data/officers.csv) — visitors can only reach them via ' . cfg('links.officers'));
 }
 
 $gear = alpine_data('gear');

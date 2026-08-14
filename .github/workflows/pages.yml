@@ -54,6 +54,15 @@ jobs:
         id: pages
         uses: actions/configure-pages@v5
 
+      - name: Prepare officer headshots
+        # Officers drop an ORIGINAL into assets/images/officers/raw/ and
+        # this makes the 528x660 the roster serves. A photo already at 4:5
+        # is only resized, because the crop is a human's judgement and not
+        # something an aspect ratio can work out.
+        run: |
+          python3 -m pip install --quiet --disable-pip-version-check Pillow
+          python3 tools/prepare_officers.py
+
       - name: Render the site
         run: |
           python3 tools/build_static.py \

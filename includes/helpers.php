@@ -87,6 +87,15 @@ function alpine_data($name)
     $key = basename($name);
     if (isset($cache[$key])) { return $cache[$key]; }
 
+    /* A .csv wins over a .php of the same name. Lists that officers edit often
+       — the roster above all — are far safer as CSV: a spreadsheet cannot
+       produce a PHP parse error, and the file opens in Excel, Sheets, Notepad
+       or the GitHub web editor without anybody learning array syntax. */
+    $csv = ALPINE_ROOT . '/data/' . $key . '.csv';
+    if (is_readable($csv)) {
+        return $cache[$key] = alpine_read_csv($csv);
+    }
+
     $file = ALPINE_ROOT . '/data/' . $key . '.php';
     if (!is_readable($file)) {
         return $cache[$key] = array();
@@ -104,6 +113,53 @@ function alpine_data($name)
     }
 
     return $cache[$key] = (is_array($data) ? $data : array());
+}
+
+/**
+ * Read one of the officer-editable CSVs into the same shape the .php files
+ * returned: a list of associative arrays keyed by the header row.
+ *
+ * Lines beginning with # are skipped, so the file can carry its own
+ * instructions at the top — which is the whole reason the roster is allowed to
+ * be a CSV rather than a bare table nobody knows how to fill in.
+ *
+ * Blank cells come back as '' and blank rows are dropped, so a spreadsheet's
+ * habit of leaving trailing empty rows does not create nameless officers.
+ */
+function alpine_read_csv($path)
+{
+    $rows   = array();
+    $header = null;
+
+    $fh = fopen($path, 'r');
+    if (!$fh) { return $rows; }
+
+    while (($cells = fgetcsv($fh)) !== false) {
+        if ($cells === array(null) || $cells === false) { continue; }   // blank line
+        $first = isset($cells[0]) ? trim((string) $cells[0]) : '';
+        if ($first !== '' && $first[0] === '#') { continue; }            // a note
+
+        if ($header === null) {
+            $header = array_map('trim', $cells);
+            continue;
+        }
+
+        if (implode('', array_map('trim', $cells)) === '') { continue; } // empty row
+
+        $row = array();
+        foreach ($header as $i => $col) {
+            if ($col === '') { continue; }
+            $row[$col] = isset($cells[$i]) ? trim((string) $cells[$i]) : '';
+        }
+        // 'until' is compared as a year elsewhere, so hand back a number.
+        if (isset($row['until'])) {
+            $row['until'] = $row['until'] === '' ? null : (int) $row['until'];
+            if ($row['until'] === null) { unset($row['until']); }
+        }
+        $rows[] = $row;
+    }
+    fclose($fh);
+    return $rows;
 }
 
 /** Any data files that failed to load this request. Used by tools/check.php. */
