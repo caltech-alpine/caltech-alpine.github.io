@@ -165,10 +165,24 @@ require __DIR__ . '/includes/header.php';
         </div>
       <?php endforeach; ?>
 
+      <?php /* The catch-all, restored 2026-08-14. It was cut as a duplicate of
+               the Contact section below, and on a full read of the page it is
+               one. But somebody scanning the roster for the right person and
+               not finding them stops HERE, at the end of the grid, and never
+               scrolls into a section they have no reason to expect. */ ?>
+      <div class="note mt-lg">
+        <?= icon('mail', 'icon icon--xs') ?>
+        <p>
+          Not sure who to ask? Write to
+          <a href="mailto:<?= e(cfg('links.officers')) ?>"><?= e(cfg('links.officers')) ?></a>
+          and it will reach an officer.
+        </p>
+      </div>
+
     <?php endif; ?>
 
     <?php /* Past officers. Nobody maintains this list — an officer gets an
-             'until' year in data/officers.php and appears here by itself. */ ?>
+             'until' year in data/officers.csv and appears here by itself. */ ?>
     <?php if ($roster['past']): ?>
       <div class="alumni">
         <h3 class="officer-group__title">Past officers</h3>
