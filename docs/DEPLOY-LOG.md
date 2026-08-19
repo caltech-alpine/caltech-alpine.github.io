@@ -9,6 +9,63 @@ rather than describing it.
 
 ---
 
+## 2026-08-19 (later) - first deploy through the daemon: 21 of 21
+
+**Who:** Kyle authenticated; Claude ran the commands over `tools/portal_daemon.py`.
+**Deployed:** `0b06ab7` to staging, from the server (§A). **Result: clean.**
+
+```
+21 checks, 0 failed, 0 could not be told
+```
+
+Everything the earlier entry left open is now closed. `X-Robots-Tag: noindex,
+nofollow` arrives, so staging is out of the search index. The "calendar last
+checked" stamp reads `10:53am` with a `-07:00` offset instead of seven hours
+ahead. The calendar refresh is five minutes. Kyle's `[test] test event` renders,
+10:00-11:00 AM, alongside the weekly run - two upcoming events.
+
+**§A1 turned out to have been done already**, on 2026-08-18 at 18:40: `repo/`,
+`bin/deploy`, `backups/` and a populated `docroot/` were all there. That was the
+undocumented deploy the earlier entry noticed. Nothing needed setting up; what
+needed doing was fixing the two ways `server-deploy.sh` died.
+
+**Both failures were the same mistake in two places: acting on files the web
+server owns.** `cache/` and `logs/` are mode 3777 so that www-data - which is
+not in `alpinewww`, and is on a different machine - can write there. What that
+does *not* give us is the right to read or chmod what it wrote.
+
+1. **Backup, line 43.** `cp -a` over the whole docroot hit `logs/.salt`, mode
+   0600 and owned by www-data. `cp: cannot open ... Permission denied`, and the
+   deploy stopped **before publishing**. Now an `rsync -a` that excludes both
+   directories. Neither is worth backing up: the cache regenerates on the next
+   page view and the publish step never touches either.
+2. **Permissions, line 100.** `find "$DOCROOT" -type f -exec chmod 0664` hit the
+   same files. This one stopped the deploy **after publishing**, which is worse -
+   the site was live and correct while the script reported failure. The sweep now
+   prunes the contents of both directories; the directories themselves are ours
+   and still get their mode.
+
+The `trap ... ERR` added on 2026-08-18 earned itself here: both failures printed
+`FAILED at line NN` and were fixed in one pass each. Without it they would have
+been silent exits.
+
+**Two notes for whoever runs this next.**
+
+- **From Git Bash, prefix a `--run` with `MSYS_NO_PATHCONV=1`.** Otherwise MSYS
+  rewrites the leading `/srv/...` into `C:/Program Files/Git/srv/...` before
+  Python ever sees it, and the error - `bash: line 1: C:/Program: No such file
+  or directory` - looks like a broken server rather than a mangled argument.
+- There is a **partial backup folder** in `backups/` from the run that died at
+  line 43. Harmless: the retention keeps the newest five and ages the rest out.
+  It was left alone rather than cleaned with `rm -rf`, which is not a command to
+  aim at a glob on a shared university server.
+
+**Next:** stop the daemon when it is no longer needed
+(`python tools/portal_daemon.py --stop`; it also expires after four hours idle).
+The `~/.ssh/alpine-portal` key from 2026-08-18 no longer exists on this machine,
+so the revocation item from that entry is moot - but **the line may still be in
+`~/.ssh/authorized_keys` on the server** and should be checked.
+
 ## 2026-08-19 - audit from outside: the site is up, and the log had missed it
 
 **Who:** Kyle, with Claude checking from the public internet only - no VPN, no
