@@ -74,6 +74,7 @@ rsync -a --delete \
   --exclude '_deploy/' \
   --exclude 'tools/*.py' \
   --exclude 'tools/*.sh' \
+  --exclude 'tools/*.bat' \
   --exclude 'tools/route.json' \
   --exclude 'cache/*' \
   --exclude 'logs/*' \
