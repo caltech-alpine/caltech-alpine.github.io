@@ -39,8 +39,15 @@ echo
 
 mkdir -p "$BACKUPS"
 STAMP="$(date +%Y-%m-%d-%H%M)"
+# cache/ and logs/ are deliberately NOT copied. They hold files the web server
+# created as www-data, mode 0600, in a world-writable directory - and we are
+# khunady, so `cp -a` cannot read them and dies mid-backup taking the whole
+# deploy with it (observed 2026-08-19 on logs/.salt). Nothing in either is worth
+# keeping anyway: the cache regenerates on the next page view, and the deploy
+# never touches the live copies of either.
 if [ -n "$(ls -A "$DOCROOT" 2>/dev/null)" ]; then
-  cp -a "$DOCROOT" "$BACKUPS/docroot-$STAMP"
+  rsync -a --exclude 'cache/' --exclude 'logs/' \
+    "$DOCROOT/" "$BACKUPS/docroot-$STAMP/"
   echo "backed up the current site to $BACKUPS/docroot-$STAMP"
 fi
 
