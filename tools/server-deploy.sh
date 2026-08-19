@@ -95,9 +95,16 @@ rsync -a --delete \
 # until IMSS fixes that they get 3777 - world writable, plus the sticky bit so
 # only a file's owner can delete it. Both deny all HTTP access via .htaccess.
 
+# The CONTENTS of cache/ and logs/ are skipped, not just given a different
+# mode: the web server wrote them as www-data, and chmod on somebody else's
+# file fails even in a directory you own. Sweeping the whole tree therefore
+# killed the deploy after it had already published (2026-08-19). The two
+# directories themselves are ours, so those still get set.
 mkdir -p "$DOCROOT/cache" "$DOCROOT/logs"
-find "$DOCROOT" -type d -exec chmod 2775 {} +
-find "$DOCROOT" -type f -exec chmod 0664 {} +
+find "$DOCROOT" -type d -not -path "$DOCROOT/cache/*" -not -path "$DOCROOT/logs/*" \
+  -exec chmod 2775 {} +
+find "$DOCROOT" -type f -not -path "$DOCROOT/cache/*" -not -path "$DOCROOT/logs/*" \
+  -exec chmod 0664 {} +
 chmod 3777 "$DOCROOT/cache" "$DOCROOT/logs"
 
 echo
