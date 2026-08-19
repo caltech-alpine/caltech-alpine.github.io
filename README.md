@@ -234,7 +234,20 @@ assets/
 
 cache/               Cached calendar data. Git-ignored, must be writable.
 
+docs/                >>> Notes for whoever runs the site. Start at docs/README.md
+  ORIENTATION.md     >>> READ FIRST if you have just taken over the site
+  ACCESS.md          Getting an account and an SSH key, and handing them back
+  DEPLOY.md          How to publish the site to the Caltech server
+  SERVERS.md         The machines, hostnames, paths and permissions
+  DEPLOY-LOG.md      What happened on each deploy, newest first
+  HOSTING.md         Why it is hosted this way
+  WRITING.md         How the copy should read
+
 tools/
+  deploy.sh          Uploads the site. See docs/DEPLOY.md.
+  probe.php          The one file to upload first to a new server
+  verify_deploy.py   Checks a deployed site from outside. No PHP needed.
+  voice_check.py     Flags copy that reads as machine-written
   check.php          Command-line health check.
   make_topo.py       Regenerates the contour-map artwork.
   make_social.py     Regenerates the link-preview image.
@@ -357,34 +370,29 @@ broken.
 
 ## Deployment
 
-`GitHub repository → Caltech Unix web server → alpine.caltech.edu`
+**The procedure is [`docs/DEPLOY.md`](docs/DEPLOY.md).** It is a checklist, and
+following it in order matters more than understanding it. The machines it talks
+about are in [`docs/SERVERS.md`](docs/SERVERS.md), and what happened last time
+somebody deployed is in [`docs/DEPLOY-LOG.md`](docs/DEPLOY-LOG.md).
 
-### The simple way (start here)
+Since 2026-08-18 there has been a staging site at
+**<https://staging.alpine.caltech.edu>**, provisioned by IMSS. That is where
+changes get tested. `alpine.caltech.edu` still runs the old Caltech Sites
+version, and nothing in this repository can affect it.
 
-Copy the files to the server over SFTP or `scp`. Everything in this repository is
-deployable as-is; there is nothing to build or compile.
-
-```bash
-# from the repository root, adjust the path to match the server
-rsync -av --delete \
-  --exclude '.git' \
-  --exclude 'cache/*' \
-  --exclude 'includes/config.local.php' \
-  ./ user@server.caltech.edu:/path/to/web/root/
-```
-
-Then, **once, on the server**:
+Everything here is deployable as-is, with nothing to build or compile:
 
 ```bash
-chmod 775 cache          # the site must be able to write here
-php tools/check.php      # confirm everything works from the server itself
+./tools/deploy.sh --dry-run YOUR_CALTECH_USERNAME    # stage and list, send nothing
+./tools/deploy.sh YOUR_CALTECH_USERNAME              # upload to staging
+python tools/verify_deploy.py https://staging.alpine.caltech.edu
 ```
 
-The `--exclude` lines matter. Never overwrite the server's `cache/` (it is
-regenerated anyway) or its `config.local.php` (that is the copy holding any key).
-
-If `rsync` is not available, plain SFTP with an FTP client works — just do not
-delete `cache/` or `config.local.php` on the far side.
+You have to be on campus, or on the Caltech VPN with **Tunnel All**. The script
+sends what git has committed, leaves the server's `cache/` and
+`config.local.php` alone (that second one holds any API key, and overwriting it
+is the one mistake here that is annoying to undo), and sets the file permissions
+IMSS asks for.
 
 ### What automated deployment could look like later
 

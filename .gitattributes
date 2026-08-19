@@ -1,0 +1,4 @@
+# Shell scripts run on Linux. A CRLF line ending makes them fail with a
+# "bad interpreter" error that gives no hint of the real cause.
+*.sh text eol=lf
+*.php text eol=lf
