@@ -14,6 +14,10 @@
 
 set -euo pipefail
 
+# Without this, any failing command exits the script with no output at all,
+# which is exactly what happened on the first run on 2026-08-18.
+trap 'echo "FAILED at line $LINENO (exit $?)" >&2' ERR
+
 SITE="/srv/www.alpine.caltech.edu/www"
 REPO="$SITE/repo"
 DOCROOT="$SITE/docroot"
@@ -40,11 +44,17 @@ if [ -n "$(ls -A "$DOCROOT" 2>/dev/null)" ]; then
   echo "backed up the current site to $BACKUPS/docroot-$STAMP"
 fi
 
-# Keep the most recent few and delete the rest.
-ls -1dt "$BACKUPS"/docroot-* 2>/dev/null | tail -n +$((KEEP + 1)) | while read -r old; do
-  rm -rf "$old"
-  echo "removed old backup $(basename "$old")"
-done
+# Keep the most recent few and delete the rest. The || true matters: with no
+# backups yet the glob matches nothing, ls exits non-zero, and under
+# `set -o pipefail` that would kill this script without printing anything.
+old_backups="$(ls -1dt "$BACKUPS"/docroot-* 2>/dev/null | tail -n +$((KEEP + 1)) || true)"
+if [ -n "$old_backups" ]; then
+  while read -r old; do
+    [ -n "$old" ] || continue
+    rm -rf "$old"
+    echo "removed old backup $(basename "$old")"
+  done <<< "$old_backups"
+fi
 
 # ----------------------------------------------------------------- publish --
 # Excluded paths are also protected from --delete: rsync will not remove a file

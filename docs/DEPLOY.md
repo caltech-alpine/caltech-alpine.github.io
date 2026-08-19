@@ -55,7 +55,7 @@ git -C "$SITE/repo" fetch --quiet origin
 git -C "$SITE/repo" reset --hard origin/main
 exec "$SITE/repo/tools/server-deploy.sh" "$@"
 ' > "$SITE/bin/deploy"
-chmod 2775 "$SITE/bin/deploy"
+chmod 775 "$SITE/bin/deploy"
 ls -la "$SITE"
 ```
 

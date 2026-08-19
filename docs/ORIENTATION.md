@@ -190,75 +190,115 @@ run when you have uncommitted changes.
 
 ## 6. Change something and publish it
 
-Do this once on a typo, before you ever need to do it in a hurry.
+Do this once on a typo, before you ever need to do it in a hurry. Every command
+goes in **Git Bash**, and every one of them assumes you have done step 1 first.
 
-**Start in your working folder, and catch up first:**
+**1. Go to the working folder.** You have to do this every time you open a new
+Git Bash window, because it always starts in your home folder:
 
 ```bash
 cd ~/Documents/alpine-website
 ```
 
+**2. Catch up with whatever anyone else has done:**
+
 ```bash
 git pull
 ```
 
-**Edit the file.** Use any text editor — Notepad works, VS Code is nicer. For a
+**3. Edit the file.** Any text editor. Notepad works, VS Code is nicer. For a
 roster change open `data/officers.csv`; for a link or an email address open
 `includes/config.php`. [`../README.md`](../README.md) says which file for every
 kind of change.
 
-**See exactly what you changed:**
+**4. See exactly what you changed**, before saving anything:
 
 ```bash
 git diff
 ```
 
-**Save it to your local history.** Write *why*, since the diff already shows
+Press `q` to exit if it fills the screen. If the changes are not what you
+expected, undo everything with `git checkout .` and start again.
+
+**5. Stage every change:**
+
+```bash
+git add -A
+```
+
+**6. Check what you staged.** Every line should start with `A` or `M`, and
+nothing should still say `??`:
+
+```bash
+git status --short
+```
+
+**7. Save it to your local history.** Write *why*, since the diff already shows
 what:
 
 ```bash
-git add -A && git commit -m "Add Jane Doe as Climbing Commodore"
+git commit -m "Add Jane Doe as Climbing Commodore"
 ```
 
-**Send it to GitHub:**
+Nothing has left your computer yet. Up to this point everything is reversible.
+
+**8. Send it to GitHub:**
 
 ```bash
 git push
 ```
 
-If that is refused, check which GitHub account you are signed in as:
+**9. Confirm it arrived.** Open
+<https://github.com/caltech-alpine/caltech-alpine.github.io/commits/main> — your
+commit should be at the top. Pushing also rebuilds
+<https://caltech-alpine.github.io> within a few minutes, which is a free preview
+before anything reaches the real site.
+
+**10. Publish it to the Caltech server.** Log into `portal.caltech.edu` with
+PuTTY and run one command:
+
+```bash
+/srv/www.alpine.caltech.edu/www/bin/deploy
+```
+
+Full detail, the first-time setup and the laptop alternative are in
+[DEPLOY.md](DEPLOY.md).
+
+**11. Write down what happened** in [DEPLOY-LOG.md](DEPLOY-LOG.md), especially
+anything that went wrong.
+
+### When the push is refused
+
+**"Repository not found"** does not mean the repository is missing. It means git
+is signed in as the wrong GitHub account. The repository belongs to the
+**`caltech-alpine`** organization, and your personal account has to have been
+added to it. Check who you are with:
 
 ```bash
 gh auth status
 ```
 
-The repository belongs to the **`caltech-alpine`** organization, so your account
-has to have been added to it. Ask whoever handed you the site. Pushing also
-rebuilds <https://caltech-alpine.github.io> within a few minutes, which is a free
-preview of your change.
-
-**Put it on the Caltech server.** VPN on Tunnel All first. See what would be
-sent, without sending it:
+**"Updates were rejected because the remote contains work that you do not have
+locally"** means somebody else pushed while you were editing. Do not force
+anything. Get their work first, then push again:
 
 ```bash
-./tools/deploy.sh --dry-run YOUR_USERNAME
+git pull --rebase
 ```
 
-Then send it:
+**"stale info" or a complaint about the remote having changed unexpectedly**
+means your machine's record of GitHub is out of date. Refresh it:
 
 ```bash
-./tools/deploy.sh YOUR_USERNAME
+git fetch origin
 ```
 
-Then check it landed:
-
-```bash
-python tools/verify_deploy.py https://staging.alpine.caltech.edu
-```
-
-**Write down what happened** in [DEPLOY-LOG.md](DEPLOY-LOG.md), especially
-anything that went wrong. [DEPLOY.md](DEPLOY.md) has the full procedure and a
-table of what each failure means.
+**Rewriting history that is already on GitHub** — replacing past commits rather
+than adding new ones — is a different operation and it is not part of normal
+work. If you ever genuinely need it, the safe form is
+`git push --force-with-lease origin main`, run only after `git fetch origin`, and
+only when you know nobody else has cloned the repository since. It was done once
+here, on 2026-08-18; see [DEPLOY-LOG.md](DEPLOY-LOG.md).
 
 ---
 
