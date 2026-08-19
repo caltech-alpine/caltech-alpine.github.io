@@ -2,3 +2,7 @@
 # "bad interpreter" error that gives no hint of the real cause.
 *.sh text eol=lf
 *.php text eol=lf
+
+# The opposite problem: a .bat with LF endings can break cmd.exe's parsing of
+# multi-line blocks. Keep these CRLF wherever they are checked out.
+*.bat text eol=crlf

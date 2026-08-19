@@ -368,9 +368,22 @@ def main():
     if args.run:
         return cmd_run(args.run, args.timeout)
 
+    # A state file does not prove a daemon. Closing the window kills the process
+    # without running its cleanup, and a leftover file that refuses every future
+    # start - with no hint about how to recover - is the worst possible failure
+    # for something meant to be double-clicked. So ask it, and only believe it
+    # if it answers.
     if read_state():
-        print("A daemon is already running. --status to check it, --stop to replace it.")
-        return 1
+        try:
+            rpc({"op": "ping"}, timeout=5)
+        except Exception:
+            print("Clearing a stale state file (the last daemon did not shut down "
+                  "cleanly - closed window, or a reboot).")
+            clear_state()
+        else:
+            print("A daemon is already running, and answering. Nothing to do.")
+            print("  --status to see it, --stop to close it.")
+            return 0
 
     user = username()
     client = connect(user)
