@@ -36,15 +36,30 @@ def record(ok, label, detail=""):
     results.append((ok, label, detail))
 
 
+class Headers(dict):
+    """Header names are case-insensitive, and Cloudflare sends them lowercased.
+
+    A plain dict() of the response headers made every lookup here miss, so this
+    script reported "0 of 3 security headers" against a server that was sending
+    all three (staging, 2026-08-19). Look them up without caring about case.
+    """
+
+    def __init__(self, pairs):
+        dict.__init__(self, ((k.lower(), v) for k, v in pairs))
+
+    def get(self, name, default=""):
+        return dict.get(self, name.lower(), default)
+
+
 def get(url, method="GET"):
     req = urllib.request.Request(url, method=method, headers={"User-Agent": UA})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-            return r.status, dict(r.headers), r.read().decode("utf-8", "replace")
+            return r.status, Headers(r.headers.items()), r.read().decode("utf-8", "replace")
     except urllib.error.HTTPError as e:
-        return e.code, dict(e.headers), e.read().decode("utf-8", "replace")
+        return e.code, Headers(e.headers.items()), e.read().decode("utf-8", "replace")
     except Exception as e:                                   # DNS, TLS, timeout
-        return None, {}, str(e)
+        return None, Headers([]), str(e)
 
 
 def main(base):

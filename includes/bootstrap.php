@@ -53,6 +53,18 @@ if ($envKey) {
 
 $GLOBALS['ALPINE_CONFIG'] = $ALPINE_CONFIG;
 
+/* --------------------------------------------------------------------------
+ *  Clock
+ *  Event times carry their own zone, so they were always right. Anything
+ *  printed with plain date() - the "calendar last checked" stamp, the
+ *  diagnostics pages - used PHP's default, which on this host is UTC, and
+ *  therefore read seven hours ahead of everyone looking at it. One line here
+ *  fixes every such call site at once.
+ * ------------------------------------------------------------------------ */
+if (!empty($ALPINE_CONFIG['calendar']['timezone'])) {
+    date_default_timezone_set($ALPINE_CONFIG['calendar']['timezone']);
+}
+
 /* -------------------------------------------------------------------------- */
 
 require_once __DIR__ . '/helpers.php';

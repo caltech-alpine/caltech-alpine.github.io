@@ -42,6 +42,18 @@ Options -Indexes
   Header set X-Frame-Options "SAMEORIGIN"
 </IfModule>
 
+# The staging copy must never be indexed - two indexable copies of the same
+# site compete with each other in search results, and the wrong one wins about
+# half the time. Keyed on the hostname rather than on a separate file, so the
+# same committed .htaccess is correct on both servers and nobody has to
+# remember to strip a line at the cutover.
+<IfModule mod_setenvif.c>
+  SetEnvIf Host "(^|\.)staging\." ALPINE_STAGING
+</IfModule>
+<IfModule mod_headers.c>
+  Header set X-Robots-Tag "noindex, nofollow" env=ALPINE_STAGING
+</IfModule>
+
 # ------------------------------------------------------------------- files --
 # The cached calendar copy is public data, but there is no reason to serve it.
 <FilesMatch "\.(cache|ics|log|md|json)$">

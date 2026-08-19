@@ -25,7 +25,7 @@ Slack. This site holds the things that stay true for years.
 
 **Add it to the club Google Calendar. That is the whole process.**
 
-The website reads the calendar every 30 minutes and builds the event cards
+The website reads the calendar every 5 minutes and builds the event cards
 itself. You do not touch this repository, and you do not create a page per trip.
 
 Optionally, put an activity tag in square brackets at the start of the title:
@@ -275,7 +275,7 @@ term, add a Google Calendar event instead.
 ## How the calendar works, and why it works this way
 
 The site reads the club's **public `.ics` feed** from Google, on the server, in
-PHP, and caches the result for 30 minutes.
+PHP, and caches the result for 5 minutes.
 
 **Why not do it in JavaScript in the browser?** Because it cannot be done.
 Google's `.ics` endpoint does not send an `Access-Control-Allow-Origin` header
@@ -347,7 +347,7 @@ the parser extracted from every event, and a checklist of cases worth creating
 and so on).
 
 Tick **Skip cache** to see calendar changes immediately instead of waiting for
-the 30-minute cache to expire.
+the five-minute cache to expire.
 
 ---
 

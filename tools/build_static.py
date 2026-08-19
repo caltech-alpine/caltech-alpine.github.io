@@ -11,9 +11,10 @@
 
  That works because the site has no server-side behaviour that depends on the
  visitor: no forms, no logins, no query parameters, no user input. The only live
- input is the club's Google Calendar, and the PHP already caches that for 30
- minutes — so a build every 30 minutes gives a visitor the same freshness the
- dynamic site does. See docs/HOSTING.md for the full comparison.
+ input is the club's Google Calendar, and the PHP caches that for 5 minutes.
+ This build runs every 30, which is deliberately coarser: GitHub's scheduler
+ will not reliably do better, and the pilot is a preview of the design rather
+ than the club's calendar of record. See docs/HOSTING.md for the comparison.
 
  WHAT IS DIFFERENT IN THE OUTPUT
  -------------------------------

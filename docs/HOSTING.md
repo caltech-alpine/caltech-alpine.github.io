@@ -23,7 +23,7 @@ So publishing to Pages requires rendering the site to HTML first, which is what
 
 > **Nothing on this site depends on who is asking.** No forms, no logins, no
 > query parameters, no sessions, no user input of any kind. The only input is
-> the Google Calendar, and the PHP layer already caches that for 30 minutes.
+> the Google Calendar, and the PHP layer already caches that for 5 minutes.
 
 A site whose output is the same for every visitor is a site that can be
 pre-rendered without loss. That is why the static pilot is a faithful copy and
@@ -48,9 +48,10 @@ not a degraded one.
 | Custom domain `alpine.caltech.edu` | possible but needs a CNAME and IMSS DNS | native |
 
 Read the freshness row carefully: the *effective* difference for a visitor is
-close to zero, because both paths show calendar data up to 30 minutes old. The
-real losses are `preview.php`, the `.htaccess` headers, and the edit-to-live
-delay for officers.
+small but no longer nil. The PHP site shows calendar data up to **five** minutes
+old; the Pages build shows it up to **thirty**, plus however late GitHub runs the
+job. The other losses are `preview.php`, the `.htaccess` headers, and the
+edit-to-live delay for officers.
 
 ### The two scheduling caveats
 

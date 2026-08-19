@@ -23,9 +23,11 @@ VPN, which is the point: the ability to deploy stops depending on one person
 having a laptop set up correctly. → §A
 
 **From your own machine.** `tools/deploy.sh` sends the files over SSH from a
-clone on your laptop. Needs Git Bash, a clone, and two rounds of password plus
-Duo. Use it to bootstrap the server-side setup, or if GitHub is unreachable.
-→ §0 onwards.
+clone on your laptop. Needs Git Bash, a clone, the VPN on "Tunnel All", and one
+round of password plus Duo. It is a single command — it remembers your username,
+checks the server is reachable before doing anything slow, uploads and sets
+permissions over one connection, and verifies the result itself. Use it to
+bootstrap the server-side setup, or if GitHub is unreachable. → §0 onwards.
 
 Both publish exactly the same files and set the same permissions. Neither can
 touch `alpine.caltech.edu`.
@@ -34,6 +36,36 @@ touch `alpine.caltech.edu`.
 
 # §A. Deploying from the server
 
+## A0. One authentication instead of a dozen
+
+```bash
+python tools/portal_daemon.py
+```
+
+Asks for your Caltech password, then Duo. Approve it on your phone once and
+leave the window open; from then on anything can run a server command with
+
+```bash
+python tools/portal_daemon.py --run "whoami"
+```
+
+without another prompt. `--status` says whether it is up, `--stop` closes it,
+and it closes itself after four hours idle or when you close the window. Your
+password is never stored or written anywhere — it goes straight into the ssh
+handshake.
+
+This exists because ssh's own `ControlMaster` cannot work from Git Bash: the
+Unix-socket emulation cannot pass file descriptors, so the master accepts
+`-O check` and then refuses to carry a session (DEPLOY-LOG, 2026-08-18). The
+daemon is the same pattern the HPC monitor in `1Research/HEA/vasp` has used for
+months, cut down to one file with nothing VASP-shaped in it.
+
+**It is a real grant of access while it runs** — anything on your machine that
+can reach `127.0.0.1` and read the token file can run commands on portal as
+you. It listens on loopback only, requires a random token, and expires. Stop it
+when you are done.
+
+
 ## A1. One-time setup
 
 Done once, by somebody in the `alpinewww` group, and never again. **The repo has
@@ -41,6 +73,11 @@ to be pushed to GitHub first**, because this clones from there.
 
 Log in — PuTTY, or `ssh YOUR_USERNAME@portal.caltech.edu` — and paste this as
 one block:
+
+> **Doing several server commands in a row?** Every ssh to portal costs a
+> password and a Duo push, and this section is a dozen commands. Start
+> `tools/portal_daemon.py` first: it authenticates **once**, holds the session,
+> and runs everything after that for free. See §A0.
 
 ```bash
 SITE=/srv/www.alpine.caltech.edu/www
@@ -200,15 +237,23 @@ ssh YOUR_USERNAME@portal.caltech.edu 'rm /srv/www.alpine.caltech.edu/www/docroot
 ## 3. Upload the site
 
 ```bash
-./tools/deploy.sh --dry-run YOUR_USERNAME
+./tools/deploy.sh --dry-run
 ```
 
 That stages a clean copy under `_deploy/` and prints the file list without
 sending anything. Look at the list. Then:
 
 ```bash
-./tools/deploy.sh YOUR_USERNAME
+./tools/deploy.sh
 ```
+
+The first run asks for your Caltech username and writes it to `.deploy-user`,
+which is git-ignored; after that it never asks again. It refuses to run on an
+uncommitted working copy, and prints the `git commit` you need. It checks
+`portal.caltech.edu:22` before anything else, because without the VPN on "Tunnel
+All" the upload would otherwise just hang. Upload and permissions go over one
+ssh connection, so Duo prompts once rather than twice. When it finishes it runs
+step 5 for you.
 
 The script exists so that the excluded files stay excluded. What never goes to
 the server, and why:
@@ -275,7 +320,9 @@ behind a key, the way `preview.php` already works.
 
 ## 5. Verify from outside
 
-From your own machine, off the VPN if you can:
+**`tools/deploy.sh` does this for you at the end of every deploy.** Run it by
+hand when you want to check the site without deploying — from your own machine,
+off the VPN if you can:
 
 ```bash
 python tools/verify_deploy.py https://staging.alpine.caltech.edu

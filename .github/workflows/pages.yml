@@ -7,9 +7,10 @@
 #  explains what changes in the output.
 #
 #  WHY THE SCHEDULE. The only live data on the site is the club's Google
-#  Calendar, which the PHP layer already caches for 30 minutes. Rebuilding on
-#  the same 30-minute cadence gives a visitor the same freshness the dynamic
-#  site does. Two caveats worth knowing:
+#  Calendar, which the PHP layer caches for five minutes. This rebuild stays at
+#  thirty on purpose: GitHub's scheduler will not reliably do better (see the
+#  first caveat), and the pilot is a preview of the design, not the club's
+#  calendar of record. Two caveats worth knowing:
 #    * GitHub runs scheduled workflows late when the fleet is busy. Minutes,
 #      occasionally longer. Nothing here is time-critical enough to care.
 #    * GitHub DISABLES scheduled workflows in a repository with no activity for

@@ -26,3 +26,15 @@ _preview/
 /logs/*
 !/logs/.gitkeep
 !/logs/.htaccess
+
+# Your Caltech username, remembered by tools/deploy.sh so it stops asking. A
+# preference, not configuration - the next person's is different.
+/.deploy-user
+
+# Staging area built by tools/deploy.sh on the way to the server.
+/_deploy/
+
+# The ssh daemon's live state: a random token and the pid of a running session,
+# plus the pinned host key. Machine-local, and the token is a secret.
+/tools/.portal-daemon.json
+/tools/.portal-known-host

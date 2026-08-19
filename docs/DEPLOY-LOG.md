@@ -9,6 +9,75 @@ rather than describing it.
 
 ---
 
+## 2026-08-19 - audit from outside: the site is up, and the log had missed it
+
+**Who:** Kyle, with Claude checking from the public internet only - no VPN, no
+SSH, no key needed. **Deployed:** nothing today.
+
+**The site is live.** Between the entry below and this one, somebody uploaded
+the whole site and did not log it. `staging.alpine.caltech.edu` now serves the
+real PHP application: `x-powered-by: PHP/8.2.29`, all eight pages HTTP 200, the
+protected paths 403, our own 404 page.
+
+```
+21 checks, 1 failed, 0 could not be told
+```
+
+The one failure is real: **the staging copy is indexable.** No `X-Robots-Tag`,
+and `robots.txt` says `Allow: /`, which contradicts SERVERS.md's own rule that
+staging must never be indexed. Fixed in `.htaccess` with a host-conditional
+`Header set X-Robots-Tag "noindex, nofollow"`, so the same committed file stays
+correct on production. **Not yet deployed - it lands with the next upload.**
+
+Two things the previous entry expected to be uncertain are now settled:
+
+- **`.htaccess` is read.** `AllowOverride` is on: all three security headers
+  arrive. The earlier `0 of 3` was `verify_deploy.py`'s own bug - it looked
+  headers up case-sensitively and Cloudflare sends them lowercased. Fixed.
+- **Outbound HTTP from the web server works.** The calendar is fetched live
+  from Google; no `stale` banner, cache written and reused on the 30-minute TTL.
+
+**The calendar is not stuck.** Checked because it looked like it was:
+the page's copy matched the live Google feed exactly - six events, nothing
+modified on the calendar since 2026-08-14, exactly one of them in the future
+(the recurring Wednesday trail run). The GitHub Pages pilot, built by a
+different route entirely, showed the same six. The site can only print what the
+calendar holds.
+
+What did look wrong was the **"Calendar last checked" stamp, which read seven
+hours ahead** - `date()` uses PHP's default zone, UTC on this host, while every
+event time is rendered through an explicit `DateTimeZone` and was always right.
+`includes/bootstrap.php` now calls `date_default_timezone_set()` from the
+configured timezone, which fixes every plain `date()` call site at once.
+**Not yet deployed.**
+
+**Calendar refresh cut from 30 minutes to 5** (`includes/config.php`), on Kyle's
+call, after a test event proved the two lags separately: Google published the
+edit to the public `.ics` in **under 40 seconds** (`LAST-MODIFIED 16:44:36Z`,
+read at 16:45:15Z), so the entire remaining wait was our own TTL. Short is cheap
+at this traffic - most visits already fall outside any TTL and pay the Google
+round trip regardless. The Pages pilot stays at 30 minutes deliberately;
+GitHub's scheduler will not reliably do better. Every doc that claimed "30
+minutes" for the PHP cache was corrected in the same pass. **Not yet deployed.**
+
+**Deploying was made a single command**, on Kyle's instruction - *"you need to
+make deployment easy and intuitive. give me instructions each time."*
+`tools/deploy.sh` now takes no arguments: it asks for the Caltech username once
+and remembers it in a git-ignored `.deploy-user`, tests `portal:22` before doing
+anything slow (a missing "Tunnel All" VPN used to present as a hang), **uploads
+and chmods over ONE ssh connection instead of two, so Duo prompts once**, and
+runs `verify_deploy.py` itself at the end. It also stopped printing
+`php tools/check.php` as the next step - portal has no PHP, so that instruction
+was impossible. On a dirty tree it now prints the exact `git commit` to run.
+`DEPLOY.md` §*Two ways*, §3 and §5 updated to match, and a `CLAUDE.md` was added
+at the repo root carrying the standing rule that any session changing a file
+here ends by handing over the publish commands.
+
+**Next:** deploy, to land the four fixes; then re-run
+`python tools/verify_deploy.py https://staging.alpine.caltech.edu` and expect
+21 of 21. Also still open: revoke `~/.ssh/alpine-portal` now that the deploy is
+proven.
+
 ## 2026-08-18 (later) - logged into portal, and the procedure changed
 
 **Who:** Kyle, with Claude driving read-only commands over an SSH key. **Deployed:** still nothing.

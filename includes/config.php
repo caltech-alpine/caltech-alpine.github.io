@@ -66,9 +66,13 @@ return array(
         'timezone'    => 'America/Los_Angeles',
 
         // How long a fetched copy is reused before we ask Google again.
-        // 1800 = 30 minutes. Raise it if the host is slow, lower it if you are
-        // impatient while testing.
-        'cache_ttl'   => 1800,
+        // 300 = 5 minutes, so an event added to the calendar is on the site
+        // within five minutes - which is what an officer posting a trip the
+        // night before expects (2026-08-19). Short is cheap here because the
+        // club site is quiet: at this traffic almost every visit already falls
+        // outside any TTL and pays the Google round trip anyway, so shortening
+        // it buys freshness for almost nothing. Raise it if the host gets slow.
+        'cache_ttl'   => 300,
 
         'cache_dir'   => dirname(__DIR__) . '/cache',
 

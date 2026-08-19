@@ -17,8 +17,8 @@ Last measured **2026-08-18**.
 | Address | https://alpine.caltech.edu | https://staging.alpine.caltech.edu | https://caltech-alpine.github.io |
 | What runs there | Caltech Sites (Wagtail CMS) | Apache + PHP, our files | Static HTML built by GitHub Actions |
 | Who controls the content | Caltech Sites editors | us, over SFTP | this repository, `main` branch |
-| Indexed by search engines | yes | no, and it must stay that way | no (`noindex`) |
-| Status | live, untouched by any of this | **empty, waiting for our first upload** | live |
+| Indexed by search engines | yes | no, and it must stay that way - `.htaccess` sends `X-Robots-Tag` when the Host starts `staging.` | no (`noindex`) |
+| Status | live, untouched by any of this | **live, serving the PHP site** (verified 2026-08-19) | live |
 
 Only production is the club's real site. Nothing done on staging changes it.
 
