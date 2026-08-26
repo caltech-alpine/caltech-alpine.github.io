@@ -37,7 +37,7 @@ not a degraded one.
 |---|---|---|
 | Page content, layout, styling | identical | identical |
 | Event dialogs, FAQ collapse, nav menu | works — client-side JS | works |
-| Recurring-event collapsing, `[TAG]` activity labels, past archive | computed at build | computed per request |
+| Recurring-event collapsing, past archive | computed at build | computed per request |
 | Officer roster, alumni `until` logic, gear inventory, sponsors | computed at build | computed per request |
 | 404 page | `404.html`, served by Pages | `ErrorDocument` in `.htaccess` |
 | Sitemap | rendered to `sitemap.xml` | live `sitemap.php` |

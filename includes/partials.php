@@ -123,8 +123,7 @@ function alpine_event_is_past(AlpineEvent $e)
  */
 function alpine_event_dialog(AlpineEvent $e)
 {
-    $activity = $e->tag ? alpine_activity($e->tag) : null;
-    $id       = alpine_event_detail_id($e);
+    $id = alpine_event_detail_id($e);
     ?>
     <dialog class="event-dialog" id="<?= e($id) ?>" aria-labelledby="<?= e($id) ?>-title">
       <form method="dialog" class="event-dialog__close-form">
@@ -134,12 +133,6 @@ function alpine_event_dialog(AlpineEvent $e)
       <div class="event-dialog__body">
         <?php if ($e->cancelled): ?>
           <p class="event-card__cancelled">Cancelled</p>
-        <?php endif; ?>
-
-        <?php if ($activity): ?>
-          <p class="event-card__tag">
-            <?= icon($activity['icon'], 'icon icon--xs') ?><?= e($activity['label']) ?>
-          </p>
         <?php endif; ?>
 
         <?php /* NOT a heading element. The same dialog is opened from a card
@@ -187,8 +180,7 @@ function alpine_event_dialog(AlpineEvent $e)
  */
 function alpine_event_card(AlpineEvent $e, $showExcerpt = true)
 {
-    $activity = $e->tag ? alpine_activity($e->tag) : null;
-    $excerpt  = $showExcerpt ? $e->excerpt() : '';
+    $excerpt = $showExcerpt ? $e->excerpt() : '';
 
     $dialogId = alpine_event_detail_id($e);
     ?>
@@ -207,12 +199,6 @@ function alpine_event_card(AlpineEvent $e, $showExcerpt = true)
 
         <?php if ($e->cancelled): ?>
           <p class="event-card__cancelled">Cancelled</p>
-        <?php endif; ?>
-
-        <?php if ($activity): ?>
-          <p class="event-card__tag">
-            <?= icon($activity['icon'], 'icon icon--xs') ?><?= e($activity['label']) ?>
-          </p>
         <?php endif; ?>
 
         <h3 class="event-card__title"><?= e($e->title) ?></h3>
@@ -263,7 +249,6 @@ function alpine_event_card(AlpineEvent $e, $showExcerpt = true)
  */
 function alpine_event_row(AlpineEvent $e)
 {
-    $activity = $e->tag ? alpine_activity($e->tag) : null;
     $dialogId = alpine_event_detail_id($e);
     ?>
     <article class="event-row event-row--openable" data-dialog="<?= e($dialogId) ?>">
@@ -273,9 +258,6 @@ function alpine_event_row(AlpineEvent $e)
         </time>
       </div>
       <div>
-        <?php if ($activity): ?>
-          <p class="event-row__tag"><?= e($activity['label']) ?></p>
-        <?php endif; ?>
         <?php /* h4, not h3: the month heading above the list is the h3, and an
                  event is inside a month rather than a sibling of it. */ ?>
         <h4 class="event-row__title"><?= e($e->title) ?></h4>

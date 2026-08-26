@@ -222,15 +222,15 @@ require __DIR__ . '/includes/header.php';
     <h2 class="h2">Parser output</h2>
     <p class="lede mt-lg">
       Every event in the window, with the fields most likely to be wrong.
-      &ldquo;Guessed&rdquo; means the activity label came from keywords in the title
-      rather than a <code>[TAG]</code> prefix.
+      &ldquo;Shown as&rdquo; is the raw title with any leading <code>[bracket]</code>
+      removed.
     </p>
 
     <div class="mt-lg" style="overflow-x:auto">
       <table class="pv-table">
         <thead>
           <tr>
-            <th>Raw title</th><th>Shown as</th><th>Tag</th>
+            <th>Raw title</th><th>Shown as</th>
             <th>Start</th><th>End</th>
             <th>All&nbsp;day</th><th>Multi&nbsp;day</th><th>Cancelled</th>
             <th>Location</th><th>Description</th>
@@ -241,16 +241,6 @@ require __DIR__ . '/includes/header.php';
             <tr>
               <td><code><?= e($ev->rawTitle) ?></code></td>
               <td><?= e($ev->title) ?></td>
-              <td>
-                <?php if ($ev->tag): ?>
-                  <?= e(strtoupper($ev->tag)) ?>
-                  <?php if ($ev->tagGuessed): ?>
-                    <br><small style="color:#8a5a12">guessed</small>
-                  <?php endif; ?>
-                <?php else: ?>
-                  <span class="pv-no">none</span>
-                <?php endif; ?>
-              </td>
               <td><?= e($ev->start->format('Y-m-d H:i')) ?></td>
               <td><?= e($ev->end->format('Y-m-d H:i')) ?></td>
               <td><?= $ev->allDay ? '<span class="pv-yes">yes</span>' : '<span class="pv-no">no</span>' ?></td>
@@ -263,7 +253,7 @@ require __DIR__ . '/includes/header.php';
             </tr>
           <?php endforeach; ?>
           <?php if (!$all): ?>
-            <tr><td colspan="10">
+            <tr><td colspan="9">
               Nothing was parsed. Check that the calendar is set to public.
             </td></tr>
           <?php endif; ?>
@@ -285,9 +275,8 @@ require __DIR__ . '/includes/header.php';
 
     <div class="prose mt-lg">
       <ul>
-        <li><code>[HIKE] Test hike</code> — the tag becomes a label and the prefix is removed</li>
-        <li><code>[NONSENSE] Test</code> — unrecognized tag, should not break the card</li>
-        <li>A title with no prefix, such as <em>Ski waxing party</em> — should be guessed as SNOW</li>
+        <li><code>[HIKE] Test hike</code> — a leading bracket is dropped from the title</li>
+        <li>A title with no prefix, such as <em>Ski waxing party</em> — shown as typed</li>
         <li>An all-day event — should show "All day" rather than a time</li>
         <li>A multi-day event — should show a date range, and the end date must not be a day late</li>
         <li>An event with no description and no location — should not leave empty rows</li>

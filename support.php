@@ -39,70 +39,36 @@ require __DIR__ . '/includes/header.php';
 <!-- ====================================================== sponsor ==== -->
 <section class="section" id="sponsor">
   <div class="wrap">
-    <div class="split split--wide-left">
-      <div>
-        <p class="eyebrow">For companies</p>
-        <h2 class="h2">Sponsorship</h2>
-        <div class="prose mt-lg">
-          <?php /* The numbers were restated here in prose, beside a stats block
-                   printing the same three. The stats won: a sponsor reads those. */ ?>
-          <h3>What sponsorship funds</h3>
-          <ul>
-            <li>Shared equipment that members borrow for club trips</li>
-            <li>Licensing and venue costs for the club's mountain film festivals</li>
-            <li>Trip costs, which keeps events affordable for students</li>
-          </ul>
-
-          <h3>Sponsor recognition</h3>
-          <ul>
-            <li>Name and logo on this website and on club event materials</li>
-            <li>Acknowledgement at the club's film festival screenings</li>
-            <li>Member discounts, as an alternative or addition to logo placement</li>
-          </ul>
-        </div>
-
-        <?php alpine_write_to(cfg('links.officers'), 'Alpine Club sponsorship', array(
-            'What your company does, and who there we would be working with',
-            'What you would want in return: logo placement, event recognition, '
-                . 'member discounts, or some combination',
-            'Roughly what scale of support you have in mind',
-        )); ?>
+    <div>
+      <p class="eyebrow">For companies</p>
+      <h2 class="h2">Sponsorship</h2>
+      <div class="prose mt-lg">
+        <p>
+          The club is looking for sponsors and has not settled on what a
+          sponsorship is. There are no tiers and no fixed price. What follows is
+          the kind of support that would be useful, not a menu &mdash; the
+          arrangement is whatever an officer and a sponsor agree on.
+        </p>
+        <ul>
+          <li>Gear donated to the loanable inventory, new or used</li>
+          <li>An equipment demo at a club event</li>
+          <li>Money toward film festival licensing and venue costs, or toward trip costs</li>
+          <li>Discounts for members</li>
+          <li>Name and logo on this site and on club event materials</li>
+          <li>Acknowledgement at the film festival screenings</li>
+        </ul>
+        <p>
+          If what you have in mind is not on that list, say it anyway. The club
+          would rather hear the idea than turn down something it did not think
+          to ask for.
+        </p>
       </div>
 
-      <div class="stack">
-        <?php /* Four numbers, four different questions a sponsor actually asks:
-                 how many people, for how long, how visible is the flagship
-                 event, and how much of it is there. Every one is derived from
-                 config rather than typed here, so none of them can go stale
-                 quietly. */ ?>
-        <div class="stats">
-          <div class="stat">
-            <div class="stat__num"><?= e(cfg('facts.members')) ?></div>
-            <div class="stat__label">
-              active members across Caltech, JPL, and the local community, about
-              <?= e(cfg('facts.grad_share')) ?> of them graduate students
-            </div>
-          </div>
-          <div class="stat">
-            <div class="stat__num"><?= date('Y') - (int) cfg('facts.founded') ?></div>
-            <div class="stat__label">years since the club was founded</div>
-          </div>
-          <div class="stat">
-            <div class="stat__num"><?= date('Y') - (int) cfg('facts.banff_since') ?></div>
-            <div class="stat__label">
-              years hosting the Banff Mountain Film Festival, since
-              <?= e(cfg('facts.banff_since')) ?>
-            </div>
-          </div>
-          <div class="stat">
-            <div class="stat__num"><?= count(cfg('facts.festivals')) ?></div>
-            <div class="stat__label">
-              mountain film festivals the club runs:
-              <?= e(implode(', ', array_keys(cfg('facts.festivals')))) ?>
-            </div>
-          </div>
-        </div>
-      </div>
+      <?php alpine_write_to(cfg('links.officers'), 'Alpine Club sponsorship', array(
+          'What your company does, and who there we would be working with',
+          'What you would want to give, and what you would want in return',
+          'Roughly what scale you have in mind, if you have a number yet',
+      )); ?>
     </div>
 
     <?php if ($sponsors): ?>

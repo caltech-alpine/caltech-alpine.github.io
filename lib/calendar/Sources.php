@@ -301,10 +301,8 @@ class AlpineGoogleApiCalendarSource implements AlpineCalendarSource
         $helper = new IcsParser($tz->getName());
         $e->descriptionHtml = $helper->publicSafeHtml($desc);
         $e->descriptionText = $helper->publicHtmlToText($desc);
-        list($tag, $title, $guessed) = $helper->publicExtractTag($summary);
-        $e->tag        = $tag;
-        $e->title      = ($title !== '') ? $title : 'Alpine Club event';
-        $e->tagGuessed = $guessed;
+        $title     = $helper->publicCleanTitle($summary);
+        $e->title  = ($title !== '') ? $title : 'Alpine Club event';
 
         return $e;
     }

@@ -12,7 +12,7 @@ require __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'About',
-    'description' => 'The Caltech Alpine Club: founded in 1987, 200+ active members, outdoor '
+    'description' => 'The Caltech Alpine Club: founded in 1987, outdoor '
                    . 'trips and film screenings for the Caltech community. Officers and how '
                    . 'to reach them.',
     'nav'         => 'about.php',
@@ -63,10 +63,10 @@ require __DIR__ . '/includes/header.php';
             first outdoor trip.
           </p>
           <?php /* ONE founding narrative across the site: the club was founded in
-                   1987, and that is what the hero, the stats and the meta description
-                   all say. The 1950 material is older and less certain, so it appears
-                   exactly once, here, hedged and subordinate. Do not promote it to a
-                   headline number. */ ?>
+                   1987, and that is what the hero and the meta description both say.
+                   The 1950 material is older and less certain, so it appears exactly
+                   once, here, hedged and subordinate. Do not promote it to a headline
+                   number. */ ?>
           <p>
             The club was founded in <?= e(cfg('facts.founded')) ?>, but club records
             suggest Caltech outdoor trips go back to around 1950.
@@ -79,32 +79,6 @@ require __DIR__ . '/includes/header.php';
           &ldquo;<?= e(rtrim(cfg('facts.mission'), '.')) ?>.&rdquo;
         </blockquote>
 
-        <div class="stats stats--light">
-          <div class="stat">
-            <div class="stat__num"><?= e(cfg('facts.members')) ?></div>
-            <div class="stat__label">members across Caltech, JPL, and the local community</div>
-          </div>
-          <div class="stat">
-            <div class="stat__num"><?= e(cfg('facts.founded')) ?></div>
-            <div class="stat__label">founded by <?= e(cfg('facts.founder')) ?></div>
-          </div>
-          <div class="stat">
-            <div class="stat__num"><?= date('Y') - (int) cfg('facts.banff_since') ?></div>
-            <div class="stat__label">
-              years hosting the Banff Mountain Film Festival, since
-              <?= e(cfg('facts.banff_since')) ?>
-            </div>
-          </div>
-          <?php /* The count comes from facts.festivals so this cannot drift out
-                   of step with the same figure on the Support page. */ ?>
-          <div class="stat">
-            <div class="stat__num"><?= count(cfg('facts.festivals')) ?></div>
-            <div class="stat__label">
-              mountain film festivals the club runs:
-              <?= e(implode(', ', array_keys(cfg('facts.festivals')))) ?>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   </div>

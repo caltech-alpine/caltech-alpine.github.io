@@ -28,24 +28,15 @@ Slack. This site holds the things that stay true for years.
 The website reads the calendar every 5 minutes and builds the event cards
 itself. You do not touch this repository, and you do not create a page per trip.
 
-Optionally, put an activity tag in square brackets at the start of the title:
+Write the title the way it should read on the website. There are no activity
+tags to remember.
 
-```
-[HIKE] Mount Baldy day hike
-[CLIMB] Joshua Tree weekend
-[SNOW] Mammoth trip
-[RUN] Eaton Canyon trail run
-[BIKE] Brown Mountain ride
-[SOCIAL] Alpine Club lunch
-[SOCIAL] Post-run coffee
-```
-
-The tag becomes the activity label on the card and is removed from the title
-shown to visitors. Events with no tag still work — the site makes a sensible
-guess from words in the title, and if it cannot, the card simply has no label.
-
-The tags are defined in [`data/activities.php`](data/activities.php). Add an
-entry there and you can start using a new tag the same day.
+The site used to accept a `[HIKE]`-style prefix and turn it into a label on the
+card. That was removed in August 2026: the labels were not worth the table of
+activities, aliases and keyword guesses behind them. Old titles are not a
+problem — a leading `[BRACKET]` is still dropped from the displayed title, so
+`[RUN] Weekly trail run` reads as *Weekly trail run*. Nothing needs editing in
+the calendar.
 
 **Other things worth knowing:**
 
@@ -119,8 +110,9 @@ Edit [`data/sponsors.php`](data/sponsors.php). If you have a logo file, put it i
 `assets/images/sponsors/` and name it in the entry. **A sponsor with no logo file
 still displays**, as a wordmark, so you can list them the day they say yes.
 
-While the list is empty, the homepage shows a short sponsorship invitation
-instead of an empty row of logos. Add one sponsor and it switches over.
+While the list is empty, the homepage's sponsor row is not rendered at all, and
+the closing section carries the invitation instead. Add one sponsor and the row
+appears.
 
 ### To add or change photos
 
@@ -218,7 +210,6 @@ includes/
 data/                >>> The files officers actually edit
   officers.csv
   sponsors.php
-  activities.php     The [TAG] labels understood on calendar event titles
 
 lib/calendar/        The Google Calendar integration. You should never need to
   Calendar.php       open these.

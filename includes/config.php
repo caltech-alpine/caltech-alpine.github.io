@@ -13,7 +13,6 @@
  *  Lists that grow and shrink live next door, one file each:
  *      data/officers.php     who runs the club
  *      data/sponsors.php     who supports it
- *      data/activities.php   the [TAG] labels understood on calendar events
  *      data/gear.php         what the club lends
  * ============================================================================
  */
@@ -42,9 +41,9 @@ return array(
 
     /* ------------------------------------------------------------ calendar */
     /*  To add an event to the website, add it to this Google Calendar.
-        There is no second step. Optionally prefix the title with an activity
-        tag — [HIKE], [CLIMB], [SNOW], [RUN], [BIKE], [SOCIAL], [COURSE] —
-        and the site turns it into a label. See data/activities.php.          */
+        There is no second step. Type the title the way it should read on the
+        site; a leading [BRACKET] left over from the old activity-tag
+        convention is dropped, and nothing replaces it.                       */
     'calendar' => array(
         'calendar_id' => 'e13b4ff623b227d4b2445fe2aadc6cb2cd18080f81f9c2edfcc51f3f9a58f673@group.calendar.google.com',
 
@@ -186,25 +185,14 @@ return array(
         'founded'      => 1987,
         'founder'      => 'Fritz Nordby',
 
-        /* "200+", not "Hundreds". The old site's About page put it at "around
-           200 active members, with approximately 50% grad students, 10%
-           undergrads, plus postdocs, faculty, staff, and JPL and community
-           members" — so "hundreds" was rounding ~200 up into the plural, which
-           is the kind of claim a sponsor can check. The "+" is what lets this
-           stay true without anybody recounting. */
-        'members'      => '200+',
-        'grad_share'   => '50%',
+        /* Banff has run every year since 2001 except 2019/20, when campus
+           closed three days before the event. Source: the old site's About and
+           Film Festivals pages.
 
-        /* The film festivals the club runs, and the year each started. Kept as
-           data because the COUNT is quoted on two pages: adding one here
-           updates both, and neither page hardcodes "three". Banff has run every
-           year since 2001 except 2019/20, when campus closed three days before
-           the event. Source: the old site's About and Film Festivals pages. */
-        'festivals'    => array(
-            'Banff Mountain Film Festival' => 2001,
-            'Reel Rock'                    => 2010,
-            "No Man's Land"                => 2020,
-        ),
+           A member count and a festival count used to live here too, printed as
+           big numbers on About and Support. They were removed in August 2026:
+           a number nobody recounts is a number that quietly goes wrong, and
+           neither one was doing work the prose was not already doing. */
         'banff_since'  => 2001,
 
         'mission'      => 'To foster the Caltech outdoor community by encouraging '

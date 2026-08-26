@@ -304,8 +304,17 @@ here, on 2026-08-18; see [DEPLOY-LOG.md](DEPLOY-LOG.md).
 
 ## 7. Four things that will confuse you
 
-**`php tools/check.php` cannot be run.** It appears in older notes. The server
-you can log into has no PHP, and the machine with PHP only answers web requests.
+**`php tools/check.php` cannot be run on the server.** It appears in older
+notes. The server you can log into has no PHP, and the machine with PHP only
+answers web requests. It runs fine on a laptop with PHP installed
+(`winget install PHP.PHP.8.4`), which is also what `tools/build_static.py` and
+`tools/audit.py` need. Kyle's machine has PHP 8.4 as of 2026-08-26; winget puts
+it outside `PATH` for non-login shells, so either restart the shell or set
+`PHP=` to the `php.exe` under
+`%LOCALAPPDATA%\Microsoft\WinGet\Packages\PHP.PHP.8.4_*\`, which
+`build_static.py` reads. One caveat: PHP 8.4 prints a `Constant E_STRICT is
+deprecated` notice from `includes/bootstrap.php:26`. It is harmless locally and
+the server's older PHP does not emit it.
 
 **Never add a force-HTTPS rule to `.htaccess`.** HTTPS is handled in front of the
 web server, so the usual recipe redirects forever and looks like an outage.

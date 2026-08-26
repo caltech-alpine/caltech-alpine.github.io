@@ -15,8 +15,8 @@
  *    tier    optional label, e.g. 'Supporting', 'Partner'
  *    note    optional one line about what they support
  *
- *  While this list is empty the homepage shows a short "become a sponsor"
- *  invitation instead of an empty shelf of logos.
+ *  While this list is empty the homepage skips the sponsor row entirely; the
+ *  "become a sponsor" invitation sits in the closing section instead.
  * ============================================================================
  */
 

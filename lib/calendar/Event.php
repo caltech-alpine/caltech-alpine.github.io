@@ -17,17 +17,11 @@ class AlpineEvent
     /** Stable id from the calendar (UID, plus the occurrence date for repeats). */
     public $uid = '';
 
-    /** Title exactly as typed in Google Calendar, e.g. "[HIKE] Welcome Hike". */
+    /** Title exactly as typed in Google Calendar, e.g. "[RUN] Weekly trail run". */
     public $rawTitle = '';
 
-    /** Title with the [TAG] prefix stripped, e.g. "Welcome Hike". */
+    /** What visitors see. A leading [bracket], if any, is dropped. */
     public $title = '';
-
-    /** Activity key: 'hike', 'climb', 'snow'... or '' if none was found. */
-    public $tag = '';
-
-    /** True when the tag was inferred from keywords rather than a [TAG] prefix. */
-    public $tagGuessed = false;
 
     /**
      * For a repeating event, the id shared by every occurrence in the series.

@@ -25,7 +25,7 @@ DEFAULT_TARGETS = [
     "index.php", "events.php", "join.php", "gear.php", "about.php",
     "support.php", "404.php",
     "includes/partials.php", "includes/config.php",
-    "data/gear.php", "data/sponsors.php", "data/activities.php",
+    "data/gear.php", "data/sponsors.php",
     "README.md", "docs/HOSTING.md", "docs/DEPLOY.md", "docs/SERVERS.md",
     "docs/WRITING.md", "docs/README.md", "docs/DEPLOY-LOG.md",
 ]

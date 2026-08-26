@@ -83,13 +83,12 @@ if (!$upcoming) {
        . 'will show them within ' . round(cfg('calendar.cache_ttl') / 60) . ' minutes.');
 }
 
-/* Show what the site will actually render, so labels can be eyeballed. */
+/* Show what the site will actually render, so titles can be eyeballed. */
 if ($events) {
     line();
     line('  Next up:');
     foreach (array_slice($upcoming, 0, 5) as $e) {
-        printf("    %-11s %-42s %s%s\n",
-            $e->tag ? strtoupper($e->tag) . ($e->tagGuessed ? '~' : '') : '—',
+        printf("    %-42s %s%s\n",
             mb_strimwidth($e->title, 0, 42, '…'),
             $e->whenLine(),
             $e->cancelled ? '  [CANCELLED]' : ''
@@ -98,15 +97,11 @@ if ($events) {
     line();
     line('  Most recent past:');
     foreach (array_slice($past, 0, 5) as $e) {
-        printf("    %-11s %-42s %s\n",
-            $e->tag ? strtoupper($e->tag) . ($e->tagGuessed ? '~' : '') : '—',
+        printf("    %-42s %s\n",
             mb_strimwidth($e->title, 0, 42, '…'),
             $e->whenLine()
         );
     }
-    line();
-    line('    ~ means the activity label was guessed from the title.');
-    line('      Add a [TAG] prefix in Google Calendar to set it explicitly.');
 }
 
 /* ------------------------------------------------------------------- links */

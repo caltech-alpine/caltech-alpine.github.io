@@ -14,7 +14,6 @@
  */
 
 require_once __DIR__ . '/Event.php';
-require_once __DIR__ . '/Tags.php';
 require_once __DIR__ . '/IcsParser.php';
 require_once __DIR__ . '/Sources.php';
 

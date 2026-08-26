@@ -280,10 +280,8 @@ class IcsParser
         $e->cancelled  = isset($b['STATUS']) && strtoupper($b['STATUS']['value']) === 'CANCELLED';
         $e->location   = isset($b['LOCATION']) ? $this->unescapeText($b['LOCATION']['value']) : '';
 
-        list($tag, $title, $guessed) = $this->extractTag($summary);
-        $e->tag         = $tag;
-        $e->title       = ($title !== '') ? $title : 'Alpine Club event';
-        $e->tagGuessed  = $guessed;
+        $title      = $this->cleanTitle($summary);
+        $e->title   = ($title !== '') ? $title : 'Alpine Club event';
 
         $e->descriptionHtml = $this->safeHtml($rawDesc);
         $e->descriptionText = $this->htmlToText($rawDesc);
@@ -519,7 +517,7 @@ class IcsParser
     }
 
     /* ===================================================================== */
-    /*  Titles, tags, text                                                    */
+    /*  Titles and text                                                       */
     /* ===================================================================== */
 
     /*
@@ -535,34 +533,30 @@ class IcsParser
     /** @see htmlToText */
     public function publicHtmlToText($raw) { return $this->htmlToText($raw); }
 
-    /** @see extractTag */
-    public function publicExtractTag($summary) { return $this->extractTag($summary); }
+    /** @see cleanTitle */
+    public function publicCleanTitle($summary) { return $this->cleanTitle($summary); }
 
     /**
-     * "[HIKE] Welcome Hike" -> ['hike', 'Welcome Hike', false]
+     * "[RUN] Weekly trail run" -> "Weekly trail run".
      *
-     * When there is no prefix we make one careful guess from keywords, so that
-     * events created before this convention existed still get a label. An
-     * explicit prefix always wins.
-     *
-     * @return array [tagKey, cleanTitle, wasGuessed]
+     * The site used to turn that prefix into an activity label on the card.
+     * That was removed in August 2026 - the labels were not worth the table of
+     * activities, aliases and keyword guesses behind them. All that survives is
+     * this: a leading [bracket] is dropped from the displayed title, so titles
+     * typed under the old convention still read cleanly. Nothing needs to be
+     * edited in the calendar, and a new event needs no prefix.
      */
-    private function extractTag($summary)
+    private function cleanTitle($summary)
     {
         $summary = trim($summary);
 
         if (preg_match('/^\[\s*([A-Za-z0-9 _\-\/&]{1,24})\s*\]\s*(.*)$/u', $summary, $m)) {
-            $key   = alpine_normalise_tag($m[1]);
-            $title = trim($m[2]);
-            if ($key !== '') {
-                return array($key, $title, false);
-            }
-            // Unknown tag in brackets: drop the bracket, keep the words as the title.
-            return array('', trim($m[1] . ' ' . $title), false);
+            $rest = trim($m[2]);
+            // A bracket with nothing after it was the whole title; keep the words.
+            return ($rest !== '') ? $rest : trim($m[1]);
         }
 
-        $guess = alpine_guess_tag($summary);
-        return array($guess, $summary, $guess !== '');
+        return $summary;
     }
 
     /** Undo iCalendar TEXT escaping. */
