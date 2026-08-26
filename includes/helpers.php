@@ -214,3 +214,33 @@ function alpine_has_image($imageName)
     return $imageName !== '' && $imageName !== null
         && is_readable(ALPINE_ROOT . '/assets/images/' . $imageName);
 }
+
+/**
+ * A URL fragment from a title: "Film Festival Coordinator" -> "film-festival-coordinator".
+ */
+function alpine_slug($text)
+{
+    $slug = strtolower(trim((string) $text));
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $slug);
+    return trim($slug, '-');
+}
+
+/**
+ * A list of things as one readable phrase, Oxford comma and all:
+ * "Jarek" / "Jarek and Max" / "Jarek, Max, and Julian".
+ *
+ * docs/WRITING.md sets the Oxford comma, so it lives here rather than in each
+ * template that happens to need a list.
+ */
+function alpine_list_phrase(array $items)
+{
+    $items = array_values(array_filter(array_map('trim', $items), 'strlen'));
+
+    $n = count($items);
+    if ($n === 0) { return ''; }
+    if ($n === 1) { return $items[0]; }
+    if ($n === 2) { return $items[0] . ' and ' . $items[1]; }
+
+    $last = array_pop($items);
+    return implode(', ', $items) . ', and ' . $last;
+}

@@ -1529,7 +1529,11 @@ body.nav-open { overflow: hidden; }
   padding-bottom: 3rem;
 }
 @media (min-width: 900px) {
-  .site-footer__inner { grid-template-columns: 22rem 1fr; }
+  /* 20rem, not 22rem. The footer nav column has to hold one link column per
+     nav item, and a fifth item (Get Involved) did not fit in what was left,
+     so it wrapped alone onto a second row. Two rem off the brand blurb is
+     cheaper than shrinking the headings until they wrap. */
+  .site-footer__inner { grid-template-columns: 20rem 1fr; }
 }
 
 .site-footer__mark { width: 2rem; height: 2rem; margin-bottom: 1rem; }
@@ -1566,8 +1570,11 @@ body.nav-open { overflow: hidden; }
 
 .site-footer__nav {
   display: grid;
-  gap: 2rem 1.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 9.5rem), 1fr));
+  gap: 2rem 1.25rem;
+  /* 8rem, not 9.5rem: the fifth nav item (Get Involved) took the count past
+     what four 9.5rem columns could hold, so it wrapped alone onto a second row
+     and the footer read as broken rather than as five columns. */
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
 }
 .site-footer__heading {
   font-size: .78rem;
@@ -1674,4 +1681,195 @@ main  { flex: 1 0 auto; }
   .section--dark h1, .section--dark h2, .hero__title, .page-hero h1 { color: #000 !important; }
   .topo, .hero__topo, .hero__media { display: none !important; }
   a[href^="http"]::after { content: " (" attr(href) ")"; font-size: .8em; }
+}
+
+
+/* ==========================================================================
+   14. ROLES, VACANCIES, AND PHOTOGRAPHIC PAGE HEROES
+
+   Added August 2026, in response to two pieces of feedback: that open roles
+   were impossible to find, and that the site looked generated. The second one
+   is mostly answered here, by two changes with no new components:
+
+     * a page hero can carry a PHOTOGRAPH. Every inner page used to open with
+       the same dark block and the same contour pattern, which is what made six
+       different pages read as one template. The contour map is a genuine survey
+       of Mount Wilson and it earns its place once, not six times, so it is now
+       the fallback rather than the default.
+
+     * nothing below introduces a card. An open role is an outline in the
+       roster grid; the homepage notice is a line on a rule. Reaching for
+       another rounded rectangle is exactly the reflex that produced the
+       complaint.
+   ========================================================================== */
+
+/* --- photographic page hero --- */
+.page-hero--photo { padding-block: clamp(4rem, 9vw, 7rem); }
+.page-hero--sm    { padding-block: clamp(2.5rem, 5vw, 3.75rem); }
+
+.page-hero__media {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center 45%;
+}
+/* Same scrim as the homepage hero, so a heading is legible over whatever
+   photograph an officer drops in without anyone checking the contrast. */
+.page-hero__media::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(to right, rgba(14,17,19,.88) 0%, rgba(14,17,19,.60) 52%, rgba(14,17,19,.34) 100%),
+    linear-gradient(to top,   rgba(14,17,19,.60) 0%, rgba(14,17,19,0) 60%);
+}
+
+/* Where the photo was taken. Small, in the corner, and skipped entirely when
+   the CSV has nothing to say about it. */
+.page-hero__credit {
+  position: absolute;
+  right: var(--gutter);
+  bottom: .6rem;
+  margin: 0;
+  font-size: .74rem;
+  letter-spacing: .04em;
+  color: rgba(255, 255, 255, .55);
+}
+@media (max-width: 640px) { .page-hero__credit { display: none; } }
+
+
+/* --- the homepage line ---------------------------------------------------
+   One sentence between the hero and the events. Rules above and below rather
+   than a filled box: it should read as the club saying something, not as an
+   advertisement placed on the page.                                         */
+.wanted-strip {
+  border-block: 1px solid var(--line-strong);
+  background: var(--paper-2);
+}
+.wanted-strip__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .6rem 1.5rem;
+  padding-block: .95rem;
+}
+.wanted-strip__text {
+  margin: 0;
+  font-size: var(--step-0);
+  max-width: 60ch;
+}
+.wanted-strip__text a {
+  font-weight: 600;
+  color: var(--accent-text);
+  text-decoration: underline;
+  text-underline-offset: .18em;
+  text-decoration-thickness: 1.5px;
+}
+.wanted-strip__text a:hover { color: var(--alpenglow-hover); }
+
+
+/* --- an open slot in the officers grid -----------------------------------
+   Deliberately the same shape as an officer, in the same grid, in the group
+   the role belongs to. A vacancy listed somewhere else on the page is a
+   vacancy nobody reads: the person scanning this grid for who to ask is the
+   person who should discover the job is going spare.                        */
+.officer--open {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.officer__vacant {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  aspect-ratio: 4 / 5;
+  margin-bottom: .8rem;
+  border: 2px dashed var(--line-strong);
+  border-radius: var(--r);
+  color: var(--line-strong);
+  transition: border-color var(--speed) var(--ease), color var(--speed) var(--ease);
+}
+/* --alpenglow-hover, not --alpenglow: the bright accent is 4.43:1 on paper and
+   4.07:1 on the tint, i.e. below the AA floor, and tools/audit.py fails on it.
+   This is the brightest the accent goes while still clearing 4.5:1 everywhere
+   it appears. */
+.officer--open:hover .officer__vacant,
+.officer--open:focus-visible .officer__vacant {
+  border-color: var(--alpenglow-hover);
+  color: var(--alpenglow-hover);
+}
+.officer--open .officer__name { color: var(--text-mute); font-style: italic; }
+.officer--open .officer__name,
+.officer--open .officer__role,
+.officer--open .officer__handles { display: block; }
+
+
+/* --- what the club needs, on the Get Involved page --- */
+.wanted { list-style: none; margin: 0; padding: 0; }
+.wanted__item {
+  padding-block: .8rem;
+  border-bottom: 1px solid var(--line);
+}
+.wanted__item:first-child { border-top: 1px solid var(--line); }
+.wanted__role {
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  color: var(--accent-text);
+}
+.wanted__role:hover { color: var(--alpenglow-hover); }
+.wanted__note {
+  display: block;
+  margin-top: .15rem;
+  font-size: .88rem;
+  color: var(--text-mute);
+}
+
+
+/* --- the role list -------------------------------------------------------
+   A definition list in all but name, set two-up. No borders, no backgrounds:
+   the roles differ in length, so letting them differ in height is what stops
+   ten of them reading as ten identical tiles.                               */
+.roles {
+  display: grid;
+  gap: 2rem 3rem;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 22rem), 1fr));
+  align-items: start;
+}
+.role { scroll-margin-top: 7rem; }
+.role__name {
+  margin: 0;
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+/* The one place a role is marked out, and it is a rule rather than a box. */
+.role--wanted {
+  border-left: 3px solid var(--alpenglow);
+  padding-left: 1.1rem;
+  margin-left: -1.1rem;
+}
+.role__what {
+  margin: .5rem 0 0;
+  max-width: 52ch;
+  line-height: 1.6;
+}
+.role__who {
+  margin: .55rem 0 0;
+  font-size: .89rem;
+  color: var(--text-mute);
+}
+.role__status {
+  display: block;
+  color: var(--accent-text);
+  font-weight: 600;
+}
+.role__how {
+  margin: .3rem 0 0;
+  font-size: .82rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--text-mute);
 }

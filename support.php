@@ -23,17 +23,14 @@ $donate   = cfg('links.donate');
 require __DIR__ . '/includes/header.php';
 ?>
 
-<header class="page-hero">
-  <div class="topo"></div>
-  <div class="wrap page-hero__inner">
-    <p class="eyebrow"><?= icon('heart', 'icon icon--xs') ?>Support</p>
-    <h1 class="h1">Support the Alpine Club</h1>
-    <p class="lede">
-      Sponsorship and donations support club trips, shared equipment, and the
-      club's film festivals.
-    </p>
-  </div>
-</header>
+<?php alpine_page_hero(array(
+    'title'  => 'Support the Alpine Club',
+    'lede'   => 'Sponsorship and donations support club trips, shared equipment, and the '
+              . "club's film festivals.",
+    'photo'  => 'photos/dsc02582.jpg',
+    'credit' => 'Summit chipmunk, unimpressed',
+    'size'   => 'sm',
+)); ?>
 
 
 <!-- ====================================================== sponsor ==== -->

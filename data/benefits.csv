@@ -1,0 +1,31 @@
+# MEMBER BENEFITS. Discounts and deals that come with being a member.
+#
+# THIS FILE IS DELIBERATELY EMPTY. The old site listed an Ikon Pass student
+# discount, a Stronghold member rate, College Outside, and discounted Stone
+# Adventures classes, with no year on any of them and an October sign-up window
+# written in the present tense -- which is exactly how a page full of deals
+# turns into a page full of wrong deals. None of them were carried over,
+# because nobody has confirmed either that they are still live or that we are
+# allowed to advertise them. Ask the Partnerships & Deals Lead before adding.
+#
+# While there are no rows here the Join page shows nothing at all. Add one and
+# the section appears. That is the whole switch.
+#
+# benefit     what it is called. "Ikon Pass", "Stronghold Climbing Gym".
+# what        one line: what a member actually gets. No prices you have not
+#             checked this year -- write "a member rate" rather than a number
+#             that will be wrong by spring.
+# visibility  public   printed in full on the site.
+#             members  the SITE SAYS NOTHING about it beyond the fact that
+#                      member-only deals exist and who to ask. Use this when a
+#                      sponsor's agreement restricts advertising, or when you
+#                      are not sure it permits it. THE DEFAULT IF UNSURE IS
+#                      members: an unadvertisable deal published by mistake is
+#                      a broken agreement, and a public deal held back for a
+#                      term costs nobody anything.
+# expires     YYYY-MM-DD. The row STOPS BEING SHOWN after this date, without
+#             anyone doing anything. Put the end of the agreement here, or the
+#             close of a sign-up window. Blank means it runs until somebody
+#             deletes the row -- only correct for a standing arrangement.
+# url         where to sign up or read the terms. Optional.
+benefit,what,visibility,expires,url

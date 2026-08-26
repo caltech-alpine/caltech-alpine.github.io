@@ -32,17 +32,13 @@ $gearEmail   = ($gearOfficer && !empty($gearOfficer['email']))
 require __DIR__ . '/includes/header.php';
 ?>
 
-<header class="page-hero">
-  <div class="topo"></div>
-  <div class="wrap page-hero__inner">
-    <p class="eyebrow"><?= icon('gear', 'icon icon--xs') ?>Equipment</p>
-    <h1 class="h1">Gear</h1>
-    <p class="lede">
-      Specialist club equipment members can borrow, plus general kit rented
-      through the Caltech Y.
-    </p>
-  </div>
-</header>
+<?php alpine_page_hero(array(
+    'title'  => 'Gear',
+    'lede'   => 'Specialist club equipment members can borrow, plus general kit rented '
+              . 'through the Caltech Y.',
+    'photo'  => 'photos/sj-horseflats.jpg',
+    'credit' => 'Bouldering at Horse Flats',
+)); ?>
 
 
 <!-- ======================================================= rental ==== -->

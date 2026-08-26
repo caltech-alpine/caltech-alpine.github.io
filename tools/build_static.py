@@ -46,8 +46,8 @@ OUT = os.path.join(ROOT, "_site")
 
 # Public pages, in the order the sitemap lists them. preview.php is absent on
 # purpose — see the module docstring.
-PAGES = ["index.php", "events.php", "join.php", "gear.php", "about.php",
-         "support.php", "404.php"]
+PAGES = ["index.php", "events.php", "join.php", "roles.php", "gear.php",
+         "about.php", "support.php", "404.php"]
 
 # Copied verbatim. Everything the pages reference at runtime.
 ASSET_DIRS = ["assets"]

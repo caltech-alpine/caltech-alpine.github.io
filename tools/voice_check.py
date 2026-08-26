@@ -22,10 +22,13 @@ import sys
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DEFAULT_TARGETS = [
-    "index.php", "events.php", "join.php", "gear.php", "about.php",
+    "index.php", "events.php", "join.php", "roles.php", "gear.php", "about.php",
     "support.php", "404.php",
     "includes/partials.php", "includes/config.php",
     "data/gear.php", "data/sponsors.php",
+    # Officer-written prose, same as any page: the role descriptions in
+    # roles.csv and the "handles" line in officers.csv both end up on screen.
+    "data/roles.csv", "data/officers.csv",
     "README.md", "docs/HOSTING.md", "docs/DEPLOY.md", "docs/SERVERS.md",
     "docs/WRITING.md", "docs/README.md", "docs/DEPLOY-LOG.md",
 ]

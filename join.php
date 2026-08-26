@@ -7,6 +7,7 @@
  */
 
 require __DIR__ . '/includes/bootstrap.php';
+require __DIR__ . '/includes/benefits.php';
 require __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
@@ -23,16 +24,12 @@ $mailing = cfg('links.mailing_list');
 require __DIR__ . '/includes/header.php';
 ?>
 
-<header class="page-hero">
-  <div class="topo"></div>
-  <div class="wrap page-hero__inner">
-    <p class="eyebrow"><?= icon('heart', 'icon icon--xs') ?>Membership</p>
-    <h1 class="h1">Join the Alpine Club</h1>
-    <p class="lede">
-      Membership is free. Join the mailing list to get started.
-    </p>
-  </div>
-</header>
+<?php alpine_page_hero(array(
+    'title'  => 'Join the Alpine Club',
+    'lede'   => 'Membership is free. Join the mailing list to get started.',
+    'photo'  => 'photos/dsc03355-pano-copy.jpg',
+    'credit' => 'Moonrise in the Sierra Nevada',
+)); ?>
 
 
 <!-- ======================================================== steps ==== -->
@@ -197,6 +194,58 @@ require __DIR__ . '/includes/header.php';
 
   </div>
 </section>
+
+
+<!-- ===================================================== benefits ==== -->
+<?php /* Renders only when data/benefits.csv has something in it, which today
+         it does not. Same switch as the sponsor row on the homepage: the
+         structure is here so adding a deal is one line in a CSV rather than a
+         new page, and an empty file costs the visitor no height at all.
+
+         Read includes/benefits.php before adding anything. Some deals may not
+         be advertised publicly, and the 'members' setting is what keeps one of
+         those off the page entirely. */ ?>
+<?php if (alpine_has_benefits()): ?>
+  <?php $benefits = alpine_benefits(); $ask = alpine_benefits_contact(); ?>
+<section class="section section--tight" id="benefits">
+  <div class="wrap wrap--narrow">
+    <h2 class="h2">What membership gets you</h2>
+
+    <?php if ($benefits['public']): ?>
+      <dl class="contact-list mt-lg">
+        <?php foreach ($benefits['public'] as $b): ?>
+          <div>
+            <dt>
+              <?php if (!empty($b['url'])): ?>
+                <a href="<?= e($b['url']) ?>" rel="noopener"><?= e($b['benefit']) ?></a>
+              <?php else: ?>
+                <?= e($b['benefit']) ?>
+              <?php endif; ?>
+            </dt>
+            <dd><?= e($b['what']) ?></dd>
+          </div>
+        <?php endforeach; ?>
+      </dl>
+    <?php endif; ?>
+
+    <?php /* Deliberately says nothing about what these are or who they are
+             with. A sponsor can require that a member rate is not published,
+             and this line is what lets the club honour that and still tell
+             members the deals exist. */ ?>
+    <?php if ($benefits['restricted'] > 0): ?>
+      <div class="note mt-lg">
+        <?= icon('heart', 'icon icon--xs') ?>
+        <p>
+          Some member discounts cannot be listed publicly. Ask
+          <a href="mailto:<?= e($ask['email']) ?>"><?= e($ask['email']) ?></a><?php
+            if ($ask['name'] !== '') { echo ' (' . e($ask['name']) . ')'; } ?>,
+          or watch the mailing list.
+        </p>
+      </div>
+    <?php endif; ?>
+  </div>
+</section>
+<?php endif; ?>
 
 
 <!-- ==================================================== questions ==== -->

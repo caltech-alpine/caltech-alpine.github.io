@@ -24,6 +24,24 @@ $checkLinks = in_array('--links', $argv, true);
 $problems   = 0;
 
 function line($s = '') { echo $s . PHP_EOL; }
+
+/**
+ * Shorten a title for the columns below.
+ *
+ * mb_strimwidth() is the right function and it lives in the mbstring
+ * extension, which is not always installed -- and when it is missing PHP does
+ * not warn, it throws, so the health check died with a fatal error partway
+ * through and never reached the content and roles sections. A checker that
+ * cannot survive a missing optional extension is worse than useless: it fails
+ * loudly in a way that looks like the site is broken. Fall back to substr().
+ */
+function alpine_short($text, $width)
+{
+    if (function_exists('mb_strimwidth')) {
+        return mb_strimwidth($text, 0, $width, '...');
+    }
+    return strlen($text) > $width ? substr($text, 0, $width - 3) . '...' : $text;
+}
 function ok($s)   { line('  OK    ' . $s); }
 function warn($s) { global $problems; $problems++; line('  WARN  ' . $s); }
 function bad($s)  { global $problems; $problems++; line('  FAIL  ' . $s); }
@@ -89,7 +107,7 @@ if ($events) {
     line('  Next up:');
     foreach (array_slice($upcoming, 0, 5) as $e) {
         printf("    %-42s %s%s\n",
-            mb_strimwidth($e->title, 0, 42, '…'),
+            alpine_short($e->title, 42),
             $e->whenLine(),
             $e->cancelled ? '  [CANCELLED]' : ''
         );
@@ -98,7 +116,7 @@ if ($events) {
     line('  Most recent past:');
     foreach (array_slice($past, 0, 5) as $e) {
         printf("    %-42s %s\n",
-            mb_strimwidth($e->title, 0, 42, '…'),
+            alpine_short($e->title, 42),
             $e->whenLine()
         );
     }
@@ -170,6 +188,48 @@ $officers = alpine_data('officers');
 $sponsors = alpine_data('sponsors');
 count($officers) ? ok(count($officers) . ' officers listed') : warn('no officers in data/officers.csv');
 count($sponsors) ? ok(count($sponsors) . ' sponsors listed') : line('  --    no sponsors yet (data/sponsors.php)');
+
+/* ------------------------------------------------------------------ roles */
+/* data/roles.csv and data/officers.csv are joined on the role title, and the
+   join is what makes a vacancy appear. A typo on either side breaks it
+   SILENTLY: the officer still shows up on the About page, the role still shows
+   up on Get Involved, and the two simply never meet -- so a filled job is
+   advertised as open, which is the one wrong answer this system must not give.
+   Nothing about the rendered page would tell you. Hence a check. */
+require_once ALPINE_ROOT . '/includes/roles.php';
+
+$roles = alpine_roles();
+if (!$roles) {
+    warn('no roles in data/roles.csv — the Get Involved page will be empty');
+} else {
+    ok(count($roles) . ' roles defined (data/roles.csv)');
+
+    $known = array();
+    foreach ($roles as $r) { $known[alpine_role_office($r['role'])] = true; }
+
+    $orphans = array();
+    foreach ($officers as $o) {
+        if (!empty($o['until'])) { continue; }   // past titles are allowed to be historical
+        $office = alpine_role_office($o['role']);
+        if (!isset($known[$office])) { $orphans[$o['role']] = true; }
+    }
+
+    if ($orphans) {
+        bad('these serving officers hold a role that is not in data/roles.csv: '
+          . implode(', ', array_keys($orphans))
+          . '  — add a row there, or fix the spelling so the two files agree');
+    } else {
+        ok('every serving role also appears in data/roles.csv');
+    }
+
+    $wanted = alpine_roles_wanted();
+    if ($wanted) {
+        line('  --    ' . count($wanted) . ' role(s) currently shown as needing somebody: '
+           . alpine_roles_sentence($wanted));
+    } else {
+        line('  --    every role is filled, so the homepage notice is hidden');
+    }
+}
 
 
 is_readable(ALPINE_ROOT . '/assets/images/hero.jpg')

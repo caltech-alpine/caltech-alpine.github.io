@@ -32,6 +32,24 @@ return array(
         'href'  => 'gear.php',
     ),
 
+    /* GET INVOLVED vs the "Join" button in the masthead. They sound alike and
+       they are not the same ask: Join gets you on the mailing list and onto
+       trips, Get Involved is about helping run the club. Both are kept because
+       a site that only offers "Join" leaves somebody who wants to do more with
+       nowhere to go, and the officers page alone reads as a closed shop.
+
+       The sub-items skip the "what we need right now" section on purpose: that
+       block only renders when a role is actually open, and a footer link to an
+       anchor that is not on the page is a dead link for most of the year. */
+    array(
+        'label' => 'Get Involved',
+        'href'  => 'roles.php',
+        'children' => array(
+            array('label' => 'The roles',    'href' => 'roles.php#roles'),
+            array('label' => 'How to start', 'href' => 'roles.php#how'),
+        ),
+    ),
+
     array(
         'label' => 'About',
         'href'  => 'about.php',

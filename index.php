@@ -7,6 +7,7 @@
  */
 
 require __DIR__ . '/includes/bootstrap.php';
+require __DIR__ . '/includes/roles.php';
 require __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
@@ -17,6 +18,7 @@ $PAGE = array(
 
 $upcoming = AlpineCalendar::upcoming(cfg('calendar.home_limit'));
 $sponsors = alpine_data('sponsors');
+$wanted   = alpine_roles_wanted();
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -58,6 +60,45 @@ require __DIR__ . '/includes/header.php';
 </section>
 
 
+<!-- ======================================================= wanted ==== -->
+<?php /* ONE LINE, and only when there is something to say.
+
+         The club genuinely needs people, and somebody who never visits the
+         About page will never learn that. But a homepage that opens with a
+         grid of open positions reads as a job board, and the club is not
+         recruiting staff -- it is telling members that a job they might enjoy
+         is going spare. So: a single sentence on a rule, above the events,
+         naming the roles.
+
+         When every role is filled this renders nothing at all. That is the
+         property that matters when nobody has touched the site for a year: the
+         failure mode is silence, not a stale banner. */ ?>
+<?php if ($wanted): ?>
+<div class="wanted-strip">
+  <div class="wrap wanted-strip__inner">
+    <?php
+    /* Assembled in PHP and echoed as one string. Built inline in the markup it
+       picked up a newline before every comma, so the rendered line read
+       "a President , Film Festival Coordinator , and a Talks Coordinator ."
+       Anything that has to come out as a single sentence should be one string
+       by the time it reaches the page. */
+    $needs = array();
+    foreach ($wanted as $r) {
+        $needs[] = '<a href="' . e(url('roles.php#' . alpine_slug($r['role']))) . '">'
+                 . e(alpine_role_need_phrase($r)) . '</a>';
+    }
+    ?>
+    <p class="wanted-strip__text">
+      The club is short <?= alpine_list_phrase($needs) ?>.
+    </p>
+    <a class="arrow-link" href="<?= e(url('roles.php')) ?>">
+      What that involves <?= icon('arrow-right', 'icon icon--xs') ?>
+    </a>
+  </div>
+</div>
+<?php endif; ?>
+
+
 <!-- ==================================================== coming up ==== -->
 <section class="section" id="coming-up">
   <div class="wrap">
@@ -87,11 +128,15 @@ require __DIR__ . '/includes/header.php';
 
 
 <!-- ========================================================= gear ==== -->
-<section class="section section--tint" id="gear">
+<?php /* --tight, not a full section: this block is two sentences and one
+         caveat. Every section on this page used to take the same 102px of
+         padding top and bottom regardless of what was in it, which is what
+         gives a page that metronomic, generated rhythm. A short section
+         should look short. */ ?>
+<section class="section section--tint section--tight" id="gear">
   <div class="wrap">
     <div class="split split--wide-left">
       <div>
-        <p class="eyebrow"><?= icon('gear', 'icon icon--xs') ?>Equipment</p>
         <h2 class="h2">Gear</h2>
         <div class="prose mt-lg">
           <p>
@@ -131,7 +176,6 @@ require __DIR__ . '/includes/header.php';
 
     <div class="split split--wide-left">
       <div>
-        <p class="eyebrow"><?= icon('mountain', 'icon icon--xs') ?>About</p>
         <h2 class="h2">About the club</h2>
         <div class="prose mt-lg">
           <p>

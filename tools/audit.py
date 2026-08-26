@@ -21,8 +21,8 @@ import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-PAGES = ["index.php", "events.php", "join.php", "gear.php", "about.php",
-         "support.php", "404.php"]
+PAGES = ["index.php", "events.php", "join.php", "roles.php", "gear.php",
+         "about.php", "support.php", "404.php"]
 
 # alpineclub@ is the MAILING LIST. A contact link wired to it mails ~200 people.
 LIST_ADDRESS = "alpineclub@caltech.edu"

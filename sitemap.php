@@ -16,6 +16,7 @@ $pages = array(
     array('',            '1.0'),
     array('events.php',  '0.9'),
     array('join.php',    '0.9'),
+    array('roles.php',   '0.8'),
     array('gear.php',    '0.8'),
     array('about.php',   '0.7'),
     array('support.php', '0.6'),

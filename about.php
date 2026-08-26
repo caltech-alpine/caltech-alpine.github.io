@@ -8,6 +8,7 @@
 
 require __DIR__ . '/includes/bootstrap.php';
 require __DIR__ . '/includes/officers.php';
+require __DIR__ . '/includes/roles.php';
 require __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
@@ -21,20 +22,26 @@ $PAGE = array(
 /* Current and past officers, split and sorted for us. */
 $roster = alpine_officers();
 
+/* The roles nobody is doing, bucketed by the same group headings the people
+   are, so an open job appears IN the roster grid rather than in a separate
+   "vacancies" box further down the page. Somebody scanning this grid for who to
+   ask is exactly the person who should find out the job is going spare, and
+   they will not scroll past the fold to find that out. */
+$openByGroup = array();
+foreach (alpine_roles_wanted() as $r) {
+    $openByGroup[!empty($r['group']) ? $r['group'] : 'Officers'][] = $r;
+}
+
 require __DIR__ . '/includes/header.php';
 ?>
 
-<header class="page-hero">
-  <div class="topo"></div>
-  <div class="wrap page-hero__inner">
-    <p class="eyebrow"><?= icon('mountain', 'icon icon--xs') ?>About</p>
-    <h1 class="h1">About the Alpine Club</h1>
-    <p class="lede">
-      The Caltech Alpine Club organizes outdoor trips and film screenings for the
-      Caltech community.
-    </p>
-  </div>
-</header>
+<?php alpine_page_hero(array(
+    'title'  => 'About the Alpine Club',
+    'lede'   => 'The Caltech Alpine Club organizes outdoor trips and film screenings '
+              . 'for the Caltech community.',
+    'photo'  => 'photos/cac-mammoth-from-sujung.jpg',
+    'credit' => 'Club trip to Mammoth',
+)); ?>
 
 
 <!-- ========================================================= what ==== -->
@@ -42,7 +49,6 @@ require __DIR__ . '/includes/header.php';
   <div class="wrap">
     <div class="split split--wide-left">
       <div>
-        <p class="eyebrow">What we do</p>
         <h2 class="h2">Getting people outside</h2>
         <div class="prose mt-lg">
           <p>
@@ -90,15 +96,20 @@ require __DIR__ . '/includes/header.php';
   <div class="wrap">
     <div class="section-head">
       <div class="section-head__text">
-        <p class="eyebrow"><?= icon('social', 'icon icon--xs') ?>Who to ask</p>
         <h2 class="h2">Officers</h2>
+        <?php /* "elected each year" used to be asserted here. Nobody has been
+                 able to point at where that is written down -- there is no
+                 constitution or bylaws in this repository or on the old site --
+                 so the page no longer claims it. What is certainly true is that
+                 they are members who volunteered, and that is the sentence that
+                 invites the reader in anyway. */ ?>
         <p class="lede">
-          Officers are volunteers, elected each year. Contact any of them with
-          questions.
+          Officers are club members who volunteer to run things. Contact any of
+          them with questions.
         </p>
       </div>
-      <a class="arrow-link" href="#contact">
-        Contact details <?= icon('arrow-right', 'icon icon--xs') ?>
+      <a class="arrow-link" href="<?= e(url('roles.php')) ?>">
+        Ways you can help run the club <?= icon('arrow-right', 'icon icon--xs') ?>
       </a>
     </div>
 
@@ -135,6 +146,23 @@ require __DIR__ . '/includes/header.php';
                 <?php endif; ?>
               </div>
             <?php endforeach; ?>
+
+            <?php /* Generated from data/roles.csv: a role listed there with
+                     nobody currently holding it. Nobody types "vacant" anywhere,
+                     and the slot disappears by itself the moment somebody is
+                     added to data/officers.csv. */ ?>
+            <?php if (!empty($openByGroup[$groupName])): ?>
+              <?php foreach ($openByGroup[$groupName] as $r): ?>
+                <a class="officer officer--open" href="<?= e(url('roles.php#' . alpine_slug($r['role']))) ?>">
+                  <span class="officer__vacant" aria-hidden="true">
+                    <?= icon('arrow-right', 'icon icon--lg') ?>
+                  </span>
+                  <span class="officer__name">Could be you</span>
+                  <span class="officer__role"><?= e($r['role']) ?></span>
+                  <span class="officer__handles"><?= e(alpine_role_status_line($r)) ?></span>
+                </a>
+              <?php endforeach; ?>
+            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>

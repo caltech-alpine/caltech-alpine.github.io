@@ -91,6 +91,76 @@ function alpine_write_to($email, $subject = '', array $include = array(), array 
     <?php
 }
 
+/**
+ * The band at the top of an inner page.
+ *
+ *  ***  Give it a PHOTOGRAPH. The club has hundreds; use them.  ***
+ *
+ * Every inner page used to open with the same dark block and the same contour
+ * pattern, which made five different pages read as one template with the words
+ * swapped. The contour map is a real survey of Mount Wilson and it is worth
+ * having, but printed six times it stops being a map and becomes wallpaper. So
+ * it is now the FALLBACK: a page with a photo shows the photo, and a page
+ * without one still looks deliberate.
+ *
+ * @param array $opts
+ *   title    required.
+ *   lede     one sentence under it. Optional.
+ *   photo    a file under assets/images/, e.g. 'photos/baldy-1.jpg'. If it is
+ *            missing from disk the contour fallback is used instead, so a
+ *            deleted photo never leaves a broken page.
+ *   alt      what is in the photo. Leave blank for a purely decorative one.
+ *   credit   a line printed in the corner: where it is, who took it.
+ *   eyebrow  the small label above the title. USE IT SPARINGLY -- a tiny
+ *            uppercase word above every heading on the site is the tic that
+ *            makes a page read as generated.
+ *   icon     icon name for the eyebrow.
+ *   size     'sm' for a page whose content starts straight away, '' otherwise.
+ */
+function alpine_page_hero(array $opts)
+{
+    $photo   = isset($opts['photo'])   ? $opts['photo']   : '';
+    $hasPic  = $photo !== '' && alpine_has_image($photo);
+    $eyebrow = isset($opts['eyebrow']) ? $opts['eyebrow'] : '';
+    $credit  = isset($opts['credit'])  ? $opts['credit']  : '';
+    $lede    = isset($opts['lede'])    ? $opts['lede']    : '';
+    $size    = isset($opts['size'])    ? $opts['size']    : '';
+
+    $class = 'page-hero';
+    if ($hasPic) { $class .= ' page-hero--photo'; }
+    if ($size === 'sm') { $class .= ' page-hero--sm'; }
+    ?>
+    <header class="<?= e($class) ?>">
+      <?php if ($hasPic): ?>
+        <?php /* A background-image, not an <img>: it is decoration behind text,
+                 it has to fill an arbitrary box, and the alt text belongs to the
+                 heading that is already there. */ ?>
+        <div class="page-hero__media" style="background-image:url(<?= e(asset('images/' . $photo)) ?>)"></div>
+      <?php else: ?>
+        <div class="topo"></div>
+      <?php endif; ?>
+
+      <div class="wrap page-hero__inner">
+        <?php if ($eyebrow !== ''): ?>
+          <p class="eyebrow">
+            <?= isset($opts['icon']) ? icon($opts['icon'], 'icon icon--xs') : '' ?><?= e($eyebrow) ?>
+          </p>
+        <?php endif; ?>
+
+        <h1 class="h1"><?= e($opts['title']) ?></h1>
+
+        <?php if ($lede !== ''): ?>
+          <p class="lede"><?= $lede ?></p>
+        <?php endif; ?>
+      </div>
+
+      <?php if ($hasPic && $credit !== ''): ?>
+        <p class="page-hero__credit"><?= e($credit) ?></p>
+      <?php endif; ?>
+    </header>
+    <?php
+}
+
 /** A DOM id for one event's dialog, stable for a given occurrence. */
 function alpine_event_detail_id(AlpineEvent $e)
 {

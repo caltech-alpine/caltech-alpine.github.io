@@ -57,35 +57,65 @@ the calendar.
 
 ### To change an officer
 
-Edit [`data/officers.csv`](data/officers.csv). One row per person:
+Edit [`data/officers.csv`](data/officers.csv). One row per person, and it is a
+spreadsheet, so open it in Excel, Sheets, Notepad or the GitHub web editor:
 
-```php
-array(
-    'name'    => 'Jane Doe',
-    'role'    => 'Climbing Commodore',
-    'handles' => 'Climbing trips and the bouldering wall',
-    'group'   => 'Activity Leaders',
-    'photo'   => 'jane-doe.jpg',
-),
+```csv
+name,role,handles,email,group,photo,until
+"Jane Doe","Climbing Commodore","Climbing trips and the bouldering wall",jdoe@caltech.edu,"Activity Leaders",jane-doe.jpg,
 ```
 
-**When somebody steps down, do not delete them.** Add an `'until'` year:
+**When somebody steps down, do not delete them.** Put the year in the last
+column:
 
-```php
-    'until'   => 2026,
+```csv
+"Jane Doe","Climbing Commodore",,,"Activity Leaders",jane-doe.jpg,2027
 ```
 
-and they move to the *Past officers* list on the About page by themselves. That
-is the whole alumni system — the club keeps a record of who ran it without
-anyone maintaining a second list, and nothing is ever lost by an edit.
+They move to the *Past officers* list on the About page by themselves, **and the
+role they left starts showing as open** — on the About page, on Get Involved,
+and as one line on the homepage. That is a single edit doing three jobs, and it
+is the only edit anyone has to remember.
 
-**You do not need to order this file.** The page sorts officers by seniority of
-role and then alphabetically, so two people sharing a title always appear
-together. The seniority table is `alpine_role_rank()` in
-`includes/officers.php` — edit it if the club invents a new position.
+When somebody takes the job on, add them as a normal row and all three notices
+disappear. **Nobody ever types the word "vacant" anywhere.**
 
-`handles` is what makes the page useful: it tells a visitor who to email about
-what. Leave it empty to hide the line. `email` is optional; club addresses are
+**You do not need to order this file.** Officers are sorted by the `order`
+column in [`data/roles.csv`](data/roles.csv), then alphabetically, so two people
+sharing a title always appear together.
+
+### To add, retire or describe a role
+
+Edit [`data/roles.csv`](data/roles.csv). This is the list of jobs that exist,
+which is a different question from who is currently doing them:
+
+```csv
+role,group,order,seats,chosen,description,recruiting
+"Talks Coordinator","Activity Leaders",230,,,"Invites people to give talks on campus, and books a room.",
+```
+
+Its own header comments explain every column. Three worth knowing here:
+
+- **`seats`** is how many people the club wants in the job. Leave it blank for
+  anything that takes as many volunteers as turn up — a blank role is only
+  reported as open when nobody at all is doing it. Set it to `2` and the site
+  says "1 of 2 filled" while one person holds it, which is how the empty
+  co-president seat stops being invisible.
+- **`recruiting`** covers the one case the site cannot work out for itself: a
+  job that is filled and still needs somebody, because the holder is leaving.
+  Write the reason in plain words — `stepping down in June` — and that sentence
+  is what the site shows.
+- **`chosen`** (elected, appointed, volunteer) is blank on every row on purpose.
+  Nobody has been able to point at where the club's election rules are written
+  down, and a blank prints nothing. Fill it in when somebody confirms it.
+
+`php tools/check.php` reports a serving officer whose role does not match
+anything in this file. That mistake is invisible on the page and it makes a
+filled job advertise itself as open, so run the check after editing either file.
+
+`handles` is what makes the roster useful: it tells a visitor who to email about
+what. It describes the *person* — the fuller description of the *job* lives in
+`data/roles.csv`, so two people sharing a title can say different things here. Leave it empty to hide the line. `email` is optional; club addresses are
 fine to publish, personal ones deserve a second thought.
 
 **Headshots** go in `assets/images/officers/`, cropped to roughly 4:5 and about
@@ -150,9 +180,9 @@ means accidentally mailing every member, so they are named for what they do:
 | `links.list` | `alpineclub@caltech.edu` | The mailing list. Anything sent here goes to every member. Never wire a contact button to it. |
 | `links.secretary` | `alpine-secretary@caltech.edu` | Membership, including join requests from outside Caltech and JPL. |
 
-Two links are currently blank and should be filled in when you have them:
-`links.slack` and `links.donate`. Both fail gracefully — the Join page shows a
-"request an invite" email link instead of a dead Slack button.
+One link is currently blank and should be filled in when you have it:
+`links.slack`. It fails gracefully — the Join page shows a "request an invite"
+email link instead of a dead Slack button.
 
 **`links.secretary` needs checking before launch.** It is where membership
 requests from outside Caltech and JPL land, and an unanswered join request is
@@ -174,8 +204,11 @@ See [Deployment](#deployment) below.
 
 Run the health check (see [Health check](#health-check)) and then:
 
-- [ ] Update `data/officers.csv` after elections
+- [ ] Update `data/officers.csv` after elections — that is also what makes newly
+      empty roles show as open, so there is nothing separate to do about those
+- [ ] Check `data/roles.csv` still describes the jobs the club actually has
 - [ ] Update `data/sponsors.php`
+- [ ] Check anything in `data/benefits.csv` is still live and still advertisable
 - [ ] Check the mailing list and Slack links still work
 - [ ] Check the gear information is still accurate (prices, notice period, what is on the shelves)
 - [ ] Refresh the photographs
@@ -190,6 +223,7 @@ index.php            Home
 events.php           Events and trips (upcoming, calendar, past)
 join.php             Join
 gear.php             Gear rental
+roles.php            Get Involved: the jobs, which are open, how to start
 about.php            What we do, officers, contact
 support.php          Sponsorship and donations
 404.php              Page not found
@@ -203,20 +237,28 @@ includes/
   header.php         Page head, masthead, navigation
   footer.php         Footer and closing markup
   nav.php            The navigation menu, defined once
-  partials.php       Event card, event row, empty states, "write to us" blocks
+  partials.php       Event card, event row, page heroes, empty states, "write to us"
+  officers.php       Splits the roster into current and past, and sorts it
+  roles.php          Joins roles.csv to officers.csv. Where "open" comes from.
+  benefits.php       Member discounts, and what may be shown publicly
   helpers.php        e(), cfg(), asset(), url(), icon()
   icons.php          Inline SVG icon sprite
 
 data/                >>> The files officers actually edit
-  officers.csv
-  sponsors.php
+  officers.csv       WHO holds each job, and who used to
+  roles.csv          WHAT the jobs are. A job here with nobody in officers.csv
+                     is what makes a vacancy appear. Nothing says "vacant".
+  sponsors.php       Who supports the club
+  gear.php           What the club lends
+  benefits.csv       Member discounts. Empty, and the section stays hidden
+                     until it is not. Read includes/benefits.php first: some
+                     deals may not be advertised publicly.
 
 lib/calendar/        The Google Calendar integration. You should never need to
   Calendar.php       open these.
   Event.php
   IcsParser.php
   Sources.php
-  Tags.php
 
 assets/
   css/style.css      One stylesheet. All colors and sizes are tokens at the top.

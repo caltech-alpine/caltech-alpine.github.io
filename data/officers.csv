@@ -1,6 +1,11 @@
 # CALTECH ALPINE CLUB OFFICERS. Edit this file and the website follows.
 # Lines starting with # are ignored, so you can leave notes here.
 #
+# This file says WHO. data/roles.csv says WHAT THE JOBS ARE. Keep the 'role'
+# column below spelled the same as the 'role' column there -- that is how the
+# site knows a job has nobody in it. `php tools/check.php` tells you if the two
+# have drifted apart.
+#
 # name     required.
 # role     their title. People sharing a title appear together.
 # handles  what to contact them about. Leave blank to hide the line.

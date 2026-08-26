@@ -17,12 +17,37 @@
  */
 
 /**
- * Role seniority. Lower sorts first. Anything not listed here comes after the
- * listed roles, ordered alphabetically by role name — which is what you want
- * for activity leaders, where no role outranks another.
+ * Everything data/roles.csv knows about one job, or null.
  *
- * Edit this if the club invents a new officer position.
+ * Matching ignores case and a "Co-" prefix, so "Co-President" finds the row
+ * that says President.
  */
+function alpine_role_meta($role)
+{
+    static $index = null;
+
+    if ($index === null) {
+        $index = array();
+        foreach (alpine_data('roles') as $r) {
+            if (empty($r['role'])) { continue; }
+            $index[alpine_role_office($r['role'])] = $r;
+        }
+    }
+
+    $key = alpine_role_office($role);
+    return isset($index[$key]) ? $index[$key] : null;
+}
+
+/**
+ * How many people the club wants in this job, or null for "as many as turn up".
+ */
+function alpine_role_seats($role)
+{
+    $meta = alpine_role_meta($role);
+    if (!$meta || !isset($meta['seats']) || $meta['seats'] === '') { return null; }
+    return (int) $meta['seats'];
+}
+
 /**
  * The office behind a title, ignoring any "Co-" prefix.
  * "Co-President" and "President" are both the office `president`.
@@ -46,28 +71,36 @@ function alpine_display_role($role, $holders)
 {
     $role = trim($role);
     if ($holders > 1) { return $role; }
+
+    /* A job the club wants TWO people in keeps its "Co-" even while only one
+       person is doing it. Dropping it there was actively misleading: a lone
+       co-president rendered as "President", which is exactly how a page hides
+       the fact that the other seat is empty. The prefix is the visible half of
+       the vacancy, so it stays until data/roles.csv says one seat is enough. */
+    $seats = alpine_role_seats($role);
+    if ($seats !== null && $seats > 1) { return $role; }
+
     if (!preg_match('/^co[-\s]*(.+)$/i', $role, $m)) { return $role; }
 
     $bare = trim($m[1]);
     return $bare === '' ? $role : ucfirst($bare);
 }
 
+/**
+ * Role seniority. Lower sorts first, and it comes from the 'order' column in
+ * data/roles.csv.
+ *
+ * This used to be a hardcoded table right here, which meant role knowledge
+ * lived in two places -- and they had already drifted: the table ranked a
+ * 'webmaster' that appears in no roster. A role the CSV does not mention sorts
+ * after the ones it does, alphabetically, which is what you want for activity
+ * leaders where no job outranks another.
+ */
 function alpine_role_rank($role)
 {
-    static $ranks = array(
-        'president'                 => 10,
-        'co-president'              => 10,
-        'vice president'            => 20,
-        'vice-president'            => 20,
-        'treasurer'                 => 30,
-        'secretary'                 => 40,
-        'film festival coordinator' => 50,
-        'gear officer'              => 60,
-        'partnerships & deals lead' => 70,
-        'webmaster'                 => 80,
-    );
-    $key = strtolower(trim($role));
-    return isset($ranks[$key]) ? $ranks[$key] : 500;
+    $meta = alpine_role_meta($role);
+    if (!$meta || !isset($meta['order']) || $meta['order'] === '') { return 500; }
+    return (int) $meta['order'];
 }
 
 /**

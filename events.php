@@ -60,16 +60,12 @@ echo json_encode(count($ld) === 1 ? $ld[0] : $ld, JSON_UNESCAPED_SLASHES);
 </script>
 <?php endif; ?>
 
-<header class="page-hero">
-  <div class="topo"></div>
-  <div class="wrap page-hero__inner">
-    <p class="eyebrow"><?= icon('calendar', 'icon icon--xs') ?>Events</p>
-    <h1 class="h1">Events and trips</h1>
-    <p class="lede">
-      Hikes, trips, talks, socials, and film screenings.
-    </p>
-  </div>
-</header>
+<?php alpine_page_hero(array(
+    'title'  => 'Events and trips',
+    'lede'   => 'Hikes, trips, talks, socials, and film screenings.',
+    'photo'  => 'photos/baldy-1.jpg',
+    'credit' => 'Looking east from Mount Baldy',
+)); ?>
 
 
 <!-- ===================================================== upcoming ==== -->

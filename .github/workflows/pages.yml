@@ -75,7 +75,7 @@ jobs:
       - name: Sanity-check the output
         run: |
           set -e
-          for f in index events join gear about support 404; do
+          for f in index events join roles gear about support 404; do
             test -s "_site/$f.html" || { echo "missing _site/$f.html"; exit 1; }
             if grep -qiE "Fatal error|Parse error|Warning:</b>" "_site/$f.html"; then
               echo "PHP error inside _site/$f.html"; exit 1
