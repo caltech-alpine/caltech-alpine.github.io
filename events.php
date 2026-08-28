@@ -63,8 +63,8 @@ echo json_encode(count($ld) === 1 ? $ld[0] : $ld, JSON_UNESCAPED_SLASHES);
 <?php alpine_page_hero(array(
     'title'  => 'Events and trips',
     'lede'   => 'Hikes, trips, talks, socials, and film screenings.',
-    'photo'  => 'photos/baldy-1.jpg',
-    'credit' => 'Looking east from Mount Baldy',
+    'photo'  => 'photos/cac-mammoth-from-sujung.jpg',
+    'credit' => 'Club trip to Mammoth',
 )); ?>
 
 

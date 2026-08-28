@@ -51,8 +51,13 @@ require __DIR__ . '/includes/header.php';
        of the three things the club actually does, so both are named. */
     'lede'   => 'The Caltech Alpine Club organizes outdoor trips, lends gear, and hosts '
               . 'mountain film screenings.',
-    'photo'  => 'photos/cac-mammoth-from-sujung.jpg',
-    'credit' => 'Club trip to Mammoth',
+    /* The horizon in this frame sits about a fifth of the way down, not in the
+       middle, so the default band (center 45%) lands entirely below it and the
+       hero reads as a dark slope rather than a view. 28% brings the ridgeline
+       and the haze over the basin into the strip that survives. */
+    'photo'  => 'photos/baldy-1.jpg',
+    'credit' => 'Looking east from Mount Baldy',
+    'focus'  => 'center 28%',
 )); ?>
 
 
