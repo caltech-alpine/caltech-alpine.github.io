@@ -33,8 +33,10 @@ W, H = 1200, 630
 INK = (20, 24, 26)
 PAPER = (236, 231, 221)
 MUTED = (150, 156, 150)
-ALPENGLOW = (192, 82, 45)
-ACCENT_ON_DARK = (226, 138, 101)   # the mark's colour, 6.86:1 on INK
+# Exactly the alpenglow token from assets/css/style.css, hsl(15 62% 46%). It
+# was (192, 82, 45) here, two points off, which is invisible alone and is a
+# visible seam next to the mark that is drawn from the real value.
+ALPENGLOW = (190, 81, 45)
 
 
 def mark_layer(size):

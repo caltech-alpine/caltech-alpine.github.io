@@ -34,10 +34,11 @@ return array(
                        . 'Anyone can join.',
         'url'         => 'https://alpine.caltech.edu',
 
-        // The club mark: two crossed ice axes under a flame. It is drawn in
-        // the accent-on-dark colour because the only two places the site shows
-        // it (the masthead and the footer) are both ink. assets/images/
-        // logo-on-light.svg is the same mark for a pale background.
+        // The club mark: two crossed ice axes under a flame, drawn in the
+        // alpenglow accent. One file covers every background, because that
+        // token is legible on both (3.75:1 on ink, 4.42:1 on paper) and using
+        // a second, lighter orange on the dark pages put the mark a visible
+        // step off the accent beside it.
         //
         // Leave this empty and the header falls back to the wordmark alone,
         // which still looks deliberate.

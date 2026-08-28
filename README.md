@@ -338,19 +338,18 @@ the worst kind of broken link.
 ### The logo
 
 The club mark is two crossed ice axes under a flame, and it lives in exactly one
-place: **`assets/images/logo.svg`**, a single path in the accent-on-dark colour.
+place: **`assets/images/logo.svg`**, a single path in the alpenglow accent.
 Everything else is generated from it, so nothing can drift out of step.
 
 | File | What it is |
 |---|---|
-| `logo.svg` | the mark, on-dark colour. Masthead and footer. The source of record |
-| `logo-on-light.svg` | the same path in the darker accent, for a pale background |
+| `logo.svg` | the mark. Masthead and footer. The source of record |
 | `favicon.svg` | the mark inset on a rounded ink tile, for the browser tab |
 | `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | rasters, written by `tools/make_icons.py` |
 | `social-default.png` | the link preview, written by `tools/make_social.py` |
 
-**To change the mark:** replace the path in `logo.svg` and `logo-on-light.svg`,
-then run both generators:
+**To change the mark:** replace the path in `logo.svg` and `favicon.svg`, then
+run both generators:
 
 ```bash
 python tools/make_icons.py
@@ -359,11 +358,16 @@ python tools/make_social.py
 
 Do not edit a PNG by hand; the next run of either script overwrites it.
 
-**Why two colour files rather than `currentColor`:** both are loaded with
-`<img>`, and an SVG used as an image has no parent to inherit from, so
-`currentColor` there resolves to black. The colours are hardcoded and are
-recorded in each file's comment. If you change the `alpenglow` or
-`accent-on-dark` token in `assets/css/style.css`, change them to match.
+**Why the colour is hardcoded rather than `currentColor`:** the mark is loaded
+with `<img>`, and an SVG used as an image has no parent to inherit from, so
+`currentColor` there resolves to black. If you change the `alpenglow` token in
+`assets/css/style.css`, change `logo.svg` and `favicon.svg` to match.
+
+**One colour, not two.** There was briefly an `accent-on-dark` variant for the
+dark pages. That token is the small-text lift for dark sections, not the accent;
+the palette names `alpenglow` for "fills, buttons, icons, large text,
+decoration", and using anything else put the mark a step lighter than every
+other accent on the same screen.
 
 Setting `site.logo` in `includes/config.php` to an empty string removes the mark
 from the masthead and leaves the wordmark, which still looks deliberate.
