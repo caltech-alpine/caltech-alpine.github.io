@@ -28,7 +28,7 @@ DEFAULT_TARGETS = [
     "data/gear.php", "data/sponsors.php",
     # Officer-written prose, same as any page: the role descriptions in
     # roles.csv descriptions and the contact_for lines both end up on screen.
-    "ROLES.csv", "PEOPLE.csv",
+    "data/roles.csv", "data/people.csv",
     "README.md", "docs/HOSTING.md", "docs/DEPLOY.md", "docs/SERVERS.md",
     "docs/WRITING.md", "docs/README.md", "docs/DEPLOY-LOG.md",
 ]

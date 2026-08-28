@@ -1,7 +1,7 @@
 <?php
 /**
  * ============================================================================
- *  People: the humans, read once from PEOPLE.csv.
+ *  People: the humans, read once from data/people.csv.
  * ============================================================================
  *
  *  A person's name, email address and photograph are written in exactly one

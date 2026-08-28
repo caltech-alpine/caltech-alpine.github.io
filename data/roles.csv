@@ -1,12 +1,12 @@
 # CALTECH ALPINE CLUB ROLES. The jobs the club wants doing, whoever is doing them.
 #
 # Three files, and each fact is written in exactly one of them:
-#   PEOPLE.csv       WHO EXISTS -- names, emails, photographs
-#   ROLES.csv        WHAT THE JOBS ARE -- this file
-#   ASSIGNMENTS.csv  WHO IS DOING WHICH JOB
+#   data/people.csv       WHO EXISTS -- names, emails, photographs
+#   data/roles.csv        WHAT THE JOBS ARE -- this file
+#   data/assignments.csv  WHO IS DOING WHICH JOB
 #
 # Nobody ever types the word "vacant". A job listed here with nobody assigned to
-# it in ASSIGNMENTS.csv is shown as open, by itself, and the notice disappears
+# it in data/assignments.csv is shown as open, by itself, and the notice disappears
 # by itself when somebody is added. There is no second edit to remember.
 #
 # Lines starting with # are ignored, so you can leave notes here.
@@ -16,7 +16,7 @@
 #
 # role_id      a short permanent name for the job, lowercase, words joined by
 #              underscores: film_festival. NOTHING SHOWS IT TO VISITORS. It is
-#              what ASSIGNMENTS.csv points at, what the page anchors use, and
+#              what data/assignments.csv points at, what the page anchors use, and
 #              what the website's own code looks for.
 #              >>> PICK IT ONCE AND NEVER CHANGE IT. <<<
 #              You can rename the TITLE below as often as you like -- to
@@ -55,9 +55,9 @@
 #                  asking again.
 #
 # Retiring a job: delete the row. Nobody is lost -- the people who held it stay
-# in PEOPLE.csv and on the Past officers list, which outlives the jobs. Do one
+# in data/people.csv and on the Past officers list, which outlives the jobs. Do one
 # thing first, though: if anybody held it in the past, put what the job was
-# called into their title_held cell in ASSIGNMENTS.csv. The row you are about to
+# called into their title_held cell in data/assignments.csv. The row you are about to
 # delete is the last record of it. `php tools/check.php --data` will stop you.
 role_id,title,title_shared,group,min_people,max_people,description,contact_for,recruiting
 president,President,Co-President,"Steering Committee",1,2,"Runs the club: calls the meetings, decides what the year looks like, and speaks for the club to Caltech. The job people bring a question to when they do not know who else to ask.","Anything about the club in general",

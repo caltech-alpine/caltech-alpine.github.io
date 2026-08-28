@@ -27,7 +27,7 @@ $gear = alpine_data('gear');
    the job without this page silently losing its contact -- no error, no blank
    space, just a page quietly pointing everybody at the general mailbox instead
    of the person who actually has the rack. tools/check.php now fails if the
-   'gear' id ever disappears from ROLES.csv; see alpine_required_roles().
+   'gear' id ever disappears from data/roles.csv; see alpine_required_roles().
 
    The title printed below is read from the data too, so renaming the job
    renames it here as well.
@@ -107,7 +107,7 @@ require __DIR__ . '/includes/header.php';
             and members borrow it. Submit the reservation form and our
             <a href="<?= e(url('about.php#officers')) ?>"><?= e($gearTitle) ?></a><?php
               if ($gearOfficer):
-                  /* Their address comes from PEOPLE.csv through
+                  /* Their address comes from data/people.csv through
                      alpine_person_link(), the same call the About page makes, so
                      it is not written a second time here. Two people can hold
                      the job and both are named. */

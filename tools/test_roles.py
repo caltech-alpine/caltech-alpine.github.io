@@ -38,11 +38,9 @@ import urllib.error
 import urllib.request
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# The three files an officer edits live in the site ROOT, in capitals, so they
-# are impossible to miss in a directory listing. Everything else that is data
-# rather than code stays in data/, where it is a developer's business.
-DATA = ROOT
-FILES = ["PEOPLE.csv", "ROLES.csv", "ASSIGNMENTS.csv"]
+# Everything a person edits is in data/. One place, one rule.
+DATA = os.path.join(ROOT, "data")
+FILES = ["people.csv", "roles.csv", "assignments.csv"]
 
 # Every page a person or a role can appear on. A change is only safe if it is
 # consistent across ALL of them -- the whole point of one authoritative source.
@@ -114,7 +112,7 @@ def drop_row(name, match):
 
 
 def person(person_id):
-    """One row of PEOPLE.csv, as {column: value}.
+    """One row of data/people.csv, as {column: value}.
 
     Scenarios read the real name and address from here rather than repeating
     them as literals. A test that hardcodes zauvil@caltech.edu is one more
@@ -122,7 +120,7 @@ def person(person_id):
     would be this file failing the rule it exists to enforce.
     """
     rows = list(__import__("csv").DictReader(
-        [l for l in read("PEOPLE.csv").split("\n") if not l.startswith("#")]))
+        [l for l in read("people.csv").split("\n") if not l.startswith("#")]))
     for r in rows:
         if (r.get("person_id") or "").strip() == person_id:
             return r
@@ -276,9 +274,9 @@ def data_ok(expect_ok=True):
 def scenario_1_replace_an_officer(base):
     """Zach leaves and Alice becomes President."""
     outgoing = person("zach-auvil")
-    edit_cell("ASSIGNMENTS.csv", "zach-auvil,president", "until", "2027")
-    add_row("PEOPLE.csv", 'alice-fell,"Alice Fell",afell@caltech.edu,')
-    add_row("ASSIGNMENTS.csv", "alice-fell,president,,")
+    edit_cell("assignments.csv", "zach-auvil,president", "until", "2027")
+    add_row("people.csv", 'alice-fell,"Alice Fell",afell@caltech.edu,')
+    add_row("assignments.csv", "alice-fell,president,,")
     data_ok()
     p = render(base)
 
@@ -298,8 +296,8 @@ def scenario_1_replace_an_officer(base):
 
 def scenario_2_two_co_presidents(base):
     """Alice and Bob become Co-Presidents."""
-    add_row("PEOPLE.csv", 'bob-ridge,"Bob Ridge",bridge@caltech.edu,')
-    add_row("ASSIGNMENTS.csv", "bob-ridge,president,,")
+    add_row("people.csv", 'bob-ridge,"Bob Ridge",bridge@caltech.edu,')
+    add_row("assignments.csv", "bob-ridge,president,,")
     data_ok()
     p = render(base)
 
@@ -316,10 +314,10 @@ def scenario_2_two_co_presidents(base):
 
 def scenario_3_rename_the_title(base):
     """The club renames the displayed title to Co-President, with one holder."""
-    drop_row("ASSIGNMENTS.csv", "bob-ridge,president")
+    drop_row("assignments.csv", "bob-ridge,president")
     # ONE edit, to the human-facing title. title_shared already says
     # Co-President and is not touched, and neither is any code.
-    edit_cell("ROLES.csv", "president,President", "title", "Co-President")
+    edit_cell("roles.csv", "president,President", "title", "Co-President")
     data_ok()
     p = render(base)
 
@@ -336,7 +334,7 @@ def scenario_3_rename_the_title(base):
 
 def scenario_4_rename_it_back(base):
     """And back again, which must be equally uneventful."""
-    edit_cell("ROLES.csv", "president,Co-President", "title", "President")
+    edit_cell("roles.csv", "president,Co-President", "title", "President")
     data_ok()
     p = render(base)
     on_page(p, "about.php", "Alice Fell", "still attached after a second rename")
@@ -346,12 +344,12 @@ def scenario_4_rename_it_back(base):
 
 def scenario_5_change_the_staffing(base):
     """Hiking goes from max 2 to max 3."""
-    edit_cell("ROLES.csv", "hiking,", "max_people", "2")
+    edit_cell("roles.csv", "hiking,", "max_people", "2")
     p = render(base)
     check("two of two hiking coordinators is full, so nothing is offered",
           "Room for" not in role_block(p, "hiking"), role_block(p, "hiking"))
 
-    edit_cell("ROLES.csv", "hiking,", "max_people", "3")
+    edit_cell("roles.csv", "hiking,", "max_people", "3")
     data_ok()
     p = render(base)
     check("raising the maximum to 3 opens a place, with no code change",
@@ -384,17 +382,17 @@ def scenario_7_an_optional_role(base):
           "Talks" not in strip(p), strip(p))
 
     # Raise its minimum to 1 and it must change register immediately.
-    edit_cell("ROLES.csv", "talks,", "min_people", "1")
+    edit_cell("roles.csv", "talks,", "min_people", "1")
     p = render(base)
     check("raising min_people to 1 makes it a real gap, with no other edit",
           "a Talks Coordinator" in strip(p), strip(p))
-    edit_cell("ROLES.csv", "talks,", "min_people", "0")
+    edit_cell("roles.csv", "talks,", "min_people", "0")
 
 
 def scenario_8_an_email_changes(base):
     """Somebody's address changes. It must change everywhere at once."""
     before = person("forrest-mccann")
-    edit_cell("PEOPLE.csv", "forrest-mccann", "email", "forrest@caltech.edu")
+    edit_cell("people.csv", "forrest-mccann", "email", "forrest@caltech.edu")
     data_ok()
     p = render(base)
 
@@ -410,7 +408,7 @@ def scenario_8_an_email_changes(base):
 
 def scenario_9_add_a_role(base):
     """A brand new job, added with one row and no template edit."""
-    add_row("ROLES.csv",
+    add_row("roles.csv",
             'ski_touring,"Ski Touring Coordinator",,"Activity Leaders",1,2,'
             '"Organizes backcountry ski days.","Ski touring",')
     data_ok()
@@ -423,7 +421,7 @@ def scenario_9_add_a_role(base):
     check("its anchor is the role_id", 'id="ski_touring"' in p["roles.php"])
 
     # Now fill it, and every one of those notices must retract by itself.
-    add_row("ASSIGNMENTS.csv", "alice-fell,ski_touring,,")
+    add_row("assignments.csv", "alice-fell,ski_touring,,")
     p = render(base)
     on_page(p, "roles.php", "Currently Alice Fell", "filling it names the holder")
     check("and the homepage notice retracts with no second edit",
@@ -434,8 +432,8 @@ def scenario_9_add_a_role(base):
 
 def scenario_10_delete_a_role(base):
     """A job the club has stopped doing. The row goes, and so does every trace."""
-    drop_row("ROLES.csv", "ski_touring,")
-    drop_row("ASSIGNMENTS.csv", "alice-fell,ski_touring")
+    drop_row("roles.csv", "ski_touring,")
+    drop_row("assignments.csv", "alice-fell,ski_touring")
     data_ok()
     p = render(base)
     nowhere(p, "Ski Touring", "the deleted job is gone from the whole site")
@@ -452,11 +450,11 @@ def scenario_10b_retiring_a_role_keeps_its_alumni(base):
     """
     # A job of its own, so this scenario does not depend on which real role
     # happens to have alumni -- and does not disturb the ones that do.
-    add_row("ROLES.csv",
+    add_row("roles.csv",
             'winter_school,"Winter School Lead",,"Activity Leaders",1,1,'
             '"Ran the winter skills weekend.","The winter school",no')
-    add_row("PEOPLE.csv", 'wanda-crag,"Wanda Crag",,')
-    add_row("ASSIGNMENTS.csv", 'wanda-crag,winter_school,2024,"Winter School Tsar"')
+    add_row("people.csv", 'wanda-crag,"Wanda Crag",,')
+    add_row("assignments.csv", 'wanda-crag,winter_school,2024,"Winter School Tsar"')
     data_ok()
     p = render(base)
     on_page(p, "about.php", "Wanda Crag", "she is on the Past officers list")
@@ -464,7 +462,7 @@ def scenario_10b_retiring_a_role_keeps_its_alumni(base):
             "under the title she actually held, not the one the job has now")
 
     # Now retire the job entirely.
-    drop_row("ROLES.csv", "winter_school,")
+    drop_row("roles.csv", "winter_school,")
     data_ok()
     p = render(base)
     on_page(p, "about.php", "Wanda Crag", "and she survives the job being retired")
@@ -474,20 +472,20 @@ def scenario_10b_retiring_a_role_keeps_its_alumni(base):
 
     # Without a title_held nothing would record what the job was called, so the
     # checker has to ask for one BEFORE the row is deleted.
-    edit_cell("ASSIGNMENTS.csv", "wanda-crag,winter_school", "title_held", "")
+    edit_cell("assignments.csv", "wanda-crag,winter_school", "title_held", "")
     out = data_ok(expect_ok=False)
     check("  ...and it says to fill in title_held before retiring a job",
           "title_held" in out, out.strip()[:200])
 
     # Put the world back for the scenarios that follow.
-    drop_row("ASSIGNMENTS.csv", "wanda-crag,winter_school")
-    drop_row("PEOPLE.csv", "wanda-crag,")
+    drop_row("assignments.csv", "wanda-crag,winter_school")
+    drop_row("people.csv", "wanda-crag,")
     data_ok()
 
 
 def scenario_11_stop_recruiting(base):
     """Temporarily stop advertising a job, without filling it."""
-    edit_cell("ROLES.csv", "film_festival,", "recruiting", "no")
+    edit_cell("roles.csv", "film_festival,", "recruiting", "no")
     data_ok()
     p = render(base)
     # Nothing else is below its minimum at this point, so the whole strip
@@ -502,7 +500,7 @@ def scenario_11_stop_recruiting(base):
     not_on_page(p, "roles.php", "What the club needs right now",
                 "and is not listed as something the club needs")
 
-    edit_cell("ROLES.csv", "film_festival,", "recruiting", "")
+    edit_cell("roles.csv", "film_festival,", "recruiting", "")
     p = render(base)
     check("clearing the cell starts advertising it again",
           "a Film Festival Coordinator" in strip(p), strip(p))
@@ -510,7 +508,7 @@ def scenario_11_stop_recruiting(base):
 
 def scenario_12_a_handover(base):
     """A filled job whose holder is leaving -- the one case counting cannot see."""
-    edit_cell("ROLES.csv", "treasurer,", "recruiting", "stepping down in June")
+    edit_cell("roles.csv", "treasurer,", "recruiting", "stepping down in June")
     data_ok()
     p = render(base)
     check("the sentence a human wrote is the sentence shown",
@@ -519,32 +517,32 @@ def scenario_12_a_handover(base):
           "Currently" in role_block(p, "treasurer"))
     check("a handover is not the same as being short, so it stays off the homepage",
           "Treasurer" not in strip(p), strip(p))
-    edit_cell("ROLES.csv", "treasurer,", "recruiting", "")
+    edit_cell("roles.csv", "treasurer,", "recruiting", "")
 
 
 def scenario_13_broken_data_is_caught(base):
     """Every mistake the validator promises to catch, actually made."""
     cases = [
         ("a role_id that does not exist",
-         lambda: add_row("ASSIGNMENTS.csv", "alice-fell,tresurer,,")),
+         lambda: add_row("assignments.csv", "alice-fell,tresurer,,")),
         ("a person_id that does not exist",
-         lambda: add_row("ASSIGNMENTS.csv", "alise-fell,treasurer,,")),
+         lambda: add_row("assignments.csv", "alise-fell,treasurer,,")),
         ("two roles with the same role_id",
-         lambda: add_row("ROLES.csv", 'treasurer,"Second Treasurer",,"Steering Committee",1,1,"x","x",')),
+         lambda: add_row("roles.csv", 'treasurer,"Second Treasurer",,"Steering Committee",1,1,"x","x",')),
         ("two people with the same person_id",
-         lambda: add_row("PEOPLE.csv", 'kyle-hunady,"Someone Else",x@caltech.edu,')),
+         lambda: add_row("people.csv", 'kyle-hunady,"Someone Else",x@caltech.edu,')),
         ("more people in a job than max_people allows",
-         lambda: add_row("ASSIGNMENTS.csv", "alice-fell,secretary,,")),
+         lambda: add_row("assignments.csv", "alice-fell,secretary,,")),
         ("min_people larger than max_people",
-         lambda: edit_cell("ROLES.csv", "secretary,", "min_people", "5")),
+         lambda: edit_cell("roles.csv", "secretary,", "min_people", "5")),
         ("a negative maximum",
-         lambda: edit_cell("ROLES.csv", "secretary,", "max_people", "-1")),
+         lambda: edit_cell("roles.csv", "secretary,", "max_people", "-1")),
         ("max_people of zero",
-         lambda: edit_cell("ROLES.csv", "secretary,", "max_people", "0")),
+         lambda: edit_cell("roles.csv", "secretary,", "max_people", "0")),
         ("a person with no name",
-         lambda: add_row("PEOPLE.csv", "nameless,,,")),
+         lambda: add_row("people.csv", "nameless,,,")),
         ("a role_id the site's own pages depend on being deleted",
-         lambda: drop_row("ROLES.csv", "gear,")),
+         lambda: drop_row("roles.csv", "gear,")),
     ]
     snapshot = {f: read(f) for f in FILES}
     for label, break_it in cases:

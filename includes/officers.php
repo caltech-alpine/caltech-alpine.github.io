@@ -5,18 +5,18 @@
  * ============================================================================
  *
  *  There is no officer data here and no officer file behind it. An "officer" is
- *  just a person from PEOPLE.csv joined to a role from ROLES.csv by a row in
- *  ASSIGNMENTS.csv, and this file is the one place that does that join in the
+ *  just a person from data/people.csv joined to a role from data/roles.csv by a row in
+ *  data/assignments.csv, and this file is the one place that does that join in the
  *  shape a roster page needs: grouped by heading, then by year for the alumni
  *  list.
  *
  *  Everything it prints comes from somewhere else, which is the point. The name
- *  and email are the person's, written once in PEOPLE.csv. The title and the
- *  "contact them about" line are the job's, written once in ROLES.csv. Nothing
+ *  and email are the person's, written once in data/people.csv. The title and the
+ *  "contact them about" line are the job's, written once in data/roles.csv. Nothing
  *  is duplicated, so nothing can disagree.
  *
- *  ORDER. Officers appear in the order ROLES.csv lists their jobs, and people
- *  sharing a job appear together, alphabetically. Moving a row in ROLES.csv
+ *  ORDER. Officers appear in the order data/roles.csv lists their jobs, and people
+ *  sharing a job appear together, alphabetically. Moving a row in data/roles.csv
  *  moves the officers too. There is no separate ordering to keep in step, and
  *  nobody has to sort a spreadsheet.
  * ============================================================================
@@ -50,7 +50,7 @@ function alpine_officer_entry(array $person, array $role, $title)
  *
  * @return array{current: array<string, array[]>, past: array<int, array[]>}
  *         current is keyed by group heading, in the order the groups first
- *         appear in ROLES.csv. past is keyed by the year they finished,
+ *         appear in data/roles.csv. past is keyed by the year they finished,
  *         newest first.
  */
 function alpine_officers()
@@ -72,19 +72,19 @@ function alpine_officers()
        ------------------------------------------------------------------
        That distinction is the whole of this block. Walking the roles and
        collecting their past holders reads more naturally and is wrong: a job
-       the club has stopped doing gets its row deleted from ROLES.csv, and
+       the club has stopped doing gets its row deleted from data/roles.csv, and
        everybody who ever held it would then quietly vanish from the Past
        officers list along with it. This list exists precisely to outlive the
        jobs, and README.md promises that retiring a role loses nobody.
 
-       So past officers are read from ASSIGNMENTS.csv directly, and the role is
+       So past officers are read from data/assignments.csv directly, and the role is
        looked up only to find out what to call them. */
     foreach (alpine_assignments()['past'] as $roleId => $people) {
         $role = alpine_role($roleId);
 
         foreach ($people as $person) {
             /* A past officer keeps the title they actually held. If the club
-               has renamed the job since, ASSIGNMENTS.csv says so in its
+               has renamed the job since, data/assignments.csv says so in its
                title_held column and it wins -- an alumni list that silently
                restates history in this year's vocabulary is quietly wrong
                about the one thing it exists to record. */

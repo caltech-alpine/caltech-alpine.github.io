@@ -87,24 +87,11 @@ function alpine_data($name)
     $key = basename($name);
     if (isset($cache[$key])) { return $cache[$key]; }
 
-    /* THE THREE FILES AN OFFICER ACTUALLY EDITS LIVE IN THE SITE ROOT, IN
-       CAPITALS: PEOPLE.csv, ROLES.csv, ASSIGNMENTS.csv.
-       ----------------------------------------------------------------------
-       Not because the code needs them there — it does not — but because the
-       person who has to edit them has never seen this repository before, and
-       `ASSIGNMENTS.csv` is only obvious to somebody who already knows the
-       site has a data directory. Three shouting filenames at the top of the
-       first listing they open advertise themselves: whoever inherits this
-       should be able to look at the folder and think "those look like the
-       things I edit" without reading a word of documentation first.
+    /* EVERYTHING A PERSON EDITS IS IN data/. One directory, one rule, and no
+       exceptions to explain -- which is worth more than any amount of making
+       individual files conspicuous.
 
-       Everything else stays in data/, where it is a developer's business. */
-    $shouty = ALPINE_ROOT . '/' . strtoupper($key) . '.csv';
-    if (is_readable($shouty)) {
-        return $cache[$key] = alpine_read_csv($shouty);
-    }
-
-    /* A .csv wins over a .php of the same name. Lists that officers edit often
+       A .csv wins over a .php of the same name. Lists that officers edit often
        are far safer as CSV: a spreadsheet cannot produce a PHP parse error, and
        the file opens in Excel, Sheets, Notepad or the GitHub web editor without
        anybody learning array syntax. */

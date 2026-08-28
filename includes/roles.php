@@ -6,9 +6,9 @@
  *
  *  THREE FILES, TWO JOINS, AND EVERY JOIN IS ON AN ID.
  *
- *    PEOPLE.csv       who exists                  keyed by person_id
- *    ROLES.csv        what the jobs are           keyed by role_id
- *    ASSIGNMENTS.csv  who is doing which job      person_id -> role_id
+ *    data/people.csv       who exists                  keyed by person_id
+ *    data/roles.csv        what the jobs are           keyed by role_id
+ *    data/assignments.csv  who is doing which job      person_id -> role_id
  *
  *  NOTHING IN THIS FILE COMPARES A ROLE TITLE.
  *  ------------------------------------------
@@ -130,13 +130,13 @@ function alpine_role_state($filled, $min, $max, $recruiting)
 
 
 /**
- * Every role, in the order ROLES.csv lists them, with its people attached.
+ * Every role, in the order data/roles.csv lists them, with its people attached.
  *
  * The file's own order IS the display order -- there is no sort column, because
  * a sort column is a second thing to keep consistent and a spreadsheet already
  * has an obvious way to say "this one goes first": move the row.
  *
- * Each entry carries everything from ROLES.csv plus:
+ * Each entry carries everything from data/roles.csv plus:
  *   role_id    stable id. The only thing any caller should match on.
  *   holders    current people (person rows), alphabetical. May be empty.
  *   past       people who have finished this job, newest year first
@@ -214,7 +214,7 @@ function alpine_role($roleId)
 
 /**
  * The roles grouped under their headings, in the order the groups first appear
- * in ROLES.csv.
+ * in data/roles.csv.
  */
 function alpine_roles_by_group()
 {

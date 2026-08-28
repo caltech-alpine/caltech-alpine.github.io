@@ -2,7 +2,7 @@
 /**
  * About: what the club is, and who to ask about what.
  *
- * The roster comes from PEOPLE.csv, ROLES.csv and ASSIGNMENTS.csv.
+ * The roster comes from data/people.csv, data/roles.csv and data/assignments.csv.
  * After an election, edit those — nothing on this page needs touching.
  */
 
@@ -131,7 +131,7 @@ require __DIR__ . '/includes/header.php';
     <?php if (!$roster['current']): ?>
       <div class="empty-state">
         <h3>The roster is being updated</h3>
-        <p>Officers are listed in <code>ASSIGNMENTS.csv</code>.</p>
+        <p>Officers are listed in <code>data/assignments.csv</code>.</p>
       </div>
     <?php else: ?>
       <?php foreach ($roster['current'] as $groupName => $people): ?>
@@ -149,9 +149,9 @@ require __DIR__ . '/includes/header.php';
                   <div class="officer__initials" aria-hidden="true"><?= e(alpine_initials($o['name'])) ?></div>
                 <?php endif; ?>
 
-                <?php /* Name, email and photo are the PERSON's, from PEOPLE.csv.
+                <?php /* Name, email and photo are the PERSON's, from data/people.csv.
                          The title and the "write to them about" line are the JOB's,
-                         from ROLES.csv. Neither is written twice anywhere, so
+                         from data/roles.csv. Neither is written twice anywhere, so
                          two people sharing a job cannot end up describing it
                          differently, and changing an address is one edit. */ ?>
                 <div class="officer__name"><?= e($o['name']) ?></div>
@@ -222,7 +222,7 @@ require __DIR__ . '/includes/header.php';
     <?php endif; ?>
 
     <?php /* Past officers. Nobody maintains this list — an officer gets an
-             'until' year in ASSIGNMENTS.csv and appears here by itself. */ ?>
+             'until' year in data/assignments.csv and appears here by itself. */ ?>
     <?php if ($roster['past']): ?>
       <div class="alumni">
         <h3 class="officer-group__title">Past officers</h3>

@@ -57,19 +57,18 @@ the calendar.
 
 ## Changing the officers
 
-Three files, and they are the three SHOUTING ONES at the top of this folder.
-They are in capitals and in the site root rather than tucked into `data/`
-precisely so that whoever inherits this can open the directory and see what
-they are meant to edit without reading anything first.
+Three files, all in [`data/`](data). **Everything on this site that a person
+edits is in that one directory** — these three, plus the gear list, the
+sponsors and the member deals. There is no second place to look.
 
-Each fact is written in exactly **one** of them, so changing an email address
-is one edit and every page follows.
+Each fact is written in exactly **one** of the three, so changing an email
+address is one edit and every page follows.
 
 | File | What it says | You edit it when |
 |---|---|---|
-| [`PEOPLE.csv`](PEOPLE.csv) | **who exists** — name, email, photo | somebody new joins the club's leadership, or an address changes |
-| [`ROLES.csv`](ROLES.csv) | **what the jobs are** — title, description, how many people | the club changes what a job is called, what it involves, or how many do it |
-| [`ASSIGNMENTS.csv`](ASSIGNMENTS.csv) | **who is doing which job** | after an election. Usually the only file that changes |
+| [`data/people.csv`](data/people.csv) | **who exists** — name, email, photo | somebody new joins the club's leadership, or an address changes |
+| [`data/roles.csv`](data/roles.csv) | **what the jobs are** — title, description, how many people | the club changes what a job is called, what it involves, or how many do it |
+| [`data/assignments.csv`](data/assignments.csv) | **who is doing which job** | after an election. Usually the only file that changes |
 
 They are spreadsheets. Open them in Excel, Sheets, Notepad, or the GitHub web
 editor. Lines starting with `#` are notes and are ignored, so each file carries
@@ -89,7 +88,7 @@ php tools/check.php --data
 Every job has two names.
 
 - **`role_id`** — `president`, `film_festival`, `gear`. Short, lowercase, never
-  shown to a visitor. It is what `ASSIGNMENTS.csv` points at, what the page
+  shown to a visitor. It is what `data/assignments.csv` points at, what the page
   anchors use, and what the website's own code looks for. **Pick it once and
   never change it.**
 - **`title`** — `President`, `Film Festival Coordinator`. What the page prints.
@@ -107,7 +106,7 @@ The one edit that *does* break things is changing a `role_id`, and
 
 ### Replacing an officer
 
-Two edits, both in `ASSIGNMENTS.csv`. Put the year in the `until` column of the
+Two edits, both in `data/assignments.csv`. Put the year in the `until` column of the
 person leaving, and add a row for the person arriving:
 
 ```csv
@@ -116,7 +115,7 @@ zach-auvil,president,2027,
 alice-fell,president,,
 ```
 
-If the new person is not in `PEOPLE.csv` yet, add them there first:
+If the new person is not in `data/people.csv` yet, add them there first:
 
 ```csv
 person_id,name,email,photo
@@ -130,14 +129,14 @@ themselves when the replacement is added. **Nobody ever types the word
 
 ### Adding a co-officer
 
-One more row in `ASSIGNMENTS.csv`:
+One more row in `data/assignments.csv`:
 
 ```csv
 alice-fell,president,,
 bob-ridge,president,,
 ```
 
-If `ROLES.csv` gives that job a `title_shared`, both are titled with it
+If `data/roles.csv` gives that job a `title_shared`, both are titled with it
 automatically — two presidents become *Co-Presidents* without anyone editing a
 title. Drop back to one and it reads *President* again.
 
@@ -145,7 +144,7 @@ Check `max_people` allows two. If it does not, the data check says so.
 
 ### Renaming a role
 
-Change `title` in `ROLES.csv`. That is all. Leave `role_id` alone.
+Change `title` in `data/roles.csv`. That is all. Leave `role_id` alone.
 
 ```csv
 role_id,title,title_shared,...
@@ -154,7 +153,7 @@ president,Chair,Co-Chair,...
 
 ### Changing how many people a job wants
 
-Two numbers in `ROLES.csv`, and they mean different things:
+Two numbers in `data/roles.csv`, and they mean different things:
 
 - **`min_people`** — how many the club *needs*. Below this, the job is
   advertised as open, on the homepage and everywhere else.
@@ -180,7 +179,7 @@ genuinely happy to go a year without.
 
 ### Adding a new role
 
-One row in `ROLES.csv`, and a row in `ASSIGNMENTS.csv` if somebody is already
+One row in `data/roles.csv`, and a row in `data/assignments.csv` if somebody is already
 doing it. No template to edit — it appears on Get Involved, in the officer
 roster, and in the vacancy counting straight away.
 
@@ -194,12 +193,12 @@ officers holding them. Move a row to move both. There is no sort column.
 
 ### Retiring a role
 
-Delete the row from `ROLES.csv`. **Nobody is lost** — the people who held it
-stay in `PEOPLE.csv` and on the *Past officers* list, which is built from
-`ASSIGNMENTS.csv` and deliberately outlives the jobs.
+Delete the row from `data/roles.csv`. **Nobody is lost** — the people who held it
+stay in `data/people.csv` and on the *Past officers* list, which is built from
+`data/assignments.csv` and deliberately outlives the jobs.
 
 One thing to do first: if anybody held that job in the past, make sure their
-`title_held` cell in `ASSIGNMENTS.csv` says what the job was called. The row you
+`title_held` cell in `data/assignments.csv` says what the job was called. The row you
 are about to delete is the last record of it. `php tools/check.php --data` will
 stop you and name the people concerned if you forget.
 
@@ -219,22 +218,22 @@ counting.
 
 ### The rest of the columns
 
-`contact_for` in `ROLES.csv` is what makes the roster useful: it tells a visitor
+`contact_for` in `data/roles.csv` is what makes the roster useful: it tells a visitor
 what to write to that officer about. It describes the **job**, so two people
 sharing one say the same thing, and it is written once.
 
-`email` in `PEOPLE.csv` is optional but worth chasing — without it a visitor can
+`email` in `data/people.csv` is optional but worth chasing — without it a visitor can
 only reach that officer through the shared mailbox. Club addresses are fine to
 publish; personal ones deserve a second thought. Wherever a person's name
 appears on the site it is a `mailto:` link, built from this one cell.
 
-`title_held` in `ASSIGNMENTS.csv` is almost always blank. Fill it in only for
+`title_held` in `data/assignments.csv` is almost always blank. Fill it in only for
 somebody who has finished and whose title at the time was not what the job is
 called now, so the *Past officers* list stays honest instead of quietly
 restating history in this year's vocabulary.
 
 **Headshots** go in `assets/images/officers/`, cropped to roughly 4:5 and about
-500px wide, then named in the `photo` column of `PEOPLE.csv`. Put the original
+500px wide, then named in the `photo` column of `data/people.csv`. Put the original
 in `assets/images/officers/raw/` and `python tools/prepare_officers.py` makes
 the cropped one. Somebody with no photo shows their initials, so nobody is left
 off the page while you chase a headshot.
@@ -285,7 +284,7 @@ for them:
 |---|---|
 | `hero.jpg` | The big homepage banner. Wide, high quality, people visible. |
 | `social.jpg` | The preview image when the site is shared on Slack or social media |
-| `officers/*.jpg` | Officer headshots, named in the `photo` column of `PEOPLE.csv` |
+| `officers/*.jpg` | Officer headshots, named in the `photo` column of `data/people.csv` |
 | `officers/raw/` | The ORIGINAL photos. Kept so a crop can be redone |
 | `sponsors/*.svg` | Sponsor logos, named in `data/sponsors.php` |
 
@@ -336,10 +335,10 @@ See [Deployment](#deployment) below.
 
 Run the health check (see [Health check](#health-check)) and then:
 
-- [ ] Update `ASSIGNMENTS.csv` after elections — that is also what makes
+- [ ] Update `data/assignments.csv` after elections — that is also what makes
       newly empty jobs show as open, so there is nothing separate to do about
-      those. Add anyone new to `PEOPLE.csv` first
-- [ ] Check `ROLES.csv` still describes the jobs the club actually has, and
+      those. Add anyone new to `data/people.csv` first
+- [ ] Check `data/roles.csv` still describes the jobs the club actually has, and
       that `min_people` still reflects what the club genuinely needs rather than
       what it once hoped for
 - [ ] `php tools/check.php --data` after any of the above
@@ -385,21 +384,19 @@ includes/
   helpers.php        e(), cfg(), asset(), url(), icon()
   icons.php          Inline SVG icon sprite
 
->>> THE THREE FILES OFFICERS ACTUALLY EDIT. They are in the site root and in
-    capitals so they are impossible to miss in this listing. That is their
-    only reason for being here rather than in data/.
+data/                >>> EVERYTHING A PERSON EDITS. Nothing else is in here,
+                     and nothing editable is anywhere else.
 
-PEOPLE.csv           WHO EXISTS. One row per human, ever. Name, email, photo,
+  people.csv         WHO EXISTS. One row per human, ever. Name, email, photo,
                      each written exactly once and read by every page.
-ROLES.csv            WHAT THE JOBS ARE. role_id is permanent; title is not.
+  roles.csv          WHAT THE JOBS ARE. role_id is permanent; title is not.
                      min_people and max_people are how the site decides between
                      "open", "room for one more", and saying nothing.
-ASSIGNMENTS.csv      WHO IS DOING WHICH JOB. The file that changes after an
+  assignments.csv    WHO IS DOING WHICH JOB. The file that changes after an
                      election, and usually the only one. A job here with nobody
                      in it is what makes a vacancy appear -- nothing anywhere
                      says "vacant".
 
-data/                The rest of the content, which changes far less often
   sponsors.php       Who supports the club
   gear.php           What the club lends
   benefits.csv       Member discounts. Empty, and the section stays hidden

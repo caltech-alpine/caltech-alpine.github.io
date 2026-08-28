@@ -40,7 +40,7 @@ if (in_array('--data', $argv, true)) {
     $found = alpine_data_problems(alpine_required_roles());
     line();
     if (!$found) {
-        line('PEOPLE.csv, ROLES.csv and ASSIGNMENTS.csv all agree.');
+        line('data/people.csv, data/roles.csv and data/assignments.csv all agree.');
         line();
         exit(0);
     }
@@ -226,10 +226,10 @@ require_once ALPINE_ROOT . '/includes/validate.php';
 $people = alpine_people();
 $roles  = alpine_roles();
 
-count($people) ? ok(count($people) . ' people listed (PEOPLE.csv)')
-               : warn('nobody in PEOPLE.csv');
-count($roles)  ? ok(count($roles) . ' roles defined (ROLES.csv)')
-               : warn('no roles in ROLES.csv — the Get Involved page will be empty');
+count($people) ? ok(count($people) . ' people listed (data/people.csv)')
+               : warn('nobody in data/people.csv');
+count($roles)  ? ok(count($roles) . ' roles defined (data/roles.csv)')
+               : warn('no roles in data/roles.csv — the Get Involved page will be empty');
 
 $problems = alpine_data_problems(alpine_required_roles());
 if ($problems) {
@@ -290,7 +290,7 @@ if (!$missingEmail && $serving) {
     ok('every serving officer has an email address');
 } elseif ($serving) {
     warn(count($missingEmail) . ' of ' . count($serving) . ' serving officers have no '
-       . 'email address in PEOPLE.csv (' . implode(', ', $missingEmail) . ') — '
+       . 'email address in data/people.csv (' . implode(', ', $missingEmail) . ') — '
        . 'visitors can only reach them via ' . cfg('links.officers'));
 }
 

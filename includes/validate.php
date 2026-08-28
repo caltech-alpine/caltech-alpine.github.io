@@ -6,7 +6,7 @@
  *
  *  The three data files point at each other by id, and a typo in an id is the
  *  one mistake that is INVISIBLE on the rendered page. Misspell a role_id in
- *  ASSIGNMENTS.csv and the officer simply does not appear, the job shows as
+ *  data/assignments.csv and the officer simply does not appear, the job shows as
  *  open, and every page looks entirely normal while advertising a vacancy in a
  *  job somebody is doing. Nothing about the site would tell you, which is
  *  exactly why this file exists.
@@ -26,7 +26,7 @@
 require_once __DIR__ . '/roles.php';
 
 /**
- * Everything wrong with PEOPLE.csv, ROLES.csv and ASSIGNMENTS.csv, as a
+ * Everything wrong with data/people.csv, data/roles.csv and data/assignments.csv, as a
  * list of sentences. An empty list means all good.
  *
  * @param string[] $requiredRoles role_ids the site's own pages look for by
@@ -48,29 +48,29 @@ function alpine_data_problems(array $requiredRoles = array())
         $id  = isset($p['person_id']) ? trim($p['person_id']) : '';
 
         if ($id === '') {
-            $problems[] = "PEOPLE.csv row $row has no person_id. Every person needs a "
+            $problems[] = "data/people.csv row $row has no person_id. Every person needs a "
                         . "short permanent id, like jane-doe.";
             continue;
         }
         if (isset($personIds[$id])) {
-            $problems[] = "PEOPLE.csv has two people with person_id '$id'. Ids must be "
+            $problems[] = "data/people.csv has two people with person_id '$id'. Ids must be "
                         . "unique -- if two people would collide, make it '{$id}-2' or "
-                        . "add an initial, and update ASSIGNMENTS.csv to match.";
+                        . "add an initial, and update data/assignments.csv to match.";
         }
         $personIds[$id] = true;
 
         if (empty($p['name'])) {
-            $problems[] = "PEOPLE.csv: '$id' has no name.";
+            $problems[] = "data/people.csv: '$id' has no name.";
         }
         if (!empty($p['email']) && strpos($p['email'], '@') === false) {
-            $problems[] = "PEOPLE.csv: '$id' has an email address with no @ in it "
+            $problems[] = "data/people.csv: '$id' has an email address with no @ in it "
                         . "('{$p['email']}').";
         }
         /* A photo named but not present renders as initials, which is fine and
            deliberate -- but it is usually a typo in the filename, so say so. */
         if (!empty($p['photo'])
             && !is_readable(ALPINE_ROOT . '/assets/images/officers/' . $p['photo'])) {
-            $problems[] = "PEOPLE.csv: '$id' names a photo "
+            $problems[] = "data/people.csv: '$id' names a photo "
                         . "'assets/images/officers/{$p['photo']}' that is not there. "
                         . "The page will show their initials instead. Check the spelling, "
                         . "or clear the cell.";
@@ -84,21 +84,21 @@ function alpine_data_problems(array $requiredRoles = array())
         $id  = isset($r['role_id']) ? trim($r['role_id']) : '';
 
         if ($id === '') {
-            $problems[] = "ROLES.csv row $row has no role_id. Every job needs a short "
+            $problems[] = "data/roles.csv row $row has no role_id. Every job needs a short "
                         . "permanent id, like film_festival.";
             continue;
         }
         if (isset($roleIds[$id])) {
-            $problems[] = "ROLES.csv has two jobs with role_id '$id'. Ids must be unique "
-                        . "-- rename one of them, and update ASSIGNMENTS.csv to match.";
+            $problems[] = "data/roles.csv has two jobs with role_id '$id'. Ids must be unique "
+                        . "-- rename one of them, and update data/assignments.csv to match.";
         }
         $roleIds[$id] = true;
 
         if (empty($r['title'])) {
-            $problems[] = "ROLES.csv: '$id' has no title, so the page has nothing to call it.";
+            $problems[] = "data/roles.csv: '$id' has no title, so the page has nothing to call it.";
         }
         if (empty($r['group'])) {
-            $problems[] = "ROLES.csv: '$id' has no group, so it has no heading to appear under.";
+            $problems[] = "data/roles.csv: '$id' has no group, so it has no heading to appear under.";
         }
 
         $minRaw = isset($r['min_people']) ? trim($r['min_people']) : '';
@@ -106,7 +106,7 @@ function alpine_data_problems(array $requiredRoles = array())
 
         foreach (array('min_people' => $minRaw, 'max_people' => $maxRaw) as $col => $raw) {
             if ($raw !== '' && !ctype_digit($raw)) {
-                $problems[] = "ROLES.csv: '$id' has $col = '$raw'. It must be a whole "
+                $problems[] = "data/roles.csv: '$id' has $col = '$raw'. It must be a whole "
                             . "number that is zero or more, or empty."
                             . ($col === 'max_people'
                                 ? ' Empty means as many volunteers as turn up.'
@@ -118,11 +118,11 @@ function alpine_data_problems(array $requiredRoles = array())
         $max = $maxRaw === '' ? null : (int) $maxRaw;
 
         if ($max !== null && $min > $max) {
-            $problems[] = "ROLES.csv: '$id' needs at least $min people but allows at most "
+            $problems[] = "data/roles.csv: '$id' needs at least $min people but allows at most "
                         . "$max. min_people must not be larger than max_people.";
         }
         if ($max !== null && $max === 0) {
-            $problems[] = "ROLES.csv: '$id' has max_people = 0, so nobody can ever hold it. "
+            $problems[] = "data/roles.csv: '$id' has max_people = 0, so nobody can ever hold it. "
                         . "If the club has stopped doing this job, delete the row.";
         }
     }
@@ -136,12 +136,12 @@ function alpine_data_problems(array $requiredRoles = array())
         $roleId   = isset($a['role_id'])   ? trim($a['role_id'])   : '';
 
         if ($personId === '' || $roleId === '') {
-            $problems[] = "ASSIGNMENTS.csv row $row is missing a person_id or a role_id.";
+            $problems[] = "data/assignments.csv row $row is missing a person_id or a role_id.";
             continue;
         }
         if (!isset($personIds[$personId])) {
-            $problems[] = "ASSIGNMENTS.csv row $row gives a job to '$personId', who is not "
-                        . "in PEOPLE.csv. Add them there first -- one row with their "
+            $problems[] = "data/assignments.csv row $row gives a job to '$personId', who is not "
+                        . "in data/people.csv. Add them there first -- one row with their "
                         . "name, email and photo.";
         }
         $until     = !empty($a['until']) ? (string) $a['until'] : '';
@@ -154,19 +154,19 @@ function alpine_data_problems(array $requiredRoles = array())
            does not know exists, so they vanish from the roster entirely.
 
            Finished: legitimate. Retiring a job means deleting its row from
-           ROLES.csv, and the people who held it have to survive that -- the
+           data/roles.csv, and the people who held it have to survive that -- the
            Past officers list exists to outlive the jobs. The only thing still
            wanted from them is what they were CALLED, and the deleted row was
            the last record of it. */
         if (!isset($roleIds[$roleId])) {
             if ($until === '') {
-                $problems[] = "ASSIGNMENTS.csv row $row puts somebody who is still serving in "
-                            . "'$roleId', which is not a role_id in ROLES.csv. They will not "
+                $problems[] = "data/assignments.csv row $row puts somebody who is still serving in "
+                            . "'$roleId', which is not a role_id in data/roles.csv. They will not "
                             . "appear on the roster at all. Check the spelling, or add the "
-                            . "job to ROLES.csv.";
+                            . "job to data/roles.csv.";
             } elseif ($titleHeld === '') {
-                $problems[] = "ASSIGNMENTS.csv row $row: '$personId' held '$roleId', which is "
-                            . "no longer in ROLES.csv, and their title_held cell is empty -- "
+                $problems[] = "data/assignments.csv row $row: '$personId' held '$roleId', which is "
+                            . "no longer in data/roles.csv, and their title_held cell is empty -- "
                             . "so nothing records what that job was called, and the Past "
                             . "officers list has no title to show for them. Put the title "
                             . "they held in the title_held column. (If you have just retired "
@@ -176,7 +176,7 @@ function alpine_data_problems(array $requiredRoles = array())
 
         $key = $personId . '|' . $roleId . '|' . $until;
         if (isset($seen[$key])) {
-            $problems[] = "ASSIGNMENTS.csv lists '$personId' in '$roleId' twice. Delete the "
+            $problems[] = "data/assignments.csv lists '$personId' in '$roleId' twice. Delete the "
                         . "duplicate row -- otherwise they are counted twice and the job "
                         . "looks fuller than it is.";
         }
@@ -185,7 +185,7 @@ function alpine_data_problems(array $requiredRoles = array())
         if ($until === '') {
             $count[$roleId] = isset($count[$roleId]) ? $count[$roleId] + 1 : 1;
         } elseif (!ctype_digit($until)) {
-            $problems[] = "ASSIGNMENTS.csv row $row has until = '$until'. It should be a "
+            $problems[] = "data/assignments.csv row $row has until = '$until'. It should be a "
                         . "year, like 2027, or empty while they are still serving.";
         }
     }
@@ -199,9 +199,9 @@ function alpine_data_problems(array $requiredRoles = array())
         $max    = (int) $r['max_people'];
         $filled = isset($count[$id]) ? $count[$id] : 0;
         if ($filled > $max) {
-            $problems[] = "'$id' has $filled people serving in it but ROLES.csv allows $max. "
+            $problems[] = "'$id' has $filled people serving in it but data/roles.csv allows $max. "
                         . "Either raise max_people, or put a year in the 'until' column of "
-                        . "whoever has finished, in ASSIGNMENTS.csv.";
+                        . "whoever has finished, in data/assignments.csv.";
         }
     }
 
@@ -212,7 +212,7 @@ function alpine_data_problems(array $requiredRoles = array())
        thing that would notice. */
     foreach ($requiredRoles as $id => $why) {
         if (!isset($roleIds[$id])) {
-            $problems[] = "ROLES.csv has no role_id '$id', and $why. Either put the row "
+            $problems[] = "data/roles.csv has no role_id '$id', and $why. Either put the row "
                         . "back with that id, or change the id the page asks for.";
         }
     }
@@ -225,7 +225,7 @@ function alpine_data_problems(array $requiredRoles = array())
  *
  * ADD TO THIS LIST whenever a page starts asking for a specific job. It is the
  * only register of the ids that are not merely data -- everything else in
- * ROLES.csv can be renamed, moved or deleted freely.
+ * data/roles.csv can be renamed, moved or deleted freely.
  */
 function alpine_required_roles()
 {

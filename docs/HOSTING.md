@@ -12,7 +12,7 @@ infrastructure.
 
 The site is plain PHP with no build step and no dependencies. Every page is
 assembled on the server: `includes/header.php`, the `cfg()` config layer, the
-officer roster in `PEOPLE.csv` and `ASSIGNMENTS.csv`, and — the only genuinely live part — the
+officer roster in `data/people.csv` and `data/assignments.csv`, and — the only genuinely live part — the
 club's Google Calendar, fetched as ICS and parsed in `lib/calendar/`.
 
 **GitHub Pages does not execute PHP.** It serves files. Pushed there as-is, every
@@ -42,7 +42,7 @@ not a degraded one.
 | 404 page | `404.html`, served by Pages | `ErrorDocument` in `.htaccess` |
 | Sitemap | rendered to `sitemap.xml` | live `sitemap.php` |
 | **Calendar freshness** | as of the last build (30-min cron) | per request, 30-min cache |
-| **Editing `ASSIGNMENTS.csv`** | push, wait for the build | upload, live immediately |
+| **Editing `data/assignments.csv`** | push, wait for the build | upload, live immediately |
 | **`preview.php`** | **not available** | works |
 | **`.htaccess`** | **ignored** — no custom headers, no directory-listing block, no deny rules on `.md`/`.json` | fully applied |
 | Custom domain `alpine.caltech.edu` | possible but needs a CNAME and IMSS DNS | native |

@@ -15,7 +15,7 @@
  Drop originals in assets/images/officers/raw/ named firstname-lastname.jpg
  (any common extension works). Output goes to assets/images/officers/ at
  528x660 — 2x the 264x330 the roster renders, so it stays sharp on a retina
- screen — and that name is what goes in the photo column of PEOPLE.csv.
+ screen — and that name is what goes in the photo column of data/people.csv.
 
  Raw files are kept. They are the only copy of the original framing, so if a
  crop is ever wrong you can redo it without asking anyone to dig out the photo

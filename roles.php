@@ -2,8 +2,8 @@
 /**
  * Get Involved — the jobs that run the club, and how you end up doing one.
  *
- * Almost everything on this page is generated from ROLES.csv and
- * ASSIGNMENTS.csv. The only hand-written prose is the opening section and the
+ * Almost everything on this page is generated from data/roles.csv and
+ * data/assignments.csv. The only hand-written prose is the opening section and the
  * "how you get one" block at the bottom, and both are written to stay true for
  * years. Nobody has to edit this file after an election.
  *
@@ -112,7 +112,7 @@ alpine_page_hero(array(
          coordinator are both true and are not the same news; running them
          together in one list makes the first sound routine and the second sound
          like an emergency. Which list a job lands in is decided by min_people
-         and max_people in ROLES.csv, not by anybody rewording anything. */ ?>
+         and max_people in data/roles.csv, not by anybody rewording anything. */ ?>
 <?php if ($asking): ?>
 <section class="section section--tight section--tint" id="open">
   <div class="wrap">
@@ -191,7 +191,7 @@ alpine_page_hero(array(
     <?php if (!$groups): ?>
       <div class="empty-state">
         <h3>The role list is being updated</h3>
-        <p>Roles are listed in <code>ROLES.csv</code>.</p>
+        <p>Roles are listed in <code>data/roles.csv</code>.</p>
       </div>
     <?php endif; ?>
 
@@ -233,7 +233,7 @@ alpine_page_hero(array(
                        which sent anybody who wanted to ask them about it back to
                        the About page to look up an address the site already knew.
                        The address is not repeated in this file: it comes from
-                       PEOPLE.csv through alpine_person_link(), the same way
+                       data/people.csv through alpine_person_link(), the same way
                        the About page gets it, so there is one copy of it. */ ?>
               <p class="role__who">
                 <?php if ($holderLinks): ?>

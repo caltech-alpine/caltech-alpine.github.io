@@ -3,15 +3,15 @@
 # This is the file that changes after an election, and usually it is the ONLY
 # file that changes. One row per person per job.
 #
-#   PEOPLE.csv   WHO EXISTS -- names, emails, photographs
-#   ROLES.csv    WHAT THE JOBS ARE
+#   data/people.csv   WHO EXISTS -- names, emails, photographs
+#   data/roles.csv    WHAT THE JOBS ARE
 #   this file         WHO IS DOING WHICH JOB
 #
 # Lines starting with # are ignored, so you can leave notes here.
 #
-# person_id   must match a person_id in PEOPLE.csv. If the new officer is
+# person_id   must match a person_id in data/people.csv. If the new officer is
 #             not in that file yet, add them there first.
-# role_id     must match a role_id in ROLES.csv.
+# role_id     must match a role_id in data/roles.csv.
 # until       the year they stopped. LEAVE BLANK while they are serving.
 #             >>> DO NOT DELETE A ROW WHEN SOMEBODY STEPS DOWN. <<<
 #             Put the year here instead. They move to the Past officers list by

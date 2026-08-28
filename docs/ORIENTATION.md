@@ -207,7 +207,7 @@ git pull
 ```
 
 **3. Edit the file.** Any text editor. Notepad works, VS Code is nicer. For a
-roster change open `ASSIGNMENTS.csv`; for a link or an email address open
+roster change open `data/assignments.csv`; for a link or an email address open
 `includes/config.php`. [`../README.md`](../README.md) says which file for every
 kind of change.
 
@@ -358,4 +358,4 @@ usually means missing data, not broken code.
 - [ ] Push one trivial change all the way through (§6)
 - [ ] Read [`../README.md`](../README.md) properly, once
 - [ ] Make sure you can add events to the club's Google Calendar
-- [ ] Add your own name to `ASSIGNMENTS.csv`
+- [ ] Add your own name to `data/assignments.csv`

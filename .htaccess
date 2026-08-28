@@ -57,16 +57,13 @@ Options -Indexes
 # ------------------------------------------------------------------- files --
 # The cached calendar copy is public data, but there is no reason to serve it.
 #
-# csv IS IN THIS LIST DELIBERATELY. PEOPLE.csv, ROLES.csv and ASSIGNMENTS.csv
-# sit in the site root rather than in data/, so that a new officer opening this
-# folder can see what they are meant to edit. That also puts them one URL away
-# from being served as plain text. They used to live under data/, whose own
-# .htaccess denies everything in it; moving them up moved them out from behind
-# that, so the protection is restated here. Nothing in them is secret -- the
-# addresses are printed on the About page -- but a downloadable file listing
-# every officer's email is a different thing from the same addresses in a page,
-# and there is no reason to hand one out. tools/verify_deploy.py checks it from
-# outside, against the deployed site.
+# csv is in the list too. Everything editable lives in data/, whose own
+# .htaccess already denies the lot, so this is belt and braces rather than the
+# only thing holding -- but a CSV that escapes into the site root one day
+# should not become a downloadable list of every officer's email address.
+# Nothing in them is secret; the addresses are printed on the About page. A
+# file you can download is still a different thing from the same addresses in
+# a page. tools/verify_deploy.py checks it from outside, on the real server.
 <FilesMatch "\.(cache|ics|log|md|json|csv)$">
   <IfModule mod_authz_core.c>
     Require all denied

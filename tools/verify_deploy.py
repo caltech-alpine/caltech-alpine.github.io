@@ -22,12 +22,12 @@ PAGES = ["/", "/index.php", "/events.php", "/join.php", "/gear.php",
 
 # Paths .htaccess is supposed to refuse. If any of these come back 200 the
 # server is ignoring .htaccess, which means AllowOverride is off.
-# The three officer CSVs sit in the SITE ROOT so a new officer can find
-# them, which puts them outside data/'s blanket deny -- the root .htaccess
-# denies .csv by name instead, and these lines prove that is working on the
-# real server rather than only in the file.
+# data/ has its own .htaccess denying everything in it, and the root one
+# denies .csv by name as well. These lines prove both are actually in force on
+# the server rather than merely present in a file -- if AllowOverride is off,
+# every officer's address is one URL away.
 DENIED = ["/includes/config.php", "/includes/", "/cache/", "/data/gear.php",
-          "/PEOPLE.csv", "/ROLES.csv", "/ASSIGNMENTS.csv"]
+          "/data/people.csv", "/data/roles.csv", "/data/assignments.csv"]
 
 TIMEOUT = 20
 UA = "alpine-club-deploy-check"

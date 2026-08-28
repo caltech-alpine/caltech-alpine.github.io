@@ -76,7 +76,7 @@ def check_data():
         sys.stderr.write(result.stdout + result.stderr)
         raise SystemExit(
             "refusing to build: the officer data has problems (listed above).\n"
-            "  they are all in PEOPLE.csv, ROLES.csv or ASSIGNMENTS.csv.\n"
+            "  they are all in data/people.csv, data/roles.csv or data/assignments.csv.\n"
             "  fix them and run this again, or `php tools/check.php --data` to "
             "re-check on its own.")
 

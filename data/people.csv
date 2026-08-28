@@ -1,14 +1,14 @@
 # CALTECH ALPINE CLUB PEOPLE. One row per human, ever.
 #
-# This file says WHO EXISTS. ROLES.csv says what the jobs are, and
-# ASSIGNMENTS.csv says who is doing which job. A person's name, email and
+# This file says WHO EXISTS. data/roles.csv says what the jobs are, and
+# data/assignments.csv says who is doing which job. A person's name, email and
 # photograph are written HERE and nowhere else, so changing an email address is
 # one edit and every page follows.
 #
 # Lines starting with # are ignored, so you can leave notes here.
 #
 # person_id  a short permanent name for this person, lowercase, words joined by
-#            hyphens: jane-doe. It is how ASSIGNMENTS.csv points at them.
+#            hyphens: jane-doe. It is how data/assignments.csv points at them.
 #            PICK IT ONCE AND NEVER CHANGE IT. Nothing shows it to visitors, so
 #            it does not matter if somebody's name changes -- the id can stay
 #            jane-doe forever while the 'name' column says whatever is right.
@@ -23,7 +23,7 @@
 #
 # DO NOT DELETE ANYBODY. Somebody who has stepped down still appears on the
 # Past officers list, and that list is built from this file. To retire them,
-# put a year in the 'until' column of ASSIGNMENTS.csv instead.
+# put a year in the 'until' column of data/assignments.csv instead.
 person_id,name,email,photo
 zach-auvil,"Zach Auvil",zauvil@caltech.edu,zach-auvil.jpg
 haakon-ervik,"Haakon Ervik",haakon@caltech.edu,haakon-ludvig-langeland-ervik.jpg

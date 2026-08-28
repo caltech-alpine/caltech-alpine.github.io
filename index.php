@@ -21,7 +21,7 @@ $sponsors = alpine_data('sponsors');
 /* ONLY the jobs the club is actually SHORT of -- below their minimum. A job
    that is running fine and could take another person is a real thing to say on
    the Get Involved page and noise on a homepage, and the difference between the
-   two is min_people and max_people in ROLES.csv rather than anyone's
+   two is min_people and max_people in data/roles.csv rather than anyone's
    judgement on the day. */
 $short = alpine_roles_needed();
 
