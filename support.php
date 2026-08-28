@@ -27,14 +27,16 @@ require __DIR__ . '/includes/header.php';
     'title'  => 'Support the Alpine Club',
     'lede'   => 'Sponsorship and donations support club trips, shared equipment, and the '
               . "club's film festivals.",
-    'photo'  => 'photos/dsc02582.jpg',
+    /* dsc02582-hero.jpg is dsc02582.jpg with 221px cropped off the right edge.
+       The hero is a wide letterbox, so background-size:cover scales the photo
+       by width and a horizontal background-position does nothing at desktop
+       sizes -- the only way to move the subject sideways is to reframe the
+       file. Uncropped, the chipmunk landed behind the last word of the h1.
+       'focus' still does the vertical work: the subject sits two thirds down
+       and the top half is haze, so the default middle band gave an empty grey
+       rectangle and half an animal on the bottom edge. */
+    'photo'  => 'photos/dsc02582-hero.jpg',
     'credit' => 'Summit chipmunk, unimpressed',
-    /* The chipmunk sits about two thirds of the way down the frame and the top
-       half is haze. The default crop takes the middle band, so this page used
-       to lead with an empty grey rectangle and half an animal on the bottom
-       edge; this puts the summit wall and the chipmunk in the strip that
-       survives. 'sm' was here too, which made the band shorter than every
-       other page hero and the crop tighter still. */
     'focus'  => 'center 70%',
 )); ?>
 
