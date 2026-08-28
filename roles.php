@@ -120,9 +120,14 @@ alpine_page_hero(array(
     <?php if ($needed): ?>
       <h2 class="h2">What the club needs right now</h2>
       <div class="prose mt-lg">
+        <?php /* One line. The previous two sentences reassured the reader that
+                 the jobs are easy and that somebody will explain them, which is
+                 the club talking about itself where the reader wants an address.
+                 What each job involves is a few lines further down, written per
+                 role; what was missing here was where to ask. */ ?>
         <p>
-          Nobody has to be appointed to any of these, and none of them are hard to
-          take on. Whoever did one last is usually happy to explain what it involved.
+          Ask <a href="mailto:<?= e(cfg('links.officers')) ?>?subject=Helping+out"><?= e(cfg('links.officers')) ?></a>
+          about any of them. It reaches the officers.
         </p>
       </div>
 
