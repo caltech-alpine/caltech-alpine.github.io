@@ -2,14 +2,14 @@
 /**
  * About: what the club is, and who to ask about what.
  *
- * The officer list comes from data/officers.php. After an election, edit that
- * file — nothing on this page needs touching.
+ * The roster comes from PEOPLE.csv, ROLES.csv and ASSIGNMENTS.csv.
+ * After an election, edit those — nothing on this page needs touching.
  */
 
-require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/officers.php';
-require __DIR__ . '/includes/roles.php';
-require __DIR__ . '/includes/partials.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/officers.php';
+require_once __DIR__ . '/includes/roles.php';
+require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'About',
@@ -22,15 +22,24 @@ $PAGE = array(
 /* Current and past officers, split and sorted for us. */
 $roster = alpine_officers();
 
-/* The roles nobody is doing, bucketed by the same group headings the people
-   are, so an open job appears IN the roster grid rather than in a separate
-   "vacancies" box further down the page. Somebody scanning this grid for who to
-   ask is exactly the person who should find out the job is going spare, and
-   they will not scroll past the fold to find that out. */
-$openByGroup = array();
-foreach (alpine_roles_wanted() as $r) {
-    $openByGroup[!empty($r['group']) ? $r['group'] : 'Officers'][] = $r;
-}
+/* WHY THE OPEN JOBS ARE NOT IN THE GRID BELOW.
+   -------------------------------------------
+   They used to be: an empty role rendered as a card the same size and shape as
+   a person's, with "Could be you" where the name goes. It answered the
+   recruiting question in the place somebody was most likely to see it, and that
+   was the whole argument for it.
+
+   It was still wrong, for a reason the argument does not reach. This grid
+   answers one question -- who runs the club, and how do I write to them -- and
+   a card that impersonates an officer without being one makes the reader check
+   each card to find out which kind it is. Actual people should look like
+   people. An opening is not a person and should not borrow their shape.
+
+   So the grid is people, and the invitation is one deliberate line underneath
+   it, which is where somebody who has finished reading the roster arrives
+   anyway. What each open job involves belongs on Get Involved, and that page
+   now carries it properly. */
+$asking = alpine_roles_asking();
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -108,15 +117,21 @@ require __DIR__ . '/includes/header.php';
           them with questions.
         </p>
       </div>
-      <a class="arrow-link" href="<?= e(url('roles.php')) ?>">
-        Ways you can help run the club <?= icon('arrow-right', 'icon icon--xs') ?>
-      </a>
+      <?php /* When the club is asking for people there is a proper callout under
+               the grid, and two links to the same page in one section is one
+               link too many. This is the fallback for the year everything is
+               filled, so the page never becomes a dead end. */ ?>
+      <?php if (!$asking): ?>
+        <a class="arrow-link" href="<?= e(url('roles.php')) ?>">
+          What each of these jobs involves <?= icon('arrow-right', 'icon icon--xs') ?>
+        </a>
+      <?php endif; ?>
     </div>
 
     <?php if (!$roster['current']): ?>
       <div class="empty-state">
         <h3>The roster is being updated</h3>
-        <p>Officers are listed in <code>data/officers.php</code>.</p>
+        <p>Officers are listed in <code>ASSIGNMENTS.csv</code>.</p>
       </div>
     <?php else: ?>
       <?php foreach ($roster['current'] as $groupName => $people): ?>
@@ -134,35 +149,24 @@ require __DIR__ . '/includes/header.php';
                   <div class="officer__initials" aria-hidden="true"><?= e(alpine_initials($o['name'])) ?></div>
                 <?php endif; ?>
 
+                <?php /* Name, email and photo are the PERSON's, from PEOPLE.csv.
+                         The title and the "write to them about" line are the JOB's,
+                         from ROLES.csv. Neither is written twice anywhere, so
+                         two people sharing a job cannot end up describing it
+                         differently, and changing an address is one edit. */ ?>
                 <div class="officer__name"><?= e($o['name']) ?></div>
-                <div class="officer__role"><?= e(isset($o['displayRole']) ? $o['displayRole'] : $o['role']) ?></div>
+                <div class="officer__role"><?= e($o['title']) ?></div>
 
-                <?php if (!empty($o['handles'])): ?>
-                  <p class="officer__handles"><?= e($o['handles']) ?></p>
+                <?php if ($o['contact_for'] !== ''): ?>
+                  <p class="officer__handles"><?= e($o['contact_for']) ?></p>
                 <?php endif; ?>
 
-                <?php if (!empty($o['email'])): ?>
+                <?php if ($o['email'] !== ''): ?>
                   <a class="officer__mail" href="mailto:<?= e($o['email']) ?>"><?= e($o['email']) ?></a>
                 <?php endif; ?>
               </div>
             <?php endforeach; ?>
 
-            <?php /* Generated from data/roles.csv: a role listed there with
-                     nobody currently holding it. Nobody types "vacant" anywhere,
-                     and the slot disappears by itself the moment somebody is
-                     added to data/officers.csv. */ ?>
-            <?php if (!empty($openByGroup[$groupName])): ?>
-              <?php foreach ($openByGroup[$groupName] as $r): ?>
-                <a class="officer officer--open" href="<?= e(url('roles.php#' . alpine_slug($r['role']))) ?>">
-                  <span class="officer__vacant" aria-hidden="true">
-                    <?= icon('arrow-right', 'icon icon--lg') ?>
-                  </span>
-                  <span class="officer__name">Could be you</span>
-                  <span class="officer__role"><?= e($r['role']) ?></span>
-                  <span class="officer__handles"><?= e(alpine_role_status_line($r)) ?></span>
-                </a>
-              <?php endforeach; ?>
-            <?php endif; ?>
           </div>
         </div>
       <?php endforeach; ?>
@@ -181,10 +185,44 @@ require __DIR__ . '/includes/header.php';
         </p>
       </div>
 
+      <?php /* THE INVITATION, and the only thing on this page about jobs
+               nobody is doing. It renders nothing at all when every job has
+               the people it needs -- there is no "no vacancies at this time"
+               placeholder, because a block that exists only to say it has
+               nothing to say is a block that will one day say it wrongly.
+
+               It does not name the jobs. Get Involved describes each one
+               properly, and a list here would be a second copy to read past
+               on the way to the thing this page is actually for.
+
+               WHAT IT MAY NOT SAY: who is eligible. The club has never written
+               that down -- there is no constitution, no bylaws and no officer
+               handbook in this repository or on the old site, both searched in
+               August 2026 -- so no sentence here invents one. What is known to
+               be true is that officers are members who volunteered, and that
+               is the sentence that invites somebody in anyway. */ ?>
+      <?php if ($asking): ?>
+        <aside class="join-callout mt-lg">
+          <div class="join-callout__text">
+            <h3 class="join-callout__title">Want to help run the Alpine Club?</h3>
+            <p>
+              The club is looking for somebody in
+              <?= e(alpine_number_word(count($asking))) ?>
+              of its jobs. You do not need to have run a club before, and for most of
+              them you do not need much outdoor experience either &mdash; say you are
+              interested and an officer will tell you what happens next.
+            </p>
+          </div>
+          <a class="btn btn--ghost" href="<?= e(url('roles.php#open')) ?>">
+            See what is open <?= icon('arrow-right', 'icon icon--xs') ?>
+          </a>
+        </aside>
+      <?php endif; ?>
+
     <?php endif; ?>
 
     <?php /* Past officers. Nobody maintains this list — an officer gets an
-             'until' year in data/officers.csv and appears here by itself. */ ?>
+             'until' year in ASSIGNMENTS.csv and appears here by itself. */ ?>
     <?php if ($roster['past']): ?>
       <div class="alumni">
         <h3 class="officer-group__title">Past officers</h3>
@@ -195,7 +233,7 @@ require __DIR__ . '/includes/header.php';
               <?php foreach ($people as $o): ?>
                 <li>
                   <span class="alumni__name"><?= e($o['name']) ?></span>
-                  <span class="alumni__role"><?= e(isset($o['displayRole']) ? $o['displayRole'] : $o['role']) ?></span>
+                  <span class="alumni__role"><?= e($o['title']) ?></span>
                 </li>
               <?php endforeach; ?>
             </ul>

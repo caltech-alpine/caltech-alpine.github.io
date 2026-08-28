@@ -330,7 +330,7 @@ python tools/verify_deploy.py https://staging.alpine.caltech.edu
 
 It checks every page returns 200, that the pages are HTML rather than PHP source,
 that events rendered, that `.htaccess` is in force (the security headers arrive,
-`/data/officers.csv` is denied, and a folder with no index does not list its
+`/ASSIGNMENTS.csv` is denied, and a folder with no index does not list its
 contents), that the 404 page is ours, and that staging is telling search engines
 to stay away.
 

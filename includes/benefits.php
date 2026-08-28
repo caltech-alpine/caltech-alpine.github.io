@@ -75,16 +75,23 @@ function alpine_has_benefits()
 }
 
 /**
- * Who to ask about deals. The person currently holding the role if the roster
- * names one, otherwise the shared officers mailbox — so this keeps working
- * through a handover, and through the role being renamed back to "Deals Shark"
- * if the club ever wants it.
+ * Who to ask about deals. Whoever currently holds the job if anybody does,
+ * otherwise the shared officers mailbox — so this keeps working through a
+ * handover, and through the job being renamed back to "Deals Shark" if the club
+ * ever wants it.
+ *
+ * That last claim used to be written here and was not true: the lookup asked
+ * for the officer whose role was spelled "Partnerships & Deals Lead", so a
+ * rename would have dropped it back to the general mailbox without a word. It
+ * asks for the role_id now, which is the thing that does not change, and
+ * tools/check.php fails if that id ever disappears — see alpine_required_roles().
  */
 function alpine_benefits_contact()
 {
-    $officer = alpine_officer_for('Partnerships & Deals Lead');
-    if ($officer && !empty($officer['email'])) {
-        return array('email' => $officer['email'], 'name' => $officer['name']);
+    foreach (alpine_role_holders('partnerships') as $person) {
+        if ($person['email'] !== '') {
+            return array('email' => $person['email'], 'name' => $person['name']);
+        }
     }
     return array('email' => cfg('links.officers'), 'name' => '');
 }

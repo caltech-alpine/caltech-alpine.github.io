@@ -51,6 +51,23 @@ jobs:
       - name: Show the PHP we are building with
         run: php -v
 
+      # The officer data, before anything else. A mistyped role_id or person_id
+      # produces a site that renders perfectly and says something false -- an
+      # officer missing from the roster, or a job advertised as open that
+      # somebody is doing. There is no visible symptom, so it has to be caught
+      # here. build_static.py runs this too; a separate step means the Actions
+      # log says plainly which check failed.
+      - name: Check the officer data adds up
+        run: php tools/check.php --data
+
+      # And then the edits a new officer will actually make: replacing
+      # somebody, adding a co-officer, renaming a title, changing a maximum,
+      # deleting a role. Each is applied to the real CSVs, rendered through real
+      # PHP, and checked -- including whether the OLD name and address survive
+      # anywhere on the site. The files are restored afterwards.
+      - name: Try next year's officer changes
+        run: python3 tools/test_roles.py
+
       - name: Configure Pages
         id: pages
         uses: actions/configure-pages@v5

@@ -1697,10 +1697,20 @@ main  { flex: 1 0 auto; }
        of Mount Wilson and it earns its place once, not six times, so it is now
        the fallback rather than the default.
 
-     * nothing below introduces a card. An open role is an outline in the
-       roster grid; the homepage notice is a line on a rule. Reaching for
-       another rounded rectangle is exactly the reflex that produced the
-       complaint.
+     * nothing below introduces a card. The homepage notice is a line on a
+       rule; the invitation on the About page is a band between two rules.
+       Reaching for another rounded rectangle is exactly the reflex that
+       produced the complaint.
+
+   REVISED AUGUST 2026, after the first answer to "open roles are impossible to
+   find" turned out to have its own cost. An empty role was rendered as a card
+   the same size and shape as a person's, inside the roster grid, with "Could be
+   you" where the name goes. It was findable. It also meant the one grid on the
+   site that answers "who runs the club" contained things that are not people
+   and cannot be written to, so a reader had to check each card to learn which
+   kind it was. Actual people look like people; an opening is not a person and
+   does not borrow their shape. The dashed placeholder frame is gone, and the
+   invitation is .join-callout below: one band, under the roster, once.
    ========================================================================== */
 
 /* --- photographic page hero --- */
@@ -1769,40 +1779,38 @@ main  { flex: 1 0 auto; }
 .wanted-strip__text a:hover { color: var(--alpenglow-hover); }
 
 
-/* --- an open slot in the officers grid -----------------------------------
-   Deliberately the same shape as an officer, in the same grid, in the group
-   the role belongs to. A vacancy listed somewhere else on the page is a
-   vacancy nobody reads: the person scanning this grid for who to ask is the
-   person who should discover the job is going spare.                        */
-.officer--open {
-  display: block;
-  text-decoration: none;
-  color: inherit;
+/* --- the invitation under the roster -------------------------------------
+   One band, under the officers, and only when the club is actually asking for
+   somebody. A band between two rules rather than a box: it is the club saying
+   something at the end of the roster, not an advertisement dropped on the page,
+   and it has to sit next to a grid of photographs without competing with them.
+
+   It is NOT in the grid. That was the previous answer and it cost more than it
+   bought -- see the note at the top of this section.                          */
+.join-callout {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-block: 1.4rem;
+  border-block: 1px solid var(--line-strong);
 }
-.officer__vacant {
-  display: grid;
-  place-items: center;
-  width: 100%;
-  aspect-ratio: 4 / 5;
-  margin-bottom: .8rem;
-  border: 2px dashed var(--line-strong);
-  border-radius: var(--r);
-  color: var(--line-strong);
-  transition: border-color var(--speed) var(--ease), color var(--speed) var(--ease);
+.join-callout__text { max-width: 62ch; }
+.join-callout__title {
+  font-size: var(--step-1);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  margin-bottom: .35rem;
 }
-/* --alpenglow-hover, not --alpenglow: the bright accent is 4.43:1 on paper and
-   4.07:1 on the tint, i.e. below the AA floor, and tools/audit.py fails on it.
-   This is the brightest the accent goes while still clearing 4.5:1 everywhere
-   it appears. */
-.officer--open:hover .officer__vacant,
-.officer--open:focus-visible .officer__vacant {
-  border-color: var(--alpenglow-hover);
-  color: var(--alpenglow-hover);
+.join-callout p {
+  margin: 0;
+  color: var(--text-mute);
+  line-height: 1.6;
 }
-.officer--open .officer__name { color: var(--text-mute); font-style: italic; }
-.officer--open .officer__name,
-.officer--open .officer__role,
-.officer--open .officer__handles { display: block; }
+/* The button must not wrap to a second line and then sit half a screen from
+   the sentence it belongs to. */
+.join-callout .btn { flex: 0 0 auto; }
 
 
 /* --- what the club needs, on the Get Involved page --- */

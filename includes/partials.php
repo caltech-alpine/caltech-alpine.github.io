@@ -116,6 +116,12 @@ function alpine_write_to($email, $subject = '', array $include = array(), array 
  *            makes a page read as generated.
  *   icon     icon name for the eyebrow.
  *   size     'sm' for a page whose content starts straight away, '' otherwise.
+ *   focus    where to crop, when the default does not land on the subject. A
+ *            CSS background-position, e.g. 'center 76%'. The hero is a wide
+ *            letterbox and most photographs are not, so the middle 30% of the
+ *            frame is all that survives; a subject sitting low or high needs
+ *            to be named or it gets cropped off. Leave it out and the default
+ *            (center 45%) applies, which suits a horizon.
  */
 function alpine_page_hero(array $opts)
 {
@@ -125,6 +131,7 @@ function alpine_page_hero(array $opts)
     $credit  = isset($opts['credit'])  ? $opts['credit']  : '';
     $lede    = isset($opts['lede'])    ? $opts['lede']    : '';
     $size    = isset($opts['size'])    ? $opts['size']    : '';
+    $focus   = isset($opts['focus'])   ? $opts['focus']   : '';
 
     $class = 'page-hero';
     if ($hasPic) { $class .= ' page-hero--photo'; }
@@ -135,7 +142,14 @@ function alpine_page_hero(array $opts)
         <?php /* A background-image, not an <img>: it is decoration behind text,
                  it has to fill an arbitrary box, and the alt text belongs to the
                  heading that is already there. */ ?>
-        <div class="page-hero__media" style="background-image:url(<?= e(asset('images/' . $photo)) ?>)"></div>
+        <div class="page-hero__media" style="background-image:url(<?= e(asset('images/' . $photo)) ?>)<?php
+            /* Only a background-position gets through, and only in the shape
+               the doc comment describes -- this is a style attribute, so a
+               value straight out of a data file must not be able to carry a
+               second declaration into it. */
+            if ($focus !== '' && preg_match('/^[a-z0-9%. ]{1,24}$/i', $focus)) {
+                echo ';background-position:' . e($focus);
+            } ?>"></div>
       <?php else: ?>
         <div class="topo"></div>
       <?php endif; ?>

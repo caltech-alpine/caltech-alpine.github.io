@@ -23,8 +23,20 @@ define('ALPINE_ROOT', dirname(__DIR__));
  *  developing) to see problems on screen instead.
  * ------------------------------------------------------------------------ */
 $alpineDebug = (getenv('ALPINE_DEBUG') === '1');
-error_reporting($alpineDebug ? E_ALL : (E_ALL & ~E_NOTICE & ~E_DEPRECATED & ~E_STRICT));
+/* display_errors FIRST. Whatever the next line does, nothing this file
+   evaluates can print to the page before this is settled -- which is exactly
+   how a notice used to escape: it was raised while working out the argument
+   to error_reporting(), i.e. one statement too early to be suppressed, and
+   landed ahead of <!DOCTYPE html>. Anything before the doctype puts the
+   browser in quirks mode and breaks any later header() call. */
 ini_set('display_errors', $alpineDebug ? '1' : '0');
+/* E_STRICT is deliberately not named here. It has done nothing since PHP 8.0
+   (its messages were folded into the other levels), the constant itself is
+   deprecated in 8.4, and merely mentioning it made 8.4 emit
+   "Constant E_STRICT is deprecated" on every page. On PHP 7.4 dropping it
+   means E_STRICT-level messages are logged rather than ignored; they are
+   still never displayed. */
+error_reporting($alpineDebug ? E_ALL : (E_ALL & ~E_NOTICE & ~E_DEPRECATED));
 define('ALPINE_DEBUG', $alpineDebug);
 
 /* --------------------------------------------------------------------------

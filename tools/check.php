@@ -4,7 +4,9 @@
  *  Health check — run this if something looks wrong, and once a year anyway.
  * ============================================================================
  *
- *      php tools/check.php            calendar + configuration
+ *      php tools/check.php            calendar + configuration + the roster
+ *      php tools/check.php --data     ONLY the officer data. No network, instant.
+ *                                     Run this after editing a CSV.
  *      php tools/check.php --links    also check every link actually resolves
  *
  *  It prints what the website can currently see. If "Upcoming" is empty here,
@@ -24,6 +26,30 @@ $checkLinks = in_array('--links', $argv, true);
 $problems   = 0;
 
 function line($s = '') { echo $s . PHP_EOL; }
+
+/* --------------------------------------------------------------- --data ----
+   Just the officer data, and nothing that touches the network. This is the
+   mode tools/build_static.py runs before it publishes anything, so a roster
+   that does not add up fails the build instead of reaching the club's website.
+   It is also the fast one to run after editing a CSV: no calendar, no link
+   probing, answers in well under a second. */
+if (in_array('--data', $argv, true)) {
+    require_once ALPINE_ROOT . '/includes/officers.php';
+    require_once ALPINE_ROOT . '/includes/validate.php';
+
+    $found = alpine_data_problems(alpine_required_roles());
+    line();
+    if (!$found) {
+        line('PEOPLE.csv, ROLES.csv and ASSIGNMENTS.csv all agree.');
+        line();
+        exit(0);
+    }
+    line(count($found) . ' problem(s) in the officer data:');
+    line();
+    foreach ($found as $i => $p) { line('  ' . ($i + 1) . '. ' . $p); }
+    line();
+    exit(1);
+}
 
 /**
  * Shorten a title for the columns below.
@@ -184,50 +210,54 @@ if ($checkLinks) {
 line();
 line('Content');
 
-$officers = alpine_data('officers');
 $sponsors = alpine_data('sponsors');
-count($officers) ? ok(count($officers) . ' officers listed') : warn('no officers in data/officers.csv');
 count($sponsors) ? ok(count($sponsors) . ' sponsors listed') : line('  --    no sponsors yet (data/sponsors.php)');
 
-/* ------------------------------------------------------------------ roles */
-/* data/roles.csv and data/officers.csv are joined on the role title, and the
-   join is what makes a vacancy appear. A typo on either side breaks it
-   SILENTLY: the officer still shows up on the About page, the role still shows
-   up on Get Involved, and the two simply never meet -- so a filled job is
-   advertised as open, which is the one wrong answer this system must not give.
-   Nothing about the rendered page would tell you. Hence a check. */
-require_once ALPINE_ROOT . '/includes/roles.php';
+/* ----------------------------------------------------- people, roles, jobs */
+/* THE ONE CLASS OF MISTAKE THAT IS INVISIBLE ON THE PAGE.
+   The three data files point at each other by id. Misspell a role_id in
+   assignments.csv and the officer simply does not appear, the job shows as
+   open, and every page looks entirely normal while advertising a vacancy in a
+   job somebody is doing -- which is the one wrong answer this system must not
+   give. Nothing about the rendered site would tell you. Hence this. */
+require_once ALPINE_ROOT . '/includes/officers.php';
+require_once ALPINE_ROOT . '/includes/validate.php';
 
-$roles = alpine_roles();
-if (!$roles) {
-    warn('no roles in data/roles.csv — the Get Involved page will be empty');
+$people = alpine_people();
+$roles  = alpine_roles();
+
+count($people) ? ok(count($people) . ' people listed (PEOPLE.csv)')
+               : warn('nobody in PEOPLE.csv');
+count($roles)  ? ok(count($roles) . ' roles defined (ROLES.csv)')
+               : warn('no roles in ROLES.csv — the Get Involved page will be empty');
+
+$problems = alpine_data_problems(alpine_required_roles());
+if ($problems) {
+    foreach ($problems as $p) { bad($p); }
 } else {
-    ok(count($roles) . ' roles defined (data/roles.csv)');
+    ok('people, roles and assignments all agree with each other');
+}
 
-    $known = array();
-    foreach ($roles as $r) { $known[alpine_role_office($r['role'])] = true; }
-
-    $orphans = array();
-    foreach ($officers as $o) {
-        if (!empty($o['until'])) { continue; }   // past titles are allowed to be historical
-        $office = alpine_role_office($o['role']);
-        if (!isset($known[$office])) { $orphans[$o['role']] = true; }
+/* What the site will actually say about staffing, so it can be eyeballed
+   against what the club knows to be true. */
+if ($roles) {
+    line();
+    line('  What each role reports:');
+    foreach ($roles as $r) {
+        $cap = ($r['max'] === null) ? 'any' : $r['max'];
+        printf("    %-42s %d of min %d / max %-3s  %-9s %s\n",
+            alpine_short(alpine_role_title($r), 42),
+            $r['filled'], $r['min'], $cap, $r['state'],
+            alpine_role_status_line($r));
     }
 
-    if ($orphans) {
-        bad('these serving officers hold a role that is not in data/roles.csv: '
-          . implode(', ', array_keys($orphans))
-          . '  — add a row there, or fix the spelling so the two files agree');
+    line();
+    $short = alpine_roles_needed();
+    if ($short) {
+        line('  --    the homepage says the club is short '
+           . alpine_roles_sentence($short));
     } else {
-        ok('every serving role also appears in data/roles.csv');
-    }
-
-    $wanted = alpine_roles_wanted();
-    if ($wanted) {
-        line('  --    ' . count($wanted) . ' role(s) currently shown as needing somebody: '
-           . alpine_roles_sentence($wanted));
-    } else {
-        line('  --    every role is filled, so the homepage notice is hidden');
+        line('  --    nothing is below its minimum, so the homepage notice is hidden');
     }
 }
 
@@ -237,31 +267,31 @@ is_readable(ALPINE_ROOT . '/assets/images/hero.jpg')
     : warn('no assets/images/hero.jpg — the homepage is using the drawn contour '
          . 'map. A wide photo of members outdoors is the biggest visual upgrade available.');
 
+$serving   = alpine_serving_officers();
 $headshots = glob(ALPINE_ROOT . '/assets/images/officers/*.{jpg,jpeg,png,webp}', GLOB_BRACE);
 $withPhoto = 0;
-foreach ($officers as $o) {
+foreach ($serving as $o) {
     if (!empty($o['photo']) && is_readable(ALPINE_ROOT . '/assets/images/officers/' . $o['photo'])) {
         $withPhoto++;
     }
 }
-line(sprintf('  --    %d of %d officers have a headshot (%d file%s on disk); '
+line(sprintf('  --    %d of %d serving officers have a headshot (%d file%s on disk); '
            . 'the rest show their initials',
-    $withPhoto, count($officers), count($headshots), count($headshots) === 1 ? '' : 's'));
+    $withPhoto, count($serving), count($headshots), count($headshots) === 1 ? '' : 's'));
 
 /* Officer email addresses. Serving officers without one can only be reached
    through the general mailbox, which defeats the point of listing who does
    what — so this is worth chasing. */
-$serving = $missingEmail = 0;
-foreach ($officers as $o) {
-    if (!empty($o['until'])) { continue; }        // past officers do not need one
-    $serving++;
-    if (empty($o['email'])) { $missingEmail++; }
+$missingEmail = array();
+foreach ($serving as $o) {
+    if ($o['email'] === '') { $missingEmail[] = $o['name']; }
 }
-if ($missingEmail === 0 && $serving > 0) {
+if (!$missingEmail && $serving) {
     ok('every serving officer has an email address');
-} elseif ($serving > 0) {
-    warn($missingEmail . ' of ' . $serving . ' serving officers have no email address '
-       . '(data/officers.csv) — visitors can only reach them via ' . cfg('links.officers'));
+} elseif ($serving) {
+    warn(count($missingEmail) . ' of ' . count($serving) . ' serving officers have no '
+       . 'email address in PEOPLE.csv (' . implode(', ', $missingEmail) . ') — '
+       . 'visitors can only reach them via ' . cfg('links.officers'));
 }
 
 $gear = alpine_data('gear');

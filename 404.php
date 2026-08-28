@@ -5,7 +5,7 @@
  * Wire this up in .htaccess with:  ErrorDocument 404 /404.php
  */
 
-require __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/bootstrap.php';
 
 http_response_code(404);
 

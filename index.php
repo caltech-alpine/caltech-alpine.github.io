@@ -6,9 +6,9 @@
  * what members can borrow, who runs it, and how to join.
  */
 
-require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/roles.php';
-require __DIR__ . '/includes/partials.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/roles.php';
+require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => '',                       // home uses the site name alone
@@ -18,7 +18,12 @@ $PAGE = array(
 
 $upcoming = AlpineCalendar::upcoming(cfg('calendar.home_limit'));
 $sponsors = alpine_data('sponsors');
-$wanted   = alpine_roles_wanted();
+/* ONLY the jobs the club is actually SHORT of -- below their minimum. A job
+   that is running fine and could take another person is a real thing to say on
+   the Get Involved page and noise on a homepage, and the difference between the
+   two is min_people and max_people in ROLES.csv rather than anyone's
+   judgement on the day. */
+$short = alpine_roles_needed();
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -73,7 +78,7 @@ require __DIR__ . '/includes/header.php';
          When every role is filled this renders nothing at all. That is the
          property that matters when nobody has touched the site for a year: the
          failure mode is silence, not a stale banner. */ ?>
-<?php if ($wanted): ?>
+<?php if ($short): ?>
 <div class="wanted-strip">
   <div class="wrap wanted-strip__inner">
     <?php
@@ -81,10 +86,12 @@ require __DIR__ . '/includes/header.php';
        picked up a newline before every comma, so the rendered line read
        "a President , Film Festival Coordinator , and a Talks Coordinator ."
        Anything that has to come out as a single sentence should be one string
-       by the time it reaches the page. */
+       by the time it reaches the page.
+
+       The link target is the role_id, so renaming a job does not break it. */
     $needs = array();
-    foreach ($wanted as $r) {
-        $needs[] = '<a href="' . e(url('roles.php#' . alpine_slug($r['role']))) . '">'
+    foreach ($short as $r) {
+        $needs[] = '<a href="' . e(url('roles.php#' . $r['role_id'])) . '">'
                  . e(alpine_role_need_phrase($r)) . '</a>';
     }
     ?>

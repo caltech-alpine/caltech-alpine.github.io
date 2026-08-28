@@ -52,8 +52,8 @@ server*, and a fix that never gets deployed is a fix that did not happen.
    per-trip page. Anything that would require editing this repository to
    announce a trip is the wrong design.
 
-3. **A vacancy is DERIVED, never typed.** `data/roles.csv` lists the jobs;
-   `data/officers.csv` lists the people; a job with nobody in it is shown as
+3. **A vacancy is DERIVED, never typed.** `ROLES.csv` lists the jobs;
+   `ASSIGNMENTS.csv` lists the people; a job with nobody in it is shown as
    open, on the About page, on Get Involved and as a line on the homepage.
    There is no status column and no "we are looking for..." paragraph anywhere
    in the source, because a claim like that takes two edits to be right -- one
@@ -62,7 +62,7 @@ server*, and a fix that never gets deployed is a fix that did not happen.
    seat is vacant goes stale the day it is filled."* If you are about to add a
    field that an officer has to remember to unset, do not.
 
-   The one exception is `recruiting` in `data/roles.csv`, for the case
+   The one exception is `recruiting` in `ROLES.csv`, for the case
    derivation cannot see: a filled job whose holder is leaving. It is free
    text, it is shown verbatim, and it is the only thing here anyone has to
    remember to clear.

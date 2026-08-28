@@ -2,8 +2,8 @@
 /**
  * Get Involved — the jobs that run the club, and how you end up doing one.
  *
- * Almost everything on this page is generated from data/roles.csv and
- * data/officers.csv. The only hand-written prose is the opening section and the
+ * Almost everything on this page is generated from ROLES.csv and
+ * ASSIGNMENTS.csv. The only hand-written prose is the opening section and the
  * "how you get one" block at the bottom, and both are written to stay true for
  * years. Nobody has to edit this file after an election.
  *
@@ -12,9 +12,10 @@
  * rather than around who is already doing it.
  */
 
-require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/roles.php';
-require __DIR__ . '/includes/partials.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/officers.php';
+require_once __DIR__ . '/includes/roles.php';
+require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'Get Involved',
@@ -24,14 +25,33 @@ $PAGE = array(
 );
 
 $groups = alpine_roles_by_group();
-$wanted = alpine_roles_wanted();
+
+/* Two different questions, and the page answers them in two different places.
+
+     $needed  the club is SHORT of these -- fewer people than it needs. This is
+              the list that gets a heading of its own, and the only list the
+              homepage is allowed to mention.
+     $asking  everything the club would welcome somebody into, which is $needed
+              plus the jobs that are running fine and could still use a hand.
+
+   Keeping them apart is what stops "we could use a second hiking coordinator"
+   from being presented with the same urgency as "nobody is running the film
+   festival". Both are true; only one is a problem. */
+$needed = alpine_roles_needed();
+$asking = alpine_roles_asking();
 
 require __DIR__ . '/includes/header.php';
 
 alpine_page_hero(array(
     'title'  => 'Get involved',
+    /* The second sentence is counted, not typed. "Some of those jobs are open"
+       was written here by hand, and it is a claim about the world that stops
+       being true the moment somebody fills the last one -- with nothing on the
+       page or in anyone's calendar to catch it. */
     'lede'   => 'The club runs on people volunteering to organize things. '
-              . 'Some of those jobs are open.',
+              . ($needed
+                  ? 'Some of those jobs are looking for somebody.'
+                  : 'There is always more of it to go round.'),
     'photo'  => 'photos/img-20200822-133229.jpg',
     'credit' => 'Club trip, August 2020',
 ));
@@ -82,32 +102,77 @@ alpine_page_hero(array(
 
 
 <!-- ======================================================== wanted ==== -->
-<?php /* Renders NOTHING when the club is fully staffed. There is no "no
+<?php /* Renders NOTHING when every job has the people it needs. There is no "no
          vacancies at this time" placeholder, because a section that exists only
          to say it has nothing to say is a section that will one day say it
-         wrongly. */ ?>
-<?php if ($wanted): ?>
+         wrongly.
+
+         Two lists, and they are separated on purpose. The club being SHORT of a
+         film festival coordinator and the club having room for a second hiking
+         coordinator are both true and are not the same news; running them
+         together in one list makes the first sound routine and the second sound
+         like an emergency. Which list a job lands in is decided by min_people
+         and max_people in ROLES.csv, not by anybody rewording anything. */ ?>
+<?php if ($asking): ?>
 <section class="section section--tight section--tint" id="open">
   <div class="wrap">
-    <h2 class="h2">What the club needs right now</h2>
-    <div class="prose mt-lg">
-      <?php /* Derived, every time the page loads, from who is listed in
-               data/officers.csv. Nobody types the word "vacant" and nobody has
-               to remember to take it down. */ ?>
-      <p>
-        The person who did each of these last is usually happy to explain what it
-        involved, and none of them are hard to take on.
-      </p>
-    </div>
 
-    <ul class="wanted mt-lg">
-      <?php foreach ($wanted as $r): ?>
-        <li class="wanted__item">
-          <a class="wanted__role" href="#<?= e(alpine_slug($r['role'])) ?>"><?= e($r['role']) ?></a>
-          <span class="wanted__note"><?= e(alpine_role_status_line($r)) ?></span>
-        </li>
-      <?php endforeach; ?>
-    </ul>
+    <?php if ($needed): ?>
+      <h2 class="h2">What the club needs right now</h2>
+      <div class="prose mt-lg">
+        <p>
+          Nobody has to be appointed to any of these, and none of them are hard to
+          take on. Whoever did one last is usually happy to explain what it involved.
+        </p>
+      </div>
+
+      <ul class="wanted mt-lg">
+        <?php foreach ($needed as $r): ?>
+          <li class="wanted__item">
+            <a class="wanted__role" href="#<?= e($r['role_id']) ?>"><?= e(alpine_role_title($r)) ?></a>
+            <span class="wanted__note"><?= e(alpine_role_status_line($r)) ?></span>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+    <?php endif; ?>
+
+    <?php
+    /* The quieter half: jobs that are running, and would still welcome
+       somebody. Under its own heading when there is a "needs" list above it,
+       and promoted to the section's heading when there is not -- so a year in
+       which nothing is actually short does not open with an empty urgency. */
+    $spare = array();
+    foreach ($asking as $r) {
+        if ($r['state'] !== ALPINE_ROLE_NEEDED) { $spare[] = $r; }
+    }
+    ?>
+    <?php if ($spare): ?>
+      <?php if ($needed): ?>
+        <h3 class="h3 mt-lg">Room for more</h3>
+        <div class="prose">
+          <p>These are being done. They would go better with another pair of hands.</p>
+        </div>
+      <?php else: ?>
+        <h2 class="h2">Room for more</h2>
+        <div class="prose mt-lg">
+          <p>
+            Every job the club needs doing is being done. These would still welcome
+            somebody, and it is the easiest time to start &mdash; you would be
+            learning it from whoever is already doing it.
+          </p>
+        </div>
+      <?php endif; ?>
+
+      <ul class="wanted mt-lg">
+        <?php foreach ($spare as $r): ?>
+          <li class="wanted__item">
+            <a class="wanted__role" href="#<?= e($r['role_id']) ?>"><?= e(alpine_role_title($r)) ?></a>
+            <span class="wanted__note"><?= e(alpine_role_status_line($r)) ?></span>
+          </li>
+        <?php endforeach; ?>
+      </ul>
+    <?php endif; ?>
+
   </div>
 </section>
 <?php endif; ?>
@@ -121,7 +186,7 @@ alpine_page_hero(array(
     <?php if (!$groups): ?>
       <div class="empty-state">
         <h3>The role list is being updated</h3>
-        <p>Roles are listed in <code>data/roles.csv</code>.</p>
+        <p>Roles are listed in <code>ROLES.csv</code>.</p>
       </div>
     <?php endif; ?>
 
@@ -131,35 +196,57 @@ alpine_page_hero(array(
 
         <div class="roles">
           <?php foreach ($roles as $r): ?>
-            <?php $status = alpine_role_status_line($r); ?>
-            <article class="role<?= $r['wanted'] ? ' role--wanted' : '' ?>" id="<?= e(alpine_slug($r['role'])) ?>">
+            <?php
+              $status = alpine_role_status_line($r);
 
-              <h4 class="role__name"><?= e($r['role']) ?></h4>
+              /* THE ANCHOR IS THE role_id, NOT THE TITLE. A link built from the
+                 title breaks the day somebody renames the job -- silently, from
+                 four other pages, and only for the people who followed the old
+                 link. The id never changes, so neither does the link. */
+              $anchor = $r['role_id'];
 
-              <?php if (!empty($r['description'])): ?>
+              /* Who to write to about this job. The people doing it if anybody
+                 is; the club's shared mailbox if nobody is, because an empty
+                 contact line on the page that exists to recruit is the one
+                 place a dead end costs something. */
+              $holderLinks = array();
+              foreach ($r['holders'] as $person) {
+                  $holderLinks[] = alpine_person_link($person, alpine_role_title($r));
+              }
+            ?>
+            <article class="role<?= $r['state'] === ALPINE_ROLE_NEEDED ? ' role--wanted' : '' ?>"
+                     id="<?= e($anchor) ?>">
+
+              <h4 class="role__name"><?= e(alpine_role_title($r)) ?></h4>
+
+              <?php if ($r['description'] !== ''): ?>
                 <p class="role__what"><?= e($r['description']) ?></p>
               <?php endif; ?>
 
+              <?php /* WHO DOES IT, AND HOW TO WRITE TO THEM -- both, in the same
+                       place. This page used to name the person and stop there,
+                       which sent anybody who wanted to ask them about it back to
+                       the About page to look up an address the site already knew.
+                       The address is not repeated in this file: it comes from
+                       PEOPLE.csv through alpine_person_link(), the same way
+                       the About page gets it, so there is one copy of it. */ ?>
               <p class="role__who">
-                <?php if ($r['holders']): ?>
-                  <?php
-                    $names = array();
-                    foreach ($r['holders'] as $o) { $names[] = $o['name']; }
-                  ?>
-                  <span class="role__holders">Currently <?= e(alpine_list_phrase($names)) ?>.</span>
+                <?php if ($holderLinks): ?>
+                  <span class="role__holders">
+                    Currently <?= alpine_list_phrase($holderLinks) ?>.
+                  </span>
+                <?php else: ?>
+                  <span class="role__holders">
+                    Nobody at the moment &mdash; write to
+                    <a href="mailto:<?= e(cfg('links.officers')) ?>?subject=<?= e(rawurlencode(alpine_role_title($r))) ?>"><?= e(cfg('links.officers')) ?></a>
+                    if you are interested.
+                  </span>
                 <?php endif; ?>
+
                 <?php if ($status !== ''): ?>
                   <span class="role__status"><?= e($status) ?></span>
                 <?php endif; ?>
               </p>
-
-              <?php /* 'chosen' is deliberately blank in data/roles.csv until
-                       somebody confirms which roles are actually elected. A
-                       blank prints nothing, which beats a confident guess about
-                       the club's own rules. */ ?>
-              <?php if (!empty($r['chosen'])): ?>
-                <p class="role__how"><?= e(ucfirst($r['chosen'])) ?></p>
-              <?php endif; ?>
 
             </article>
           <?php endforeach; ?>
@@ -169,7 +256,7 @@ alpine_page_hero(array(
 
     <p class="mt-lg">
       <a class="arrow-link" href="<?= e(url('about.php#officers')) ?>">
-        Meet the people doing these jobs <?= icon('arrow-right', 'icon icon--xs') ?>
+        See the officers with their photographs <?= icon('arrow-right', 'icon icon--xs') ?>
       </a>
     </p>
   </div>

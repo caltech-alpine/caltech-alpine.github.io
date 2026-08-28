@@ -11,8 +11,8 @@
  * whole idea: the club runs events, and the website keeps the record.
  */
 
-require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/partials.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'Events & Trips',

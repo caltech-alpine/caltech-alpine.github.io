@@ -1,0 +1,72 @@
+# CALTECH ALPINE CLUB ROLES. The jobs the club wants doing, whoever is doing them.
+#
+# Three files, and each fact is written in exactly one of them:
+#   PEOPLE.csv       WHO EXISTS -- names, emails, photographs
+#   ROLES.csv        WHAT THE JOBS ARE -- this file
+#   ASSIGNMENTS.csv  WHO IS DOING WHICH JOB
+#
+# Nobody ever types the word "vacant". A job listed here with nobody assigned to
+# it in ASSIGNMENTS.csv is shown as open, by itself, and the notice disappears
+# by itself when somebody is added. There is no second edit to remember.
+#
+# Lines starting with # are ignored, so you can leave notes here.
+#
+# THE ORDER OF THE ROWS IS THE ORDER ON THE PAGE. Move a row and the site
+# follows -- officers are listed in this order too. There is no sort column.
+#
+# role_id      a short permanent name for the job, lowercase, words joined by
+#              underscores: film_festival. NOTHING SHOWS IT TO VISITORS. It is
+#              what ASSIGNMENTS.csv points at, what the page anchors use, and
+#              what the website's own code looks for.
+#              >>> PICK IT ONCE AND NEVER CHANGE IT. <<<
+#              You can rename the TITLE below as often as you like -- to
+#              Co-President, to Presidents, to Chair -- and nothing breaks,
+#              because no part of the site looks at the title to decide
+#              anything. Changing a role_id is the one edit that does break
+#              things, and `php tools/check.php` will tell you what.
+# title        what one holder of this job is called. Change this freely.
+# title_shared what EACH holder is called when more than one person shares the
+#              job -- "Co-President" for two presidents. LEAVE IT BLANK and the
+#              title above is used however many people there are, which is
+#              right for most jobs: two hiking coordinators are just two hiking
+#              coordinators, not co-anythings.
+# group        the heading it appears under.
+# min_people   how many the club NEEDS. Below this the job is advertised as
+#              open, on the homepage and everywhere else. Set it to 0 for a job
+#              that is nice to have and not essential -- an empty one is then
+#              offered quietly instead of announced as a gap.
+# max_people   how many the club can USE. Between min and max the site says
+#              there is room for another without calling the job open. LEAVE
+#              BLANK for a job that takes as many volunteers as turn up, and it
+#              never asks for more once somebody is doing it.
+# description  what the job involves, in a sentence or two. Write it so it is
+#              still true in five years: no names, no dates, no numbers that
+#              drift. What one person did last year belongs in a handover note.
+# contact_for  what to write to this person about, in a few words. Shown under
+#              their name on the About page. It describes the JOB, so it is
+#              written once here however many people share it.
+# recruiting   LEAVE BLANK almost always. Two other things it can say:
+#                a sentence -- for a job that is filled and still needs
+#                  somebody: "stepping down in June". What you write is what
+#                  the site shows.
+#                the word no -- stop advertising this job for now, even if it
+#                  is empty. It still appears on Get Involved with its
+#                  description; it just stops asking. Delete the word to start
+#                  asking again.
+#
+# Retiring a job: delete the row. Nobody is lost -- the people who held it stay
+# in PEOPLE.csv and on the Past officers list, which outlives the jobs. Do one
+# thing first, though: if anybody held it in the past, put what the job was
+# called into their title_held cell in ASSIGNMENTS.csv. The row you are about to
+# delete is the last record of it. `php tools/check.php --data` will stop you.
+role_id,title,title_shared,group,min_people,max_people,description,contact_for,recruiting
+president,President,Co-President,"Steering Committee",1,2,"Runs the club: calls the meetings, decides what the year looks like, and speaks for the club to Caltech. The job people bring a question to when they do not know who else to ask.","Anything about the club in general",
+treasurer,Treasurer,,"Steering Committee",1,1,"Looks after club money. Pays for trips and film festival costs, handles reimbursements, and keeps the accounts straight with Caltech.","Reimbursements and club funds",
+secretary,Secretary,,"Steering Committee",1,1,"Runs the mailing list and membership: adds people who ask to join, including from outside Caltech, and sends what goes out to members.","Mailing list and membership",
+film_festival,"Film Festival Coordinator",,"Steering Committee",1,2,"Puts on the club's film festivals. Books the venue, buys the screening license, arranges tickets through the Caltech Ticket Office, and lines up the raffle donations. The club's largest events and the ones that fund most of the rest.","The film festivals",
+gear,"Gear Officer",,"Steering Committee",1,1,"Looks after the equipment the club owns and lends out, including the specialist climbing and packrafting kit that does not go through the Caltech Y. Handles reservations and keeps track of what has come back.","Borrowing club equipment, including specialist gear",
+partnerships,"Partnerships & Deals Lead",,"Steering Committee",1,1,"Finds and keeps the discounts members get, and talks to companies about sponsoring the club.","Sponsorships, member discounts, and pro deals",
+climbing,"Climbing Commodore",,"Activity Leaders",1,,"Organizes climbing days and looks after the bouldering cave in Brown Gym, including route setting.","Climbing trips and the bouldering wall",
+hiking,"Hiking and Backpacking Trip Coordinator",,"Activity Leaders",1,,"Organizes hikes and overnight backpacking trips. Picks where and when, posts it on the calendar, and helps people sort out transport.","Hiking and backpacking trips",
+trail_running,"Trail Run Tyrant",,"Activity Leaders",1,,"Runs the weekly trail run.","The weekly trail run",
+talks,"Talks Coordinator",,"Activity Leaders",0,1,"Invites people to give talks on campus about trips they have done, and books a room. A few evenings a year.","Talks on campus",

@@ -6,9 +6,9 @@
  * able to join without reading the rest of the page.
  */
 
-require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/benefits.php';
-require __DIR__ . '/includes/partials.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/benefits.php';
+require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'Join',

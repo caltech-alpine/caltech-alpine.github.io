@@ -1,219 +1,158 @@
 <?php
 /**
  * ============================================================================
- *  Officers: current, past, and the order they appear in.
+ *  Officers: the roster as the About page wants to read it.
  * ============================================================================
  *
- *  The roster is data/officers.csv. Everything here is presentation:
+ *  There is no officer data here and no officer file behind it. An "officer" is
+ *  just a person from PEOPLE.csv joined to a role from ROLES.csv by a row in
+ *  ASSIGNMENTS.csv, and this file is the one place that does that join in the
+ *  shape a roster page needs: grouped by heading, then by year for the alumni
+ *  list.
  *
- *    - anyone with an 'until' year is automatically a past officer. You never
- *      move an entry between lists or delete anybody — you add one line when
- *      they step down, and the site sorts it out. That is what keeps the
- *      alumni list honest: it accumulates by itself.
+ *  Everything it prints comes from somewhere else, which is the point. The name
+ *  and email are the person's, written once in PEOPLE.csv. The title and the
+ *  "contact them about" line are the job's, written once in ROLES.csv. Nothing
+ *  is duplicated, so nothing can disagree.
  *
- *    - officers are ordered by the seniority of their role, and people sharing
- *      a role sit together, alphabetically. See $ROLE_RANK below.
+ *  ORDER. Officers appear in the order ROLES.csv lists their jobs, and people
+ *  sharing a job appear together, alphabetically. Moving a row in ROLES.csv
+ *  moves the officers too. There is no separate ordering to keep in step, and
+ *  nobody has to sort a spreadsheet.
  * ============================================================================
  */
 
+require_once __DIR__ . '/roles.php';
+
 /**
- * Everything data/roles.csv knows about one job, or null.
+ * One officer entry as the roster renders it: the person's own facts, plus the
+ * job's facts under the names a template expects.
  *
- * Matching ignores case and a "Co-" prefix, so "Co-President" finds the row
- * that says President.
+ * 'title' is what to call them, worked out from how many people share the job.
+ * 'contact_for' describes the job, so two people sharing one say the same
+ * thing -- which is correct, and which used to be two cells that could drift.
  */
-function alpine_role_meta($role)
+function alpine_officer_entry(array $person, array $role, $title)
 {
-    static $index = null;
-
-    if ($index === null) {
-        $index = array();
-        foreach (alpine_data('roles') as $r) {
-            if (empty($r['role'])) { continue; }
-            $index[alpine_role_office($r['role'])] = $r;
-        }
-    }
-
-    $key = alpine_role_office($role);
-    return isset($index[$key]) ? $index[$key] : null;
-}
-
-/**
- * How many people the club wants in this job, or null for "as many as turn up".
- */
-function alpine_role_seats($role)
-{
-    $meta = alpine_role_meta($role);
-    if (!$meta || !isset($meta['seats']) || $meta['seats'] === '') { return null; }
-    return (int) $meta['seats'];
-}
-
-/**
- * The office behind a title, ignoring any "Co-" prefix.
- * "Co-President" and "President" are both the office `president`.
- */
-function alpine_role_office($role)
-{
-    return strtolower(preg_replace('/^co[-\s]*/i', '', trim($role)));
-}
-
-/**
- * Drop a "Co-" prefix when only one person holds that office.
- *
- * Officers write "Co-President" in the data file and the page prints
- * "President" as soon as there is only one of them — nobody has to remember to
- * retitle the survivor when a co-lead steps down. It only ever REMOVES the
- * prefix, never adds one: two people can share a job without being "Co-" (two
- * hiking coordinators are just two coordinators), so inventing the prefix
- * would produce titles nobody uses.
- */
-function alpine_display_role($role, $holders)
-{
-    $role = trim($role);
-    if ($holders > 1) { return $role; }
-
-    /* A job the club wants TWO people in keeps its "Co-" even while only one
-       person is doing it. Dropping it there was actively misleading: a lone
-       co-president rendered as "President", which is exactly how a page hides
-       the fact that the other seat is empty. The prefix is the visible half of
-       the vacancy, so it stays until data/roles.csv says one seat is enough. */
-    $seats = alpine_role_seats($role);
-    if ($seats !== null && $seats > 1) { return $role; }
-
-    if (!preg_match('/^co[-\s]*(.+)$/i', $role, $m)) { return $role; }
-
-    $bare = trim($m[1]);
-    return $bare === '' ? $role : ucfirst($bare);
-}
-
-/**
- * Role seniority. Lower sorts first, and it comes from the 'order' column in
- * data/roles.csv.
- *
- * This used to be a hardcoded table right here, which meant role knowledge
- * lived in two places -- and they had already drifted: the table ranked a
- * 'webmaster' that appears in no roster. A role the CSV does not mention sorts
- * after the ones it does, alphabetically, which is what you want for activity
- * leaders where no job outranks another.
- */
-function alpine_role_rank($role)
-{
-    $meta = alpine_role_meta($role);
-    if (!$meta || !isset($meta['order']) || $meta['order'] === '') { return 500; }
-    return (int) $meta['order'];
-}
-
-/**
- * Sort officers: role seniority, then role name, then person's name.
- * Two people with the same title always end up next to each other.
- */
-function alpine_sort_officers(array $people)
-{
-    usort($people, function ($a, $b) {
-        $ra = alpine_role_rank(isset($a['role']) ? $a['role'] : '');
-        $rb = alpine_role_rank(isset($b['role']) ? $b['role'] : '');
-        if ($ra !== $rb) { return $ra - $rb; }
-
-        $roleCmp = strcasecmp(isset($a['role']) ? $a['role'] : '', isset($b['role']) ? $b['role'] : '');
-        if ($roleCmp !== 0) { return $roleCmp; }
-
-        return strcasecmp($a['name'], $b['name']);
-    });
-    return $people;
+    return array(
+        'person_id'   => $person['person_id'],
+        'name'        => $person['name'],
+        'email'       => $person['email'],
+        'photo'       => $person['photo'],
+        'role_id'     => $role['role_id'],
+        'title'       => $title,
+        'contact_for' => $role['contact_for'],
+    );
 }
 
 /**
  * The roster, split and sorted.
  *
  * @return array{current: array<string, array[]>, past: array<int, array[]>}
- *         current is keyed by group heading, in the order groups first appear
- *         in the data file. past is keyed by the year they finished, newest
- *         first.
+ *         current is keyed by group heading, in the order the groups first
+ *         appear in ROLES.csv. past is keyed by the year they finished,
+ *         newest first.
  */
 function alpine_officers()
 {
-    $all = alpine_data('officers');
+    static $cache = null;
+    if ($cache !== null) { return $cache; }
 
     $current = array();
     $past    = array();
 
-    foreach ($all as $o) {
-        if (empty($o['name'])) { continue; }
-
-        if (!empty($o['until'])) {
-            $past[(string) $o['until']][] = $o;
-        } else {
-            $group = !empty($o['group']) ? $o['group'] : 'Officers';
-            $current[$group][] = $o;
+    foreach (alpine_roles() as $role) {
+        foreach ($role['holders'] as $person) {
+            $current[$role['group']][] =
+                alpine_officer_entry($person, $role, alpine_role_title($role));
         }
     }
 
-    foreach ($current as $group => $people) {
-        $current[$group] = alpine_sort_officers($people);
-    }
+    /* THE ALUMNI LIST IS BUILT FROM THE ASSIGNMENTS, NOT FROM THE ROLES.
+       ------------------------------------------------------------------
+       That distinction is the whole of this block. Walking the roles and
+       collecting their past holders reads more naturally and is wrong: a job
+       the club has stopped doing gets its row deleted from ROLES.csv, and
+       everybody who ever held it would then quietly vanish from the Past
+       officers list along with it. This list exists precisely to outlive the
+       jobs, and README.md promises that retiring a role loses nobody.
 
-    krsort($past, SORT_NATURAL);            // most recent year first
-    foreach ($past as $year => $people) {
-        $past[$year] = alpine_sort_officers($people);
-    }
+       So past officers are read from ASSIGNMENTS.csv directly, and the role is
+       looked up only to find out what to call them. */
+    foreach (alpine_assignments()['past'] as $roleId => $people) {
+        $role = alpine_role($roleId);
 
-    /* Count how many people currently hold each office, then let
-       alpine_display_role() drop a redundant "Co-" prefix. Past officers keep
-       whatever title they actually held at the time. */
-    $holders = array();
-    foreach ($current as $people) {
-        foreach ($people as $o) {
-            $office = alpine_role_office($o['role']);
-            $holders[$office] = isset($holders[$office]) ? $holders[$office] + 1 : 1;
-        }
-    }
-    foreach ($current as $group => $people) {
-        foreach ($people as $i => $o) {
-            $office = alpine_role_office($o['role']);
-            $current[$group][$i]['displayRole'] =
-                alpine_display_role($o['role'], $holders[$office]);
-        }
-    }
-    foreach ($past as $year => $people) {
-        foreach ($people as $i => $o) {
-            $past[$year][$i]['displayRole'] = $o['role'];
-        }
-    }
-
-    return array('current' => $current, 'past' => $past);
-}
-
-/**
- * The person currently holding a role, or null if nobody does.
- *
- * Matching is on the role title exactly as written in data/officers.csv, case
- * insensitively. Past officers are never returned — an alumnus is not the
- * person to email.
- */
-function alpine_officer_for($role)
-{
-    $roster = alpine_officers();
-    foreach ($roster['current'] as $people) {
-        foreach ($people as $o) {
-            if (isset($o['role']) && strcasecmp(trim($o['role']), trim($role)) === 0) {
-                return $o;
+        foreach ($people as $person) {
+            /* A past officer keeps the title they actually held. If the club
+               has renamed the job since, ASSIGNMENTS.csv says so in its
+               title_held column and it wins -- an alumni list that silently
+               restates history in this year's vocabulary is quietly wrong
+               about the one thing it exists to record. */
+            if ($person['title_held'] !== '') {
+                $title = $person['title_held'];
+            } elseif ($role) {
+                $title = alpine_role_title($role, 1);
+            } else {
+                /* The job is gone and nobody wrote down what it was called, so
+                   we genuinely do not know. Print the person without a title
+                   rather than inventing one out of the role_id. tools/check.php
+                   asks for a title_held before it can come to this. */
+                $title = '';
             }
+
+            $past[$person['until']][] = $role
+                ? alpine_officer_entry($person, $role, $title)
+                : array(
+                    'person_id'   => $person['person_id'],
+                    'name'        => $person['name'],
+                    'email'       => $person['email'],
+                    'photo'       => $person['photo'],
+                    'role_id'     => $roleId,
+                    'title'       => $title,
+                    'contact_for' => '',
+                );
         }
     }
-    return null;
+
+    krsort($past, SORT_NUMERIC);                     // most recent year first
+    foreach ($past as $year => $people) {
+        $past[$year] = alpine_sort_people($people);
+    }
+
+    return $cache = array('current' => $current, 'past' => $past);
 }
 
 /**
- * Which stick figure stands in for someone with no headshot.
- *
- * Chosen from their name, so it is the same every time the page loads rather
- * than shuffling, and two officers side by side are unlikely to match.
+ * Everyone currently holding any role, in roster order. Used by tools/check.php
+ * to ask how many serving officers have an email address and a headshot.
  */
-function alpine_officer_figure($name)
+function alpine_serving_officers()
 {
-    static $figures = array(
-        'hiker', 'climber', 'skier', 'runner', 'biker',
-        'alpinist', 'camper', 'belayer', 'paddler', 'summit',
-    );
-    return $figures[crc32(strtolower($name)) % count($figures)];
+    $out = array();
+    foreach (alpine_officers()['current'] as $people) {
+        foreach ($people as $o) { $out[] = $o; }
+    }
+    return $out;
+}
+
+/**
+ * One person and their address as a mailto link, or just their name when the
+ * roster has no address for them.
+ *
+ * Every place a person's email appears on the site comes through here, so the
+ * markup is the same everywhere and there is no page that shows a name without
+ * making it possible to write to them.
+ *
+ * @param array  $person  a row from alpine_people(), or an officer entry
+ * @param string $subject optional mail subject, already plain text
+ */
+function alpine_person_link(array $person, $subject = '')
+{
+    $name = e($person['name']);
+    if (empty($person['email'])) { return $name; }
+
+    $href = 'mailto:' . $person['email'];
+    if ($subject !== '') { $href .= '?subject=' . rawurlencode($subject); }
+
+    return '<a href="' . e($href) . '">' . $name . '</a>';
 }

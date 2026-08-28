@@ -6,8 +6,8 @@
  * an alum deciding whether to give. Both want to know exactly where money goes.
  */
 
-require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/partials.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'Support Us',
@@ -29,7 +29,13 @@ require __DIR__ . '/includes/header.php';
               . "club's film festivals.",
     'photo'  => 'photos/dsc02582.jpg',
     'credit' => 'Summit chipmunk, unimpressed',
-    'size'   => 'sm',
+    /* The chipmunk sits about two thirds of the way down the frame and the top
+       half is haze. The default crop takes the middle band, so this page used
+       to lead with an empty grey rectangle and half an animal on the bottom
+       edge; this puts the summit wall and the chipmunk in the strip that
+       survives. 'sm' was here too, which made the band shorter than every
+       other page hero and the crop tighter still. */
+    'focus'  => 'center 70%',
 )); ?>
 
 

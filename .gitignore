@@ -38,3 +38,7 @@ _preview/
 # plus the pinned host key. Machine-local, and the token is a secret.
 /tools/.portal-daemon.json
 /tools/.portal-known-host
+
+# Python bytecode, from running the tools in tools/.
+__pycache__/
+*.pyc

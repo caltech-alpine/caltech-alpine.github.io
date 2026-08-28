@@ -11,7 +11,9 @@
  *  key to leak. See README.md if you ever decide to add one.
  *
  *  Lists that grow and shrink live next door, one file each:
- *      data/officers.php     who runs the club
+ *      PEOPLE.csv       who exists
+ *      ROLES.csv        what the jobs are
+ *      ASSIGNMENTS.csv  who is doing which job
  *      data/sponsors.php     who supports it
  *      data/gear.php         what the club lends
  * ============================================================================

@@ -56,6 +56,31 @@ ASSET_FILES = ["robots.txt"]
 HOST, PORT = "127.0.0.1", 8899
 
 
+def check_data():
+    """Refuse to build a site whose officer data does not add up.
+
+    The three data files (people, roles, assignments) point at each other by id,
+    and a mistyped id produces a site that renders perfectly and says something
+    false -- an officer missing from the roster, or a job advertised as open
+    that somebody is doing. There is no visible symptom, so it has to be caught
+    here, before anything is published, rather than noticed by a visitor.
+
+    tools/check.php --data is the same validation the health check runs. It
+    touches no network and takes well under a second.
+    """
+    php = os.environ.get("PHP", "php")
+    result = subprocess.run(
+        [php, os.path.join(ROOT, "tools", "check.php"), "--data"],
+        cwd=ROOT, capture_output=True, text=True)
+    if result.returncode != 0:
+        sys.stderr.write(result.stdout + result.stderr)
+        raise SystemExit(
+            "refusing to build: the officer data has problems (listed above).\n"
+            "  they are all in PEOPLE.csv, ROLES.csv or ASSIGNMENTS.csv.\n"
+            "  fix them and run this again, or `php tools/check.php --data` to "
+            "re-check on its own.")
+
+
 def start_server():
     """PHP's built-in server, which is enough to render the site once."""
     # ALPINE_STATIC switches off the activity log (includes/activity.php).
@@ -131,6 +156,8 @@ def main():
                     help="do not wipe _site/ first")
     args = ap.parse_args()
 
+    check_data()
+
     if os.path.isdir(OUT) and not args.keep:
         shutil.rmtree(OUT)
     os.makedirs(OUT, exist_ok=True)
@@ -139,6 +166,23 @@ def main():
     try:
         for page in PAGES:
             html = rewrite_links(fetch(base + "/" + page), args.base_url, args.noindex)
+            # Nothing may precede the doctype. PHP prints a notice wherever it
+            # is raised, and one raised before bootstrap.php can switch
+            # display_errors off lands right here -- ahead of <!DOCTYPE html>,
+            # which drops the browser into quirks mode and breaks any later
+            # header() call. It happened once (PHP 8.4: "Constant E_STRICT is
+            # deprecated") and CI missed it, because CI greps for "Fatal error"
+            # and this was only a notice. Failing on the doctype catches the
+            # whole class, whatever a future PHP deprecates next.
+            # Whitespace and a BOM before the doctype are harmless per spec, and a
+            # stray blank line above a <?php tag is an easy thing to add -- failing
+            # on those would be a gate that cries wolf. Anything else is not.
+            if not html.lstrip("﻿ \t\r\n").startswith("<!DOCTYPE"):
+                raise SystemExit(
+                    "%s: something was printed before <!DOCTYPE html>.\n"
+                    "  starts with: %r\n"
+                    "  usually a PHP notice raised before includes/bootstrap.php "
+                    "turns display_errors off." % (page, html[:200]))
             dest = os.path.join(OUT, page[:-4] + ".html")
             with open(dest, "w", encoding="utf-8", newline="") as fh:
                 fh.write(html)

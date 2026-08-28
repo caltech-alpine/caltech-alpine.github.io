@@ -1,0 +1,41 @@
+# CALTECH ALPINE CLUB PEOPLE. One row per human, ever.
+#
+# This file says WHO EXISTS. ROLES.csv says what the jobs are, and
+# ASSIGNMENTS.csv says who is doing which job. A person's name, email and
+# photograph are written HERE and nowhere else, so changing an email address is
+# one edit and every page follows.
+#
+# Lines starting with # are ignored, so you can leave notes here.
+#
+# person_id  a short permanent name for this person, lowercase, words joined by
+#            hyphens: jane-doe. It is how ASSIGNMENTS.csv points at them.
+#            PICK IT ONCE AND NEVER CHANGE IT. Nothing shows it to visitors, so
+#            it does not matter if somebody's name changes -- the id can stay
+#            jane-doe forever while the 'name' column says whatever is right.
+#            If two people would collide, add something: jane-doe-2, jane-doe-ge.
+# name       what the site prints. Change this freely.
+# email      optional. Club addresses are fine; think twice about a personal
+#            one. Shown as a mailto: link wherever this person appears.
+# photo      a file in assets/images/officers/. Put the ORIGINAL in
+#            assets/images/officers/raw/ and tools/prepare_officers.py makes
+#            this one. Leave blank and the site shows their initials instead,
+#            so nobody is left off the page while you chase a headshot.
+#
+# DO NOT DELETE ANYBODY. Somebody who has stepped down still appears on the
+# Past officers list, and that list is built from this file. To retire them,
+# put a year in the 'until' column of ASSIGNMENTS.csv instead.
+person_id,name,email,photo
+zach-auvil,"Zach Auvil",zauvil@caltech.edu,zach-auvil.jpg
+haakon-ervik,"Haakon Ludvig Langeland Ervik",haakon@caltech.edu,haakon-ludvig-langeland-ervik.jpg
+kyle-hunady,"Kyle Hunady",khunady@caltech.edu,kyle-hunady.jpg
+forrest-mccann,"Forrest McCann",fmccann@caltech.edu,forrest-mccann.jpg
+holly-krynicki,"Holly Krynicki",hkrynick@caltech.edu,holly-krynicki.jpg
+elise-sledge,"Elise Sledge",,
+jarek-kwiecinski,"Jarek Kwiecinski",jkwiecin@caltech.edu,jarek-kwiecinski.jpg
+max-freeman,"Max Freeman",mpfreema@caltech.edu,max-freeman.jpg
+julian-schmitt,"Julian Schmitt",jschmitt@caltech.edu,
+daniel-van-beveren,"Daniel Van Beveren",,daniel-van-beveren.jpg
+tina-seeger,"Tina Seeger",,tina-seeger.jpg
+abby-keebler,"Abby Keebler",,abby-keebler.jpg
+noel-csomay-shanklin,"Noel Csomay-Shanklin",,noel-csomay-shanklin.jpg
+aubrey-schonhoff,"Aubrey Schonhoff",,aubrey-schonhoff.jpg

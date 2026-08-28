@@ -6,9 +6,9 @@
  * rule is worse than no page at all.
  */
 
-require __DIR__ . '/includes/bootstrap.php';
-require __DIR__ . '/includes/officers.php';
-require __DIR__ . '/includes/partials.php';
+require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/officers.php';
+require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
     'title'       => 'Gear',
@@ -20,14 +20,29 @@ $PAGE = array(
 
 $gear = alpine_data('gear');
 
-/* Who currently holds the role, if anyone. Every use below degrades on its
-   own: no officer listed -> we just say "the Gear Officer" and link to the
-   roster; officer listed but no email -> we fall back to the shared officers
+/* Who currently looks after the club's own equipment.
+   -------------------------------------------------
+   Asked for by role_id, never by title. This page used to ask for the officer
+   whose role was spelled "Gear Officer", which meant the club could not rename
+   the job without this page silently losing its contact -- no error, no blank
+   space, just a page quietly pointing everybody at the general mailbox instead
+   of the person who actually has the rack. tools/check.php now fails if the
+   'gear' id ever disappears from ROLES.csv; see alpine_required_roles().
+
+   The title printed below is read from the data too, so renaming the job
+   renames it here as well.
+
+   Every use degrades on its own: nobody in the job -> we name the job and link
+   to the roster; somebody with no email -> we fall back to the shared officers
    mailbox. Nothing here can produce a dead link or a blank name. */
-$gearOfficer = alpine_officer_for('Gear Officer');
-$gearEmail   = ($gearOfficer && !empty($gearOfficer['email']))
-             ? $gearOfficer['email']
-             : cfg('links.officers');
+$gearRole    = alpine_role('gear');
+$gearTitle   = $gearRole ? alpine_role_title($gearRole) : 'Gear Officer';
+$gearOfficer = alpine_role_holders('gear');
+
+$gearEmail = cfg('links.officers');
+foreach ($gearOfficer as $person) {
+    if ($person['email'] !== '') { $gearEmail = $person['email']; break; }
+}
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -90,12 +105,17 @@ require __DIR__ . '/includes/header.php';
                      the roster. */ ?>
             Rock, ice, and packrafting equipment belongs to the club rather than the Y,
             and members borrow it. Submit the reservation form and our
-            <a href="<?= e(url('about.php#officers')) ?>">Gear Officer</a><?php
+            <a href="<?= e(url('about.php#officers')) ?>"><?= e($gearTitle) ?></a><?php
               if ($gearOfficer):
-                echo ', ' . e($gearOfficer['name']);
-                if (!empty($gearOfficer['email'])):
-                  ?> (<a href="mailto:<?= e($gearOfficer['email']) ?>?subject=Specialist+gear"><?= e($gearOfficer['email']) ?></a>)<?php
-                endif;
+                  /* Their address comes from PEOPLE.csv through
+                     alpine_person_link(), the same call the About page makes, so
+                     it is not written a second time here. Two people can hold
+                     the job and both are named. */
+                  $named = array();
+                  foreach ($gearOfficer as $person) {
+                      $named[] = alpine_person_link($person, 'Specialist gear');
+                  }
+                  echo ', ' . alpine_list_phrase($named);
               endif;
             ?> will confirm it.
           </p>

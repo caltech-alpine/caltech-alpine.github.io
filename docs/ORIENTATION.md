@@ -207,7 +207,7 @@ git pull
 ```
 
 **3. Edit the file.** Any text editor. Notepad works, VS Code is nicer. For a
-roster change open `data/officers.csv`; for a link or an email address open
+roster change open `ASSIGNMENTS.csv`; for a link or an email address open
 `includes/config.php`. [`../README.md`](../README.md) says which file for every
 kind of change.
 
@@ -312,9 +312,16 @@ answers web requests. It runs fine on a laptop with PHP installed
 it outside `PATH` for non-login shells, so either restart the shell or set
 `PHP=` to the `php.exe` under
 `%LOCALAPPDATA%\Microsoft\WinGet\Packages\PHP.PHP.8.4_*\`, which
-`build_static.py` reads. One caveat: PHP 8.4 prints a `Constant E_STRICT is
-deprecated` notice from `includes/bootstrap.php:26`. It is harmless locally and
-the server's older PHP does not emit it.
+`build_static.py` reads. PHP 8.4 used to print a `Constant E_STRICT is
+deprecated` notice from `includes/bootstrap.php` here, and the older note called
+it harmless. It was not: it landed **ahead of `<!DOCTYPE html>`**, which puts the
+browser in quirks mode and breaks any later `header()` call, and a local
+`build_static.py` run baked it into the top of every file in `_site/`. Fixed
+2026-08-27 — `display_errors` is now settled before anything can raise a notice,
+and `E_STRICT` is not named at all. `build_static.py` fails the build if
+anything precedes the doctype, so the next deprecation cannot ship quietly; the
+CI grep would not have caught it, because it looks for `Fatal error` and this
+was only a notice.
 
 **Never add a force-HTTPS rule to `.htaccess`.** HTTPS is handled in front of the
 web server, so the usual recipe redirects forever and looks like an outage.
@@ -351,4 +358,4 @@ usually means missing data, not broken code.
 - [ ] Push one trivial change all the way through (§6)
 - [ ] Read [`../README.md`](../README.md) properly, once
 - [ ] Make sure you can add events to the club's Google Calendar
-- [ ] Add your own name to `data/officers.csv`
+- [ ] Add your own name to `ASSIGNMENTS.csv`
