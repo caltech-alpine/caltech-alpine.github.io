@@ -26,7 +26,7 @@
 # put a year in the 'until' column of ASSIGNMENTS.csv instead.
 person_id,name,email,photo
 zach-auvil,"Zach Auvil",zauvil@caltech.edu,zach-auvil.jpg
-haakon-ervik,"Haakon Ludvig Langeland Ervik",haakon@caltech.edu,haakon-ludvig-langeland-ervik.jpg
+haakon-ervik,"Haakon Ervik",haakon@caltech.edu,haakon-ludvig-langeland-ervik.jpg
 kyle-hunady,"Kyle Hunady",khunady@caltech.edu,kyle-hunady.jpg
 forrest-mccann,"Forrest McCann",fmccann@caltech.edu,forrest-mccann.jpg
 holly-krynicki,"Holly Krynicki",hkrynick@caltech.edu,holly-krynicki.jpg
