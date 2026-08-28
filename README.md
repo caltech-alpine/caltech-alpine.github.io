@@ -335,11 +335,38 @@ email link instead of a dead Slack button.
 requests from outside Caltech and JPL land, and an unanswered join request is
 the worst kind of broken link.
 
-### To change the logo
+### The logo
 
-Put the file in `assets/images/` and set `site.logo` in `includes/config.php` to
-its filename. Until then the header shows a placeholder ice axe next to the
-wordmark. `assets/images/favicon.svg` is the browser tab icon and is separate.
+The club mark is two crossed ice axes under a flame, and it lives in exactly one
+place: **`assets/images/logo.svg`**, a single path in the accent-on-dark colour.
+Everything else is generated from it, so nothing can drift out of step.
+
+| File | What it is |
+|---|---|
+| `logo.svg` | the mark, on-dark colour. Masthead and footer. The source of record |
+| `logo-on-light.svg` | the same path in the darker accent, for a pale background |
+| `favicon.svg` | the mark inset on a rounded ink tile, for the browser tab |
+| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | rasters, written by `tools/make_icons.py` |
+| `social-default.png` | the link preview, written by `tools/make_social.py` |
+
+**To change the mark:** replace the path in `logo.svg` and `logo-on-light.svg`,
+then run both generators:
+
+```bash
+python tools/make_icons.py
+python tools/make_social.py
+```
+
+Do not edit a PNG by hand; the next run of either script overwrites it.
+
+**Why two colour files rather than `currentColor`:** both are loaded with
+`<img>`, and an SVG used as an image has no parent to inherit from, so
+`currentColor` there resolves to black. The colours are hardcoded and are
+recorded in each file's comment. If you change the `alpenglow` or
+`accent-on-dark` token in `assets/css/style.css`, change them to match.
+
+Setting `site.logo` in `includes/config.php` to an empty string removes the mark
+from the masthead and leaves the wordmark, which still looks deliberate.
 
 ### To deploy
 

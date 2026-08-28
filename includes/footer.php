@@ -6,7 +6,7 @@
   <div class="wrap site-footer__inner">
 
     <div class="site-footer__brand">
-      <img class="site-footer__mark" src="<?= e(asset('images/ice-axe.svg')) ?>"
+      <img class="site-footer__mark" src="<?= e(asset('images/logo.svg')) ?>"
            alt="" width="32" height="32" aria-hidden="true">
       <?php /* ONE LINE. This block identifies the site to somebody who has
                scrolled to the bottom; it is not a second About page. "Founded

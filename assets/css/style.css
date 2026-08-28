@@ -569,9 +569,8 @@ h1, h2, h3, h4 {
   padding-block: .55rem;
 }
 .brand__logo { width: 2.1rem; height: 2.1rem; }
-/* The mark's color lives in assets/images/ice-axe.svg, not here: it is loaded
+/* The mark's color lives in assets/images/logo.svg, not here: it is loaded
    with <img>, so it cannot inherit anything from this stylesheet. */
-.brand__logo--placeholder { opacity: .95; }
 .brand__text { display: grid; line-height: 1.05; }
 .brand__caltech {
   font-size: .64rem;

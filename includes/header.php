@@ -64,7 +64,11 @@ $navItems = require __DIR__ . '/nav.php';
 <?php endif; ?>
 
 <link rel="icon" href="<?= e(asset('images/favicon.svg')) ?>" type="image/svg+xml">
-<link rel="apple-touch-icon" href="<?= e(asset('images/favicon.svg')) ?>">
+<?php /* iOS ignores an SVG icon and will not use one for a home-screen
+         bookmark, so the touch icon has to be a raster. Both are generated
+         from favicon.svg by tools/make_icons.py. */ ?>
+<link rel="apple-touch-icon" href="<?= e(asset('images/apple-touch-icon.png')) ?>">
+<link rel="icon" href="<?= e(asset('images/favicon-32.png')) ?>" sizes="32x32" type="image/png">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="<?= e(cfg('site.name')) ?>">
@@ -124,12 +128,11 @@ $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
       <?php if (cfg('site.logo') && alpine_has_image(cfg('site.logo'))): ?>
         <img class="brand__logo" src="<?= e(asset('images/' . cfg('site.logo'))) ?>"
              alt="<?= e(cfg('site.logo_alt')) ?>" width="40" height="40">
-      <?php else: ?>
-        <?php /* Placeholder mark until the real logo lands. Set site.logo in
-                 includes/config.php and this swaps automatically. */ ?>
-        <img class="brand__logo brand__logo--placeholder"
-             src="<?= e(asset('images/ice-axe.svg')) ?>" alt="" width="40" height="40" aria-hidden="true">
       <?php endif; ?>
+      <?php /* No fallback image. This used to point at a placeholder ice-axe
+               mark, which was deleted when the real logo landed; a fallback
+               that names a file nobody keeps is a broken image waiting for
+               somebody to clear site.logo. The wordmark below stands alone. */ ?>
       <span class="brand__text">
         <span class="brand__caltech">Caltech</span>
         <span class="brand__name">Alpine Club</span>

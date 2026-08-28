@@ -34,10 +34,14 @@ return array(
                        . 'Anyone can join.',
         'url'         => 'https://alpine.caltech.edu',
 
-        // Drop a logo file in assets/images/ and put its name here. Leave it
-        // empty and the header shows a clean wordmark instead — which looks
-        // deliberate, so there is no rush.
-        'logo'        => '',
+        // The club mark: two crossed ice axes under a flame. It is drawn in
+        // the accent-on-dark colour because the only two places the site shows
+        // it (the masthead and the footer) are both ink. assets/images/
+        // logo-on-light.svg is the same mark for a pale background.
+        //
+        // Leave this empty and the header falls back to the wordmark alone,
+        // which still looks deliberate.
+        'logo'        => 'logo.svg',
         'logo_alt'    => 'Caltech Alpine Club',
     ),
 

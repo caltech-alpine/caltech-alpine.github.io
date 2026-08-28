@@ -14,11 +14,12 @@
  by 630, people visible — and the site uses that instead automatically. This
  exists so the site is never bare while you find one.
 
- Requires: pillow, svglib, reportlab, rlPyCairo (only to run the script; the
- output PNG is committed, so nobody else needs them).
+ Requires: pillow, svglib, reportlab, rlPyCairo, cairosvg (only to run the
+ script; the output PNG is committed, so nobody else needs them).
 =============================================================================
 """
 
+import io
 import os
 
 from PIL import Image, ImageDraw, ImageFont
@@ -33,6 +34,26 @@ INK = (20, 24, 26)
 PAPER = (236, 231, 221)
 MUTED = (150, 156, 150)
 ALPENGLOW = (192, 82, 45)
+ACCENT_ON_DARK = (226, 138, 101)   # the mark's colour, 6.86:1 on INK
+
+
+def mark_layer(size):
+    """The club mark, rasterised from assets/images/logo.svg.
+
+    Imported here rather than at module scope: cairosvg is the one dependency
+    this script has that is awkward to install, and the rest of the image is
+    still worth generating without it.
+    """
+    svg = os.path.join(IMAGES, "logo.svg")
+    if not os.path.exists(svg):
+        return None
+    try:
+        import cairosvg
+    except ImportError:
+        print("  note: cairosvg missing, so the mark is omitted")
+        return None
+    png = cairosvg.svg2png(url=svg, output_width=size, output_height=size)
+    return Image.open(io.BytesIO(png)).convert("RGBA")
 
 
 def font(size, bold=False):
@@ -108,10 +129,17 @@ def main():
 
     d.text((x, 372), "Less lab. More mountains.", font=font(46), fill=ALPENGLOW)
 
-    d.text((x, 452), "Hiking, backpacking, climbing, and more,", font=font(28), fill=PAPER)
-    d.text((x, 490), "to get Caltech and JPL outdoors.", font=font(28), fill=PAPER)
+    # NOT "to get Caltech and JPL outdoors": membership is open to anyone, and
+    # this image is the first thing somebody sees when a link is pasted.
+    d.text((x, 452), "Hiking, backpacking, climbing, and skiing.", font=font(28), fill=PAPER)
+    d.text((x, 490), "Open to Caltech, JPL and anyone else.", font=font(28), fill=PAPER)
 
     d.text((x, 552), "alpine.caltech.edu", font=font(25), fill=MUTED)
+
+    # The mark, on the right, clear of the longest line of text above.
+    mark = mark_layer(280)
+    if mark is not None:
+        img.paste(mark, (W - 280 - 90, (H - 280) // 2), mark)
 
     img.save(OUT, "PNG", optimize=True)
     print("  wrote %s (%.0f KB, %dx%d)"
