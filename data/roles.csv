@@ -60,13 +60,13 @@
 # called into their title_held cell in data/assignments.csv. The row you are about to
 # delete is the last record of it. `php tools/check.php --data` will stop you.
 role_id,title,title_shared,group,min_people,max_people,description,contact_for,recruiting
-president,President,Co-President,"Steering Committee",1,2,"Runs the club: calls the meetings, decides what the year looks like, and speaks for the club to Caltech. The job people bring a question to when they do not know who else to ask.","Anything about the club in general",
+president,President,Co-President,"Steering Committee",1,2,"Runs the club, calls meetings, plans the year, and represents the club to Caltech.","Anything about the club in general",
 treasurer,Treasurer,,"Steering Committee",1,1,"Looks after club money. Pays for trips and film festival costs, handles reimbursements, and keeps the accounts straight with Caltech.","Reimbursements and club funds",
-secretary,Secretary,,"Steering Committee",1,1,"Runs the mailing list and membership: adds people who ask to join, including from outside Caltech, and sends what goes out to members.","Mailing list and membership",
-film_festival,"Film Festival Coordinator",,"Steering Committee",1,2,"Puts on the club's film festivals. Books the venue, buys the screening license, arranges tickets through the Caltech Ticket Office, and lines up the raffle donations. The club's largest events and the ones that fund most of the rest.","The film festivals",
-gear,"Gear Officer",,"Steering Committee",1,1,"Looks after the equipment the club owns and lends out, including the specialist climbing and packrafting kit that does not go through the Caltech Y. Handles reservations and keeps track of what has come back.","Borrowing club equipment, including specialist gear",
+secretary,Secretary,,"Steering Committee",1,1,"Runs the mailing list, handles membership including join requests from outside Caltech, and sends club announcements.","Mailing list and membership",
+film_festival,"Film Festival Coordinator",,"Steering Committee",1,2,"Organizes the club's film festivals: books the venue, buys the screening license, arranges tickets through the Caltech Ticket Office, and lines up raffle donations. The festivals are the club's largest events and a major source of its funding.","The film festivals",
+gear,"Gear Officer",,"Steering Committee",1,1,"Looks after the equipment the club owns and lends out, including the specialist climbing and packrafting gear that does not go through the Caltech Y. Handles reservations and tracks what comes back.","Borrowing club equipment, including specialist gear",
 partnerships,"Partnerships & Deals Lead",,"Steering Committee",1,1,"Finds and keeps the discounts members get, and talks to companies about sponsoring the club.","Sponsorships, member discounts, and pro deals",
 climbing,"Climbing Commodore",,"Activity Leaders",1,,"Organizes climbing days and looks after the bouldering cave in Brown Gym, including route setting.","Climbing trips and the bouldering wall",
 hiking,"Hiking and Backpacking Trip Coordinator",,"Activity Leaders",1,,"Organizes hikes and overnight backpacking trips. Picks where and when, posts it on the calendar, and helps people sort out transport.","Hiking and backpacking trips",
 trail_running,"Trail Run Tyrant",,"Activity Leaders",1,,"Runs the weekly trail run.","The weekly trail run",
-talks,"Talks Coordinator",,"Activity Leaders",0,1,"Invites people to give talks on campus about trips they have done, and books a room. A few evenings a year.","Talks on campus",
+talks,"Talks Coordinator",,"Activity Leaders",0,1,"Invites club members and visiting climbers to talk on campus about trips they have done, and books the room. A few evenings a year.","Talks on campus",

@@ -1402,9 +1402,9 @@ body.nav-open { overflow: hidden; }
    11. JOIN STEPS
    ========================================================================== */
 
-/* Two columns, not three: step 1 forks into 1a/1b, and the pair has to land
-   side by side on the same row or the fork reads as two separate steps. */
-.steps { display: grid; gap: 1rem; counter-reset: step; }
+/* Two columns. The two mailing-list cards have to land side by side on the
+   same row, or a reader who is not at Caltech reads only the first one. */
+.steps { display: grid; gap: 1rem; }
 @media (min-width: 760px) {
   .steps { grid-template-columns: repeat(2, 1fr); }
 }
@@ -1418,54 +1418,18 @@ body.nav-open { overflow: hidden; }
   border-radius: var(--r);
   box-shadow: var(--shadow-card);
 }
-.step__num {
-  display: grid;
-  place-items: center;
-  width: 2.4rem; height: 2.4rem;
-  margin-bottom: 1rem;
-  border-radius: 50%;
-  background: var(--ink);
-  color: var(--white);
-  font-size: 1rem;
-  font-weight: 700;
-}
+/* .step__num, .step__who and .step__same are gone with the 1a/1b/2/3
+   numbering: joining is one email, and numbering Slack as step 2 drew a
+   workflow diagram over it. */
 .step--primary { box-shadow: 0 0 0 2px var(--alpenglow), var(--shadow-card); }
-.step--primary .step__num { background: var(--alpenglow); }
 .step h2 { font-size: var(--step-2); margin-bottom: .6rem; }
 .step p { color: var(--text-mute); line-height: 1.6; }
 .step > p + p { margin-top: .7rem; }
 .step__hint { font-size: .84rem; }
-/* A card's standing, above its heading: "Optional", "Any time". */
-.step__who {
-  font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--accent-text);
-  margin-bottom: .35rem;
-}
-.step:not(.step--primary) .step__who { color: var(--text-mute); }
 
-/* The 1a/1b fork. Both cards print the SAME line here, which is the signal
-   that they are one step and not two — so it must stay identical in both,
-   and stay quieter than the heading below it, which is the audience. */
-.step__same {
-  font-size: .78rem;
-  font-weight: 700;
-  letter-spacing: .13em;
-  text-transform: uppercase;
-  color: var(--text-mute);
-  margin-bottom: .5rem;
-  padding-bottom: .5rem;
-  border-bottom: 1px solid var(--line);
-}
-/* The audience is what the reader is scanning for, so it gets the accent and
-   a size of its own rather than inheriting the ordinary card heading. */
-.step--fork h2 { color: var(--accent-text); }
-
-/* The buttons must line up across all three cards, whatever the text above
-   them does. That means the action block holds ONLY the button and is pushed
-   to the bottom; explanatory notes flow with the paragraphs above it. */
+/* The buttons must line up across the cards, whatever the text above them
+   does. That means the action block holds ONLY the button and is pushed to the
+   bottom; explanatory notes flow with the paragraphs above it. */
 .step__action { margin-top: auto; padding-top: 1.5rem; }
 
 .faq { display: grid; gap: 0; }
@@ -1568,30 +1532,20 @@ body.nav-open { overflow: hidden; }
   margin-top: .15rem;
 }
 
-.site-footer__nav {
-  display: grid;
-  gap: 2rem 1.25rem;
-  /* 8rem, not 9.5rem: the fifth nav item (Get Involved) took the count past
-     what four 9.5rem columns could hold, so it wrapped alone onto a second row
-     and the footer read as broken rather than as five columns. */
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 8rem), 1fr));
+/* ONE ROW OF PAGES. This was a four-column grid of every section anchor on
+   the site, repeated on all eight pages. Six links wrap on a phone and sit on
+   one line on a laptop. */
+.site-footer__links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .4rem 1.5rem;
 }
-.site-footer__heading {
-  font-size: .78rem;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  margin-bottom: .9rem;
-}
-.site-footer__heading a { color: var(--white); text-decoration: none; }
-.site-footer__heading a:hover { color: var(--accent-on-dark); }
-.site-footer__col li + li { margin-top: .35rem; }
-.site-footer__col a {
+.site-footer__links a {
   font-size: .9rem;
   text-decoration: none;
   color: var(--on-dark-mute);
 }
-.site-footer__col a:hover { color: var(--white); }
+.site-footer__links a:hover { color: var(--white); }
 
 .site-footer__legal {
   position: relative;
@@ -1646,12 +1600,9 @@ main  { flex: 1 0 auto; }
    copyable addresses (24px).
    -------------------------------------------------------------------------- */
 @media (pointer: coarse) {
-  .site-footer__col a,
+  .site-footer__links a,
   .site-footer__legal a,
-  .site-footer__contact a,
-  .site-footer__heading a { display: inline-block; padding-block: .68rem; }
-  .site-footer__col li + li { margin-top: 0; }
-  .site-footer__heading { margin-bottom: .3rem; }
+  .site-footer__contact a { display: inline-block; padding-block: .68rem; }
 
   .event-card__details,
   .event-row__details,

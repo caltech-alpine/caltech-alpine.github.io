@@ -7,10 +7,12 @@
  */
 
 require_once __DIR__ . '/includes/bootstrap.php';
+require_once __DIR__ . '/includes/officers.php';
+require_once __DIR__ . '/includes/roles.php';
 require_once __DIR__ . '/includes/partials.php';
 
 $PAGE = array(
-    'title'       => 'Support Us',
+    'title'       => 'Support',
     'description' => 'Sponsor or donate to the Caltech Alpine Club. Support funds club trips, '
                    . 'shared gear, and the mountain film festivals the club has hosted since '
                    . '2001.',
@@ -19,6 +21,13 @@ $PAGE = array(
 
 $sponsors = alpine_data('sponsors');
 $donate   = cfg('links.donate');
+
+/* Both asks on this page have an owner, and it is not the general mailbox:
+   sponsorship belongs to the Partnerships lead, an offer of equipment to
+   whoever has to find room for it. Asked for by role_id, so renaming either job
+   does not lose the contact. See alpine_role_contact() for how it degrades. */
+$partner = alpine_role_contact('partnerships');
+$gear    = alpine_role_contact('gear');
 
 require __DIR__ . '/includes/header.php';
 ?>
@@ -45,35 +54,47 @@ require __DIR__ . '/includes/header.php';
 <section class="section" id="sponsor">
   <div class="wrap">
     <div>
-      <p class="eyebrow">For companies</p>
+      <?php /* No "For companies" eyebrow: the heading under it says
+               Sponsorship, which is the same information in smaller type.
+
+               WHAT THIS SECTION MAY NOT DO is explain the club's internal
+               position. It used to open with "the club is looking for sponsors
+               and has not settled on what a sponsorship is... there are no
+               tiers and no fixed price", which is four clauses of our own
+               thinking handed to somebody deciding whether to write. The useful
+               part of it is one clause, and it is the last line here. */ ?>
       <h2 class="h2">Sponsorship</h2>
       <div class="prose mt-lg">
         <p>
-          The club is looking for sponsors and has not settled on what a
-          sponsorship is. There are no tiers and no fixed price. What follows is
-          the kind of support that would be useful, not a menu &mdash; the
-          arrangement is whatever an officer and a sponsor agree on.
+          The club welcomes sponsorship from companies and other organizations.
         </p>
+
+        <h3>Ways to support the club</h3>
         <ul>
-          <li>Gear donated to the loanable inventory, new or used</li>
-          <li>An equipment demo at a club event</li>
-          <li>Money toward film festival licensing and venue costs, or toward trip costs</li>
-          <li>Discounts for members</li>
-          <li>Name and logo on this site and on club event materials</li>
-          <li>Acknowledgement at the film festival screenings</li>
+          <li>Donate new or used gear to the loan inventory</li>
+          <li>Offer a discount to members</li>
+          <li>Run an equipment demo at a club event</li>
+          <li>Help cover film festival licensing, venue, or ticket costs</li>
+          <li>Fund a trip, or contribute directly</li>
         </ul>
+
+        <?php /* WHAT THE CLUB CAN ACTUALLY DELIVER, and nothing else. The
+                 website roster is real (data/sponsors.php renders it on this
+                 page and on the homepage), event materials and the festival
+                 screenings are the club's own. Do not add a benefit here that
+                 no officer has committed to. */ ?>
         <p>
-          If what you have in mind is not on that list, say it anyway. The club
-          would rather hear the idea than turn down something it did not think
-          to ask for.
+          Depending on the arrangement, the club can name sponsors on this website, in
+          event materials, and at the film festival screenings. There are no fixed
+          tiers, so the terms depend on the kind of support.
+        </p>
+        <p>
+          Email <?php if ($partner['name'] !== ''): ?>the club's
+          <?= e($partner['title']) ?>, <?= e($partner['name']) ?>, at <?php endif; ?><a
+            href="mailto:<?= e($partner['email']) ?>?subject=Alpine+Club+sponsorship"><?=
+            e($partner['email']) ?></a> with what you have in mind.
         </p>
       </div>
-
-      <?php alpine_write_to(cfg('links.officers'), 'Alpine Club sponsorship', array(
-          'What your company does, and who there we would be working with',
-          'What you would want to give, and what you would want in return',
-          'Roughly what scale you have in mind, if you have a number yet',
-      )); ?>
     </div>
 
     <?php if ($sponsors): ?>
@@ -109,12 +130,12 @@ require __DIR__ . '/includes/header.php';
   <div class="wrap">
     <div class="split">
       <div>
-        <p class="eyebrow"><?= icon('heart', 'icon icon--xs') ?>For individuals</p>
+        <?php /* No "For individuals" eyebrow either. */ ?>
         <h2 class="h2">Donations</h2>
         <div class="prose mt-lg">
           <p>
-            Donations support the same things as sponsorship: shared equipment, and
-            keeping event tickets affordable for students.
+            Donations help replace shared gear, support club trips, and keep film
+            festival tickets affordable for students.
           </p>
         </div>
         <?php if ($donate): ?>
@@ -124,39 +145,44 @@ require __DIR__ . '/includes/header.php';
             </a>
           </div>
         <?php else: ?>
-          <?php /* No giving page configured yet — see 'donate' in includes/config.php.
+          <?php /* No giving page configured yet -- see 'donate' in includes/config.php.
                    There is no way to take money on this site until that value exists,
                    so the page says so plainly rather than dressing an email up as a
                    payment button. Filling in that one link replaces this branch. */ ?>
           <div class="prose">
             <p>
-              The club has no online giving page yet, so a gift starts with an email
-              and an officer replies with where to send it.
+              The club has no online giving page yet. Email
+              <a href="mailto:<?= e(cfg('links.officers')) ?>?subject=Donation"><?=
+                e(cfg('links.officers')) ?></a>
+              and an officer will reply with where to send it.
             </p>
           </div>
-          <?php alpine_write_to(cfg('links.officers'), 'Donation', array(
-              'That you would like to donate, and roughly how much',
-              'Whether you would like it to go to a particular thing, '
-                  . 'such as equipment or film festival tickets',
-          )); ?>
         <?php endif; ?>
 
         <div class="prose mt-lg">
           <h3>Donating equipment</h3>
+          <?php /* WHAT IS SOLICITED HERE IS DELIBERATELY NOT SAFETY-CRITICAL.
+                   The list used to invite ropes and climbing hardware, and to
+                   say that "worn but still serviceable" equipment was worth
+                   offering. The club has no written inspection or acceptance
+                   procedure -- not in this repository and not on the old site --
+                   so the page does not publicly ask for used gear whose failure
+                   mode is a fall. An offer of climbing hardware still reaches
+                   the Gear Officer, who can judge it; the difference is that
+                   the club is not asking for it in advance. */ ?>
           <p>
-            Much of the club's own stock was donated. Tents, packs, ropes, hardware, skis,
-            and snow gear are all useful, and equipment that is worn but still serviceable
-            is worth offering.
+            The club also takes useful outdoor gear in good working order. Much of what
+            it lends today was donated. Tents, packs, skis, and snow equipment are the
+            most useful.
+          </p>
+          <p>
+            To offer equipment, email <?php if ($gear['name'] !== ''): ?>the
+            <?= e($gear['title']) ?>, <?= e($gear['name']) ?>, at <?php endif; ?><a
+              href="mailto:<?= e($gear['email']) ?>?subject=Equipment+donation"><?=
+              e($gear['email']) ?></a> with what you have, its rough age and condition,
+            and where it is.
           </p>
         </div>
-        <?php /* These three prompts do the job a form would do — they get an officer
-                 what they need to answer in one reply — with nothing to host, no spam
-                 to filter and no submissions to remember to check. */ ?>
-        <?php alpine_write_to(cfg('links.officers'), 'Equipment donation', array(
-            'What the equipment is',
-            'Rough age and condition',
-            'Where you are, and when you could hand it over',
-        )); ?>
       </div>
 
     </div>

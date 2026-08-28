@@ -26,39 +26,33 @@ require __DIR__ . '/includes/header.php';
 
 <?php alpine_page_hero(array(
     'title'  => 'Join the Alpine Club',
-    'lede'   => 'Membership is free. Join the mailing list to get started.',
+    'lede'   => 'Membership is free and open to people at and outside Caltech. The '
+              . 'mailing list is the best place to start.',
     'photo'  => 'photos/dsc03355-pano-copy.jpg',
     'credit' => 'Moonrise in the Sierra Nevada',
 )); ?>
 
 
 <!-- ======================================================== steps ==== -->
+<?php /* FOUR CARDS, NOT A NUMBERED PROCESS. These were 1a, 1b, 2 and 3, which
+         drew a workflow diagram over something that is one email long: joining
+         Slack and turning up to a hike are not steps two and three of joining,
+         they are other things you can do. The two mailing-list cards still sit
+         side by side, because a non-affiliate who reads only the first one
+         would conclude the club is closed to them.
+
+         Each heading is the audience or the thing, so the reader can find their
+         own row without reading the others. */ ?>
 <section class="section">
   <div class="wrap">
     <div class="steps">
 
-      <?php /* STEP 1 IS A FORK, NOT TWO STEPS. The sign-up page is behind the
-               Caltech network, so affiliates self-serve and everyone else is added
-               by hand — same destination, same membership, different door. They are
-               numbered 1a and 1b so nobody works through both, and they sit side by
-               side so a non-affiliate never reads the affiliate card and concludes
-               the club is closed to them. */ ?>
-
-      <?php /* THE HEADING IS THE AUDIENCE, NOT THE ACTION. The reader's question
-               here is "which one is me?", so that has to be the biggest text in
-               the card. The shared eyebrow above it — identical on both — is what
-               says these are one step with two doors; when the two headings read
-               "Join the mailing list" and "Ask to be added" they scanned as two
-               unrelated asks, which is the opposite of the point. */ ?>
-
-      <!-- 1a ----------------------------------------------------------- -->
-      <div class="step step--primary step--fork">
-        <div class="step__num">1a</div>
-        <p class="step__same">Join the mailing list</p>
-        <h2>If you are Caltech or JPL</h2>
+      <!-- Caltech and JPL --------------------------------------------- -->
+      <div class="step step--primary">
+        <h2>Caltech and JPL</h2>
         <p>
-          Sign up on the list yourself. It carries trips, film festivals, socials,
-          and club elections.
+          Join the mailing list directly. It carries trip announcements, events,
+          film festivals, and club elections.
         </p>
         <p class="step__hint">
           <?= e(cfg('links.mailing_list_note')) ?> Off campus, email
@@ -67,42 +61,33 @@ require __DIR__ . '/includes/header.php';
         </p>
         <div class="step__action">
           <a class="btn btn--primary btn--block" href="<?= e(alpine_outbound('mailing_list')) ?>" rel="noopener">
-            <?= icon('mail', 'icon icon--xs') ?> Sign up directly
+            <?= icon('mail', 'icon icon--xs') ?> Join the mailing list
           </a>
         </div>
       </div>
 
-      <!-- 1b ----------------------------------------------------------- -->
-      <div class="step step--primary step--fork">
-        <div class="step__num">1b</div>
-        <p class="step__same">Join the mailing list</p>
-        <h2>If you are not</h2>
+      <!-- Outside Caltech --------------------------------------------- -->
+      <div class="step step--primary">
+        <h2>Outside Caltech</h2>
         <p>
-          Email the secretary and they will add you to the same list. Caltech
-          affiliation is not required to join.
+          You can join too. Email the secretary and we will add you to the same
+          mailing list.
         </p>
-        <?php /* No explanation of WHY this route exists. An earlier draft asserted
-                 the sign-up page was network-restricted; it is a gate check on the
-                 list, not a network one. Do not describe a mechanism here unless
-                 someone has actually confirmed it — the card works without it. */ ?>
         <div class="step__action">
           <?php /* An in-page jump, not an action, so it takes the chevron rather
-                   than the mail icon 1a uses for its outbound link. */ ?>
+                   than the mail icon the card above uses for its outbound link. */ ?>
           <a class="btn btn--primary btn--block" href="#outside">
-            <?= icon('chevron-down', 'icon icon--xs') ?> See instructions below
+            <?= icon('chevron-down', 'icon icon--xs') ?> What to write
           </a>
         </div>
       </div>
 
-      <!-- 2 ------------------------------------------------------------ -->
+      <!-- Slack -------------------------------------------------------- -->
       <div class="step">
-        <div class="step__num">2</div>
-        <p class="step__who">Optional</p>
-        <h2>Join Slack</h2>
+        <h2>Slack</h2>
         <p>
-          Not required, but it is where most of the week to week happens: finding
-          partners, asking questions, and organizing informal outings, with a separate
-          channel per activity.
+          Slack is where members find partners, ask questions, and organize informal
+          trips, with a separate channel per activity.
         </p>
         <?php if ($slack): ?>
           <div class="step__action">
@@ -112,9 +97,9 @@ require __DIR__ . '/includes/header.php';
           </div>
         <?php else: ?>
           <?php /* No public invite link in config yet. The card says where the
-                   invite comes from and stops there — no button, because there is
-                   nothing here for one to do. Set links.slack and the real Join
-                   Slack button above appears. */ ?>
+                   invite comes from and stops there -- no button, because there
+                   is nothing here for one to do. Set links.slack and the real
+                   Join Slack button above appears. */ ?>
           <p class="step__hint">
             The invite link goes out on the mailing list. If you have missed it, ask
             the secretary at
@@ -124,18 +109,16 @@ require __DIR__ . '/includes/header.php';
         <?php endif; ?>
       </div>
 
-      <!-- 3 ------------------------------------------------------------ -->
+      <!-- Come to an event --------------------------------------------- -->
       <div class="step">
-        <div class="step__num">3</div>
-        <p class="step__who">Any time</p>
-        <h2>Attend an event</h2>
+        <h2>Come to an event</h2>
         <p>
-          Many club events are open to people without prior experience or club
-          involvement, including hikes, talks, film screenings, and socials.
+          Hikes, talks, film screenings, and socials are open to anyone, member or
+          not.
         </p>
         <div class="step__action">
           <a class="btn btn--ghost btn--block" href="<?= e(url('events.php')) ?>">
-            <?= icon('calendar', 'icon icon--xs') ?> View upcoming events
+            <?= icon('calendar', 'icon icon--xs') ?> Upcoming events
           </a>
         </div>
       </div>
@@ -149,19 +132,19 @@ require __DIR__ . '/includes/header.php';
 <section class="section section--tint" id="outside">
   <div class="wrap wrap--narrow">
 
-    <p class="eyebrow"><?= icon('social', 'icon icon--xs') ?>No Caltech or JPL affiliation</p>
     <h2 class="h2">Joining from outside Caltech</h2>
 
+    <?php /* NOT AN APPLICATION, and it must not read like one. An earlier draft
+             insisted "this is not a screening process, it is how we know a real
+             person is asking", which announces a filter while denying there is
+             one. Two things are actually needed: an address a person can reply
+             to, and enough to point whoever answers at the right activity.
+             "How you came across the club" was a third, and nothing was ever
+             done with the answer. */ ?>
     <div class="prose mt-lg">
       <p>
-        You are welcome in the club. Introduce yourself by email and an officer
-        adds you to the mailing list.
-      </p>
-      <p>
-        Write from an email address that identifies you — a work or university
-        address is ideal. A couple of sentences on each point below is plenty:
-        this is not a screening process, it is how we know a real person is
-        asking, and it tells whoever replies which activities to point you at.
+        Email the secretary with your name, where you are based, and what you would
+        like to do with the club. A work or university address helps.
       </p>
     </div>
 
@@ -173,22 +156,22 @@ require __DIR__ . '/includes/header.php';
            . "I would like to join the Caltech Alpine Club. I am not affiliated with "
            . "Caltech or JPL.\n\n"
            . "Who I am, and where I work or study:\n\n\n"
-           . "What I would like to get out of the club:\n\n\n"
-           . "How I came across the club:\n\n\n"
+           . "What I am interested in doing:\n\n\n"
            . "Thanks,\n";
     ?>
-    <?php alpine_write_to(cfg('links.secretary'), 'Membership request', array(
-        'Who you are, and where you work or study',
-        'What you would like to get out of the club',
-        'How you came across the club',
-    ), array('body' => $intro)); ?>
+    <?php /* No "Please include" list: the sentence above it is the
+             instruction, and the same two prompts are already pre-filled into
+             the mail client by $intro. This block is the address and the
+             subject line. */ ?>
+    <?php alpine_write_to(cfg('links.secretary'), 'Membership request', array(),
+        array('body' => $intro)); ?>
 
     <div class="note mt-lg">
       <?= icon('gear', 'icon icon--xs') ?>
       <p>
-        One limit worth knowing before you write: <strong>club and Caltech Y equipment
-        both require Caltech or JPL affiliation</strong>. Everything else — trips,
-        events, Slack — is open to you.
+        <strong>Gear loans and rentals are limited to Caltech and JPL
+        affiliates.</strong> Other members can still join trips, events, and Slack, but
+        need to bring their own gear.
       </p>
     </div>
 
@@ -265,9 +248,7 @@ require __DIR__ . '/includes/header.php';
     $faqs = array(
         array(
             'q' => 'Do I have to be a Caltech student?',
-            'a' => '<p>No. Caltech affiliation is not required to join. Most members are '
-                 . 'graduate students, undergraduates, postdocs, faculty, staff, and JPL '
-                 . 'employees, but community members are welcome. If that is you, see '
+            'a' => '<p>No. Membership is open to people outside Caltech. See '
                  . '<a href="#outside">joining from outside Caltech</a>.</p>',
         ),
         array(
@@ -278,31 +259,37 @@ require __DIR__ . '/includes/header.php';
         array(
             'q' => 'Do I need prior experience?',
             'a' => '<p>Not for most club events. Hikes, socials, talks, and film screenings '
-                 . 'assume no experience. Climbing and snow trips vary, and trip organizers '
-                 . 'state the experience and fitness a given trip requires.</p>',
+                 . 'assume no experience. Climbing and snow trips vary.</p>',
         ),
         array(
             'q' => 'What if I do not own any gear?',
-            'a' => '<p>Specialist club gear is borrowed from the club; general kit is '
-                 . 'rented from the Caltech Y for about $1 a day. <strong>Both need '
-                 . 'Caltech or JPL affiliation</strong>, so non-affiliates are welcome '
-                 . 'on trips but need their own kit. See '
+            'a' => '<p>The Caltech Y rents general gear for about $1 a day, and the club '
+                 . 'lends specialist climbing, ice, and packrafting gear. <strong>Both '
+                 . 'need Caltech or JPL affiliation</strong>, so other members are welcome '
+                 . 'on trips but bring their own. See '
                  . '<a href="' . e(url('gear.php')) . '">what is available</a>.</p>',
         ),
         array(
             'q' => 'How do I find people to go with?',
             'a' => '<p>Most coordination happens on Slack: post what you want to do and when. '
-                 . 'The club\'s activity leaders also organize outings that members can join — '
-                 . 'see <a href="' . e(url('about.php#officers')) . '">who currently leads '
+                 . 'The club\'s activity leaders also organize outings members can join. See '
+                 . '<a href="' . e(url('about.php#officers')) . '">who currently leads '
                  . 'what</a>.</p>',
         ),
         array(
             'q' => 'How does the club handle safety?',
-            'a' => '<p>Trip organizers state the experience, fitness, and equipment a trip '
-                 . 'requires before people sign up, and deciding a trip is not for you is a '
-                 . 'normal outcome. Avalanche beacons, shovels, probes, helmets, and satellite '
-                 . 'messengers are all available from the club or the Caltech Y. The club follows and teaches Leave '
-                 . 'No Trace practice.</p>',
+            /* CONCRETE PRACTICES ONLY. The question invites an institutional
+               claim, and there is no written safety policy in this repository
+               or on the old site to base one on. What went: "deciding a trip is
+               not for you is a normal outcome" (reassurance about a worry the
+               reader had not raised) and "the club follows and teaches Leave No
+               Trace practice" (unverified -- the old site published a Leave No
+               Trace guide, which is not the same claim). Put either back only
+               when an officer confirms it. */
+            'a' => '<p>Each trip organizer states the experience, fitness, and equipment '
+                 . 'their trip requires. Avalanche beacons, shovels, probes, helmets, and '
+                 . 'satellite messengers are available from the club or the Caltech Y. For a '
+                 . 'specific trip, ask the organizer.</p>',
         ),
     );
     ?>

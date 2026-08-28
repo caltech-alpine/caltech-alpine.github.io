@@ -96,10 +96,11 @@ require __DIR__ . '/includes/header.php';
     }
     ?>
     <p class="wanted-strip__text">
-      The club is short <?= alpine_list_phrase($needs) ?>.
+      We're looking for <?= alpine_list_phrase($needs) ?>.
     </p>
     <a class="arrow-link" href="<?= e(url('roles.php')) ?>">
-      What that involves <?= icon('arrow-right', 'icon icon--xs') ?>
+      <?= count($short) === 1 ? 'See the role' : 'See the roles' ?>
+      <?= icon('arrow-right', 'icon icon--xs') ?>
     </a>
   </div>
 </div>
@@ -146,18 +147,19 @@ require __DIR__ . '/includes/header.php';
       <div>
         <h2 class="h2">Gear</h2>
         <div class="prose mt-lg">
+          <?php /* Not the inventory. That is the Gear page's job, and one
+                   eleven-item sentence is unreadable on a homepage. Which pool
+                   holds what is checked against data/gear.php: the Y has the
+                   camping and snow equipment plus helmets and crash pads, the
+                   club has the trad racks, the ice tools and the packrafts. */ ?>
           <p>
-            Tents, sleeping bags, stoves, crampons, ice axes, avalanche equipment,
-            touring skis, splitboards, and satellite messengers, for about $1 per day
-            through the Caltech&nbsp;Y. Specialist climbing and packrafting equipment
-            is held by the club directly.
+            Members can rent camping and snow equipment from the Caltech&nbsp;Y for
+            about $1 per day. The club lends climbing, ice, and packrafting gear
+            directly.
           </p>
         </div>
         <div class="btn-row mt-lg">
-          <a class="btn btn--primary btn--gated" href="<?= e(url('gear.php#rental')) ?>">
-            <span class="btn__label">Borrow gear</span>
-            <span class="btn__gate">Caltech / JPL only</span>
-          </a>
+          <a class="btn btn--primary" href="<?= e(url('gear.php#rental')) ?>">Borrow gear</a>
           <a class="btn btn--ghost" href="<?= e(url('support.php#donate')) ?>">Donate gear</a>
         </div>
       </div>
@@ -167,9 +169,9 @@ require __DIR__ . '/includes/header.php';
       <div class="stack">
         <div class="note">
           <?= icon('gear', 'icon icon--xs') ?>
-          <p>Club and Caltech Y equipment alike is for <strong>Caltech and JPL
-             affiliates</strong>. Anyone can join the club and come on trips, but
-             non-affiliates need their own kit.</p>
+          <p><strong>Gear loans and rentals are limited to Caltech and JPL
+             affiliates.</strong> Anyone can join the club and come on trips, but other
+             members need to bring their own gear.</p>
         </div>
       </div>
     </div>
@@ -185,15 +187,13 @@ require __DIR__ . '/includes/header.php';
       <div>
         <h2 class="h2">About the club</h2>
         <div class="prose mt-lg">
+          <?php /* Two sentences. The homepage does not need the club's
+                   biography -- the founder, the 1950 records and the full
+                   activity list are on About, one click away. */ ?>
           <p>
-            The Caltech Alpine Club was founded in <?= e(cfg('facts.founded')) ?> by
-            <?= e(cfg('facts.founder')) ?>.
-          </p>
-          <p>
-            Members are graduate students, undergraduates, postdocs, faculty, staff,
-            JPL employees, and people from the wider community, and range from
-            experienced climbers and mountaineers to people on their first outdoor
-            trip.
+            The Caltech Alpine Club has organized outdoor trips since
+            <?= e(cfg('facts.founded')) ?>. Members include students, postdocs,
+            faculty, staff, JPL employees, and people from outside Caltech.
           </p>
         </div>
       </div>
@@ -232,8 +232,7 @@ require __DIR__ . '/includes/header.php';
         <?= icon('talk', 'icon icon--lg pillar__icon') ?>
         <h3>Talks</h3>
         <p>
-          Talks by club members and visiting climbers, held on campus during the
-          academic year.
+          Talks on campus by club members and visiting climbers.
         </p>
       </div>
       <div class="pillar">

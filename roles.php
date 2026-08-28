@@ -44,14 +44,14 @@ require __DIR__ . '/includes/header.php';
 
 alpine_page_hero(array(
     'title'  => 'Get involved',
-    /* The second sentence is counted, not typed. "Some of those jobs are open"
-       was written here by hand, and it is a claim about the world that stops
-       being true the moment somebody fills the last one -- with nothing on the
-       page or in anyone's calendar to catch it. */
-    'lede'   => 'The club runs on people volunteering to organize things. '
-              . ($needed
-                  ? 'Some of those jobs are looking for somebody.'
-                  : 'There is always more of it to go round.'),
+    /* NO CLAIM ABOUT WHAT IS OPEN TODAY. This sentence used to branch on
+       $needed and say "some of those jobs are looking for somebody", which is a
+       statement about the world in the one place on the page that is not
+       derived from the data -- and the section below already lists exactly
+       which jobs, from data/roles.csv, or renders nothing. What belongs here is
+       the thing that is true every year. */
+    'lede'   => "The club runs on members volunteering to organize things. You don't "
+              . 'need to be an officer to help.',
     'photo'  => 'photos/img-20200822-133229.jpg',
     'credit' => 'Club trip, August 2020',
 ));
@@ -65,23 +65,21 @@ alpine_page_hero(array(
   <div class="wrap">
     <div class="split split--wide-left">
       <div>
-        <h2 class="h2">You do not need a title</h2>
+        <h2 class="h2">You don't need to be an officer</h2>
         <div class="prose mt-lg">
           <p>
-            Most of what the club does is organized by whoever felt like organizing
-            it. If you want to run a hike up Islip next Saturday, put it on the
-            calendar and go &mdash; ask an officer and they will add it. Nobody has
-            to appoint you.
+            Any member can organize a trip or an event. Want to lead a hike up
+            Mt.&nbsp;Islip next Saturday? Ask an officer and we will help put it on the
+            calendar.
           </p>
           <p>
-            The same goes for the parts of a big event that need hands rather than a
-            plan: taking tickets at the film festival, setting problems in the
-            bouldering cave, driving people to the trailhead, carrying a rope.
+            You can also help without organizing anything: take tickets at the film
+            festival, set problems in the bouldering cave, or drive people to the
+            trailhead.
           </p>
           <p>
-            Officer roles exist for the work that has to happen whether or not
-            anybody feels like it &mdash; the money, the mailing list, the gear that
-            has to come back.
+            Officers handle the club's ongoing work, including finances, membership,
+            equipment, trips, and events.
           </p>
         </div>
       </div>
@@ -90,9 +88,9 @@ alpine_page_hero(array(
         <div class="note">
           <?= icon('mail', 'icon icon--xs') ?>
           <p>
-            Easiest first move: write to
+            Want to help? Email
             <a href="mailto:<?= e(cfg('links.officers')) ?>"><?= e(cfg('links.officers')) ?></a>
-            and say what you would like to do. It reaches the current officers.
+            and tell us what you're interested in. It reaches the current officers.
           </p>
         </div>
       </div>
@@ -118,18 +116,10 @@ alpine_page_hero(array(
   <div class="wrap">
 
     <?php if ($needed): ?>
+      <?php /* The heading, then the list. The address was repeated here and it
+               is already in the note at the top of this page, four inches up
+               the screen, under "Want to help?". */ ?>
       <h2 class="h2">What the club needs right now</h2>
-      <div class="prose mt-lg">
-        <?php /* One line. The previous two sentences reassured the reader that
-                 the jobs are easy and that somebody will explain them, which is
-                 the club talking about itself where the reader wants an address.
-                 What each job involves is a few lines further down, written per
-                 role; what was missing here was where to ask. */ ?>
-        <p>
-          Ask <a href="mailto:<?= e(cfg('links.officers')) ?>?subject=Helping+out"><?= e(cfg('links.officers')) ?></a>
-          about any of them. It reaches the officers.
-        </p>
-      </div>
 
       <ul class="wanted mt-lg">
         <?php foreach ($needed as $r): ?>
@@ -153,19 +143,9 @@ alpine_page_hero(array(
     ?>
     <?php if ($spare): ?>
       <?php if ($needed): ?>
-        <h3 class="h3 mt-lg">Room for more</h3>
-        <div class="prose">
-          <p>These are being done. They would go better with another pair of hands.</p>
-        </div>
+        <h3 class="h3 mt-lg">Could use more help</h3>
       <?php else: ?>
-        <h2 class="h2">Room for more</h2>
-        <div class="prose mt-lg">
-          <p>
-            Every job the club needs doing is being done. These would still welcome
-            somebody, and it is the easiest time to start &mdash; you would be
-            learning it from whoever is already doing it.
-          </p>
-        </div>
+        <h2 class="h2">Could use more help</h2>
       <?php endif; ?>
 
       <ul class="wanted mt-lg">
@@ -242,7 +222,7 @@ alpine_page_hero(array(
                   </span>
                 <?php else: ?>
                   <span class="role__holders">
-                    Nobody at the moment &mdash; write to
+                    Nobody at the moment. Write to
                     <a href="mailto:<?= e(cfg('links.officers')) ?>?subject=<?= e(rawurlencode(alpine_role_title($r))) ?>"><?= e(cfg('links.officers')) ?></a>
                     if you are interested.
                   </span>
@@ -271,7 +251,7 @@ alpine_page_hero(array(
 <!-- ======================================================= how ======= -->
 <section class="section section--tint" id="how">
   <div class="wrap wrap--narrow">
-    <h2 class="h2">How you end up with one</h2>
+    <h2 class="h2">How to become an officer</h2>
 
     <div class="prose mt-lg">
       <?php /* WHAT THIS SECTION MAY SAY.
@@ -287,33 +267,25 @@ alpine_page_hero(array(
                rule, a term length or a date. If an officer confirms the real
                procedure, replace this with it and record here who said so. */ ?>
       <p>
-        Say you are interested, and an officer will tell you what happens next.
-        Sometimes that means waiting for the next round of elections. More often a
-        role is simply not being done and you can start doing it.
+        Email the officers if you're interested in a role, or the president directly if
+        you know who that is. Some positions are filled at elections; open coordinator
+        roles can often be picked up during the year.
       </p>
       <p>
-        Write to the officers, or to the president directly if you know who that is.
-        There is no form to fill in and no deadline to miss.
-      </p>
-      <p>
-        You do not need experience running a club, and for most of these you do not
-        need much outdoor experience either. What the jobs mostly need is somebody
-        who answers email.
+        Most roles don't require previous club leadership or much outdoor experience.
+        Being reliable and answering email matters more.
       </p>
     </div>
 
-    <?php
-    $body = "Hello,\n\n"
-          . "I would like to help run the Alpine Club.\n\n"
-          . "Which role, or what sort of thing I would like to do:\n\n\n"
-          . "A bit about me:\n\n\n"
-          . "Thanks,\n";
-    ?>
-    <?php alpine_write_to(cfg('links.officers'), 'Getting involved', array(
-        'Which role you are interested in, or just what you would like to help with',
-        'Whether you are at Caltech or JPL, and roughly how long you expect to be around',
-        'Anything you have organized before. It is fine if the answer is nothing.',
-    ), array('body' => $body)); ?>
+    <?php /* THE ADDRESS AND THE SUBJECT LINE, and nothing else. This was a
+             "Please include" list of three, two of which nobody needs before
+             somebody can help: what you have organized before (no role requires
+             it, so asking implies one does) and how long you expect to be
+             around (there is no written term or eligibility rule anywhere -- see
+             the note above -- so nothing could be done with the answer). The
+             third is in the paragraph above. Volunteering is not an
+             application. */ ?>
+    <?php alpine_write_to(cfg('links.officers'), 'Getting involved'); ?>
 
   </div>
 </section>

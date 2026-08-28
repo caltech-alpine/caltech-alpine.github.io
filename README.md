@@ -48,8 +48,24 @@ the calendar.
 - **Whatever you put in the event description appears on the card**, and every
   event has a **Details** button that opens the full text in a pop-up. Links
   survive there, so a sign-up sheet or a map pin in the description is
-  clickable. Keep the first sentence useful — that is the part shown on the
-  card itself.
+  clickable.
+- **The first sentence is the one shown on the card**, so put the useful part
+  first: *"Meeting at the Chaney Trail gate at 7am, about 6 miles round trip"*,
+  not *"Come join us for a great morning out!"*. Everything after it still shows
+  in the pop-up. Write the event the way you would tell a friend about it — the
+  calendar is allowed to sound like club members, and the site does not tidy it
+  up.
+- **Do not leave a test event on the calendar.** The archive fills itself in
+  from the calendar and never forgets, so an event called `test` is on the
+  public website until somebody deletes it from Google Calendar. There is a
+  place to test without touching the club calendar: `preview.php`, which renders
+  any public calendar using the real site's components. See the top of that
+  file.
+- **Google Meet boilerplate is stripped automatically.** Ticking "Add Google
+  Meet video conferencing" makes Google write *"Join with Google Meet: ..."* and
+  *"Learn more about Meet at: ..."* into the description; the site removes both
+  lines and keeps anything you wrote yourself. See
+  `stripConferencingBoilerplate()` in `lib/calendar/IcsParser.php`.
 - **A repeating event shows only its next occurrence**, labelled "Weekly on
   Tuesdays" or similar, so a standing weekly run does not bury everything else.
   Editing or deleting a single week in Google Calendar works as you would

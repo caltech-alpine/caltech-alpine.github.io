@@ -65,11 +65,65 @@ PHRASES = [
     (r"\bstunning\b", "adjective doing a photograph's job"),
     (r"\bbreathtaking\b", "adjective doing a photograph's job"),
     (r"\bwhether it(?:'|)s\b", "the hedged universal again"),
+
+    # ---------------------------------------------------------------------
+    # The second failure mode: copy trying to SOUND human rather than saying
+    # the useful thing. Added August 2026 after a pass that found the site
+    # clean by the list above and still reading as written-to-seem-authentic.
+    # Every pattern here is anchored to an exact construction, because the
+    # underlying problem is judgment and a longer blacklist does not help.
+    # ---------------------------------------------------------------------
+
+    # Meta-transitions. The sentence after these can always stand by itself.
+    (r"\bwhat follows\b", "meta-transition - start with the next sentence"),
+    (r"\bworth (?:noting|knowing|saying)\b", "meta-transition - just say it"),
+    (r"\beasiest first (?:move|step)\b", "meta-transition - just say it"),
+    (r"\bthe same goes for\b", "meta-transition - start the sentence properly"),
+    (r"\bas mentioned above\b", "if they need it twice, one place is wrong"),
+    (r"\bat its core\b", "filler"),
+    (r"\bone (?:thing|limit) [a-z ]{0,20}before you\b", "meta-transition"),
+
+    # Reassurance about a worry the reader had not raised. A FACTUAL
+    # "you do not need prior experience" is fine and is not matched here.
+    (r"\bis not a (?:screening|selection|vetting|test|competition)\b",
+     "denying a filter announces one - state the reason instead"),
+    (r"\bno (?:form|forms) to fill\b", "reassurance nobody asked for"),
+    (r"\bno deadline to miss\b", "reassurance nobody asked for"),
+    (r"\bnobody has to appoint you\b", "reassurance nobody asked for"),
+    (r"\bis a normal outcome\b", "reassurance nobody asked for"),
+    (r"\bit(?:'|) ?is fine if\b", "reassurance - either ask for it or do not"),
+    (r"\bdo(?:n't| not) worry\b", "reassurance nobody asked for"),
+    (r"\beasier than you (?:might )?think\b", "reassurance nobody asked for"),
+
+    # Reaching for informality. Flagged, not banned - read each one.
+    (r"\banother pair of hands\b", "written informality"),
+    (r"\bwhoever felt like\b", "written informality"),
+    (r"\bend up with one\b", "written informality - say what the section is"),
+    (r"\banything at all\b", "written informality - name the thing"),
+    (r"\btheir own kit\b|\bown kit\b", "British; and 'gear' is the word this site uses"),
 ]
 
 # Markdown and PHP comments are notes to officers, not copy shown to visitors.
 # The style guide itself quotes every phrase in the list, so it is skipped.
 SKIP_FILES = {"docs/WRITING.md", "tools/voice_check.py"}
+
+
+def blank_block_comments(text):
+    """Blank the inside of every /* ... */ while keeping the line count.
+
+    The comments in this repository explain WHY a piece of copy reads the way it
+    does, which means they quote the copy that was removed -- so scanning them
+    reports every rule this file enforces as a violation of itself. Line-start
+    matching was not enough: these comments run to five or six lines and only
+    the first one starts with the marker.
+    """
+    out, i = [], 0
+    for m in re.finditer(r"/\*.*?\*/", text, re.S):
+        out.append(text[i:m.start()])
+        out.append(re.sub(r"[^\n]", " ", m.group(0)))
+        i = m.end()
+    out.append(text[i:])
+    return "".join(out)
 
 
 def strip_noise(line, path):
@@ -80,19 +134,47 @@ def strip_noise(line, path):
     return line
 
 
+def read_prose(path):
+    """One file's lines with the block comments blanked out."""
+    full = os.path.join(ROOT, path)
+    if not os.path.exists(full):
+        return []
+    with open(full, encoding="utf-8", errors="replace") as fh:
+        text = fh.read()
+    return blank_block_comments(text).split("\n")
+
+
+# An em dash is punctuation. As a page's default device for a conversational
+# aside it is one of the loudest tells there is, and it is the one thing here a
+# word list cannot express -- the problem is the RATE, not any single use. Six is
+# not a law; it is high enough that a page under it was never the problem and a
+# page over it always was when this was calibrated (August 2026).
+EM_DASH_BUDGET = 6
+
+# Only the pages. docs/ and README.md are notes to whoever runs the site, not
+# copy a visitor reads, and counting their dashes was the check crying wolf on
+# its first run.
+EM_DASH_TARGETS = [t for t in DEFAULT_TARGETS if not t.endswith(".md")]
+
+
+def em_dashes(path):
+    """Count em dashes in the visible copy of one file."""
+    n = 0
+    for raw in read_prose(path):
+        line = strip_noise(raw, path)
+        n += line.count("\u2014") + line.count("&mdash;")
+    return n
+
+
 def check(path):
     rel = path.replace("\\", "/")
     hits = []
-    full = os.path.join(ROOT, path)
-    if not os.path.exists(full):
-        return hits
-    with open(full, encoding="utf-8", errors="replace") as fh:
-        for n, raw in enumerate(fh, 1):
-            line = strip_noise(raw, rel)
-            for pattern, why in PHRASES:
-                m = re.search(pattern, line, re.IGNORECASE)
-                if m:
-                    hits.append((rel, n, m.group(0).strip(), why, raw.strip()))
+    for n, raw in enumerate(read_prose(path), 1):
+        line = strip_noise(raw, rel)
+        for pattern, why in PHRASES:
+            m = re.search(pattern, line, re.IGNORECASE)
+            if m:
+                hits.append((rel, n, m.group(0).strip(), why, raw.strip()))
     return hits
 
 
@@ -104,7 +186,19 @@ def main(argv):
     for t in targets:
         all_hits.extend(check(t))
 
+    scanned = [t for t in targets if t in EM_DASH_TARGETS or argv[1:]]
+    heavy = [(t, n) for t in scanned for n in [em_dashes(t)] if n > EM_DASH_BUDGET]
+    if heavy:
+        print()
+        for t, n in heavy:
+            print("%s: %d em dashes (budget %d)" % (t, n, EM_DASH_BUDGET))
+            print("  Read them. Most are a period wearing a costume - see")
+            print("  docs/WRITING.md, 'Em dashes are punctuation, not a voice'.")
+            print()
+
     if not all_hits:
+        if heavy:
+            return 1
         print("\n%d files, nothing flagged.\n" % len(targets))
         print("That means none of the known tells are present. It does not mean")
         print("the writing is good - see docs/WRITING.md for the part a word")

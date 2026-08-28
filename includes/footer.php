@@ -8,14 +8,17 @@
     <div class="site-footer__brand">
       <img class="site-footer__mark" src="<?= e(asset('images/ice-axe.svg')) ?>"
            alt="" width="32" height="32" aria-hidden="true">
+      <?php /* ONE LINE. This block identifies the site to somebody who has
+               scrolled to the bottom; it is not a second About page. "Founded
+               1987" was here too, on all eight pages, and it is on the homepage
+               hero and on About already. */ ?>
       <p class="site-footer__blurb">
-        Trips, shared gear, and people to go with.
-        Founded <?= e(cfg('facts.founded')) ?>. Caltech affiliation is not required
-        to join.
+        Trips, shared gear, and people to go with. Membership is open beyond
+        Caltech.
       </p>
 
       <dl class="site-footer__contact">
-        <dt>General enquiries</dt>
+        <dt>General questions</dt>
         <dd>
           <a href="mailto:<?= e(cfg('links.officers')) ?>"><?= e(cfg('links.officers')) ?></a>
         </dd>
@@ -32,21 +35,18 @@
       </dl>
     </div>
 
+    <?php /* TOP-LEVEL PAGES ONLY. This used to print every section anchor as
+             well: four columns of sub-links, on eight pages, for a site with
+             five pages and a Join button. The anchors are still in nav.php and
+             still open from the header menu, which is where somebody looking
+             for one goes. */ ?>
     <nav class="site-footer__nav" aria-label="Footer">
-      <?php foreach ((require __DIR__ . '/nav.php') as $item): ?>
-        <div class="site-footer__col">
-          <h2 class="site-footer__heading">
-            <a href="<?= e(url($item['href'])) ?>"><?= e($item['label']) ?></a>
-          </h2>
-          <?php if (!empty($item['children'])): ?>
-            <ul>
-              <?php foreach ($item['children'] as $child): ?>
-                <li><a href="<?= e(url($child['href'])) ?>"><?= e($child['label']) ?></a></li>
-              <?php endforeach; ?>
-            </ul>
-          <?php endif; ?>
-        </div>
-      <?php endforeach; ?>
+      <ul class="site-footer__links">
+        <?php foreach ((require __DIR__ . '/nav.php') as $item): ?>
+          <li><a href="<?= e(url($item['href'])) ?>"><?= e($item['label']) ?></a></li>
+        <?php endforeach; ?>
+        <li><a href="<?= e(url('join.php')) ?>">Join</a></li>
+      </ul>
     </nav>
 
   </div>

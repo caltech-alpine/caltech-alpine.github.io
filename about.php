@@ -46,8 +46,11 @@ require __DIR__ . '/includes/header.php';
 
 <?php alpine_page_hero(array(
     'title'  => 'About the Alpine Club',
-    'lede'   => 'The Caltech Alpine Club organizes outdoor trips and film screenings '
-              . 'for the Caltech community.',
+    /* Not "for the Caltech community": membership is open to anyone, which
+       this site says on four other pages. Gear and the film festivals are two
+       of the three things the club actually does, so both are named. */
+    'lede'   => 'The Caltech Alpine Club organizes outdoor trips, lends gear, and hosts '
+              . 'mountain film screenings.',
     'photo'  => 'photos/cac-mammoth-from-sujung.jpg',
     'credit' => 'Club trip to Mammoth',
 )); ?>
@@ -58,24 +61,26 @@ require __DIR__ . '/includes/header.php';
   <div class="wrap">
     <div class="split split--wide-left">
       <div>
-        <h2 class="h2">Getting people outside</h2>
+        <?php /* The nav calls this anchor "What we do". The heading says the
+                 same words, so somebody arriving from the menu lands on the
+                 thing they clicked. */ ?>
+        <h2 class="h2">What we do</h2>
         <div class="prose mt-lg">
           <p>
-            The club organizes hiking, backpacking, trail running, climbing, and
-            other outdoor trips, and keeps a stock of equipment members can borrow.
-            What runs in a given year depends on who is leading it, so the
-            <a href="<?= e(url('events.php')) ?>">calendar</a> is the best guide to
-            what is happening now.
+            The club organizes hiking, backpacking, trail running, climbing, and other
+            trips. Members can also borrow outdoor equipment. Activities vary from year
+            to year, so check the
+            <a href="<?= e(url('events.php')) ?>">calendar</a> for what is happening now.
           </p>
           <p>
-            The club also hosts the Banff Mountain Film Festival on campus each year,
-            along with other mountain film screenings and talks by members and visiting
+            The club hosts the Banff Mountain Film Festival on campus each year, along
+            with other mountain film screenings and talks by members and visiting
             climbers.
           </p>
           <p>
-            Members are graduate students, undergraduates, postdocs, faculty, staff, and
-            JPL employees, and range from experienced mountaineers to people on their
-            first outdoor trip.
+            Members include students, postdocs, faculty, staff, JPL employees, and
+            people from outside Caltech. Experience ranges from first-time hikers to
+            experienced climbers and mountaineers.
           </p>
           <?php /* ONE founding narrative across the site: the club was founded in
                    1987, and that is what the hero and the meta description both say.
@@ -83,8 +88,9 @@ require __DIR__ . '/includes/header.php';
                    once, here, hedged and subordinate. Do not promote it to a headline
                    number. */ ?>
           <p>
-            The club was founded in <?= e(cfg('facts.founded')) ?>, but club records
-            suggest Caltech outdoor trips go back to around 1950.
+            The club was founded in <?= e(cfg('facts.founded')) ?> by
+            <?= e(cfg('facts.founder')) ?>, though club records suggest Caltech outdoor
+            trips go back to around 1950.
           </p>
         </div>
       </div>
@@ -205,16 +211,18 @@ require __DIR__ . '/includes/header.php';
         <aside class="join-callout mt-lg">
           <div class="join-callout__text">
             <h3 class="join-callout__title">Want to help run the Alpine Club?</h3>
+            <?php /* ONE SENTENCE, and no count. What the jobs need from a
+                     person, and what happens after you say you are interested,
+                     are both on Get Involved. The count was derived rather than
+                     typed, so it could not go stale, but it was still a number
+                     the reader has to hold on the way to a button that shows
+                     them the list. */ ?>
             <p>
-              The club is looking for somebody in
-              <?= e(alpine_number_word(count($asking))) ?>
-              of its jobs. You do not need to have run a club before, and for most of
-              them you do not need much outdoor experience either &mdash; say you are
-              interested and an officer will tell you what happens next.
+              Some officer and coordinator roles are currently open.
             </p>
           </div>
           <a class="btn btn--ghost" href="<?= e(url('roles.php#open')) ?>">
-            See what is open <?= icon('arrow-right', 'icon icon--xs') ?>
+            See open roles <?= icon('arrow-right', 'icon icon--xs') ?>
           </a>
         </aside>
       <?php endif; ?>
@@ -253,7 +261,7 @@ require __DIR__ . '/includes/header.php';
 
     <dl class="contact-list mt-lg">
       <div>
-        <dt>Anything at all</dt>
+        <dt>General questions</dt>
         <dd>
           <a href="mailto:<?= e(cfg('links.officers')) ?>"><?= e(cfg('links.officers')) ?></a>
           <span class="contact-list__note">Reaches the current officers.</span>
@@ -274,7 +282,7 @@ require __DIR__ . '/includes/header.php';
       <?php endif; ?>
 
       <div>
-        <dt>A particular activity</dt>
+        <dt>Activity questions</dt>
         <dd>
           <a href="#officers">Find the officer who looks after it</a>
         </dd>

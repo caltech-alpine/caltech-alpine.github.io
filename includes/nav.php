@@ -61,7 +61,7 @@ return array(
     ),
 
     array(
-        'label' => 'Support Us',
+        'label' => 'Support',
         'href'  => 'support.php',
         'children' => array(
             array('label' => 'Sponsorship', 'href' => 'support.php#sponsor'),

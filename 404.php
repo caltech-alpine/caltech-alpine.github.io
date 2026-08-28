@@ -23,9 +23,9 @@ require __DIR__ . '/includes/header.php';
   <div class="wrap page-hero__inner">
     <p class="eyebrow">404</p>
     <h1 class="h1">Page not found</h1>
-    <p class="lede">
-      This page does not exist.
-    </p>
+    <?php /* No lede. It said "This page does not exist", which is the
+             heading again in different words. The links below are the whole
+             useful content of a 404. */ ?>
   </div>
 </header>
 
@@ -34,7 +34,7 @@ require __DIR__ . '/includes/header.php';
     <div class="btn-row">
       <a class="btn btn--primary" href="<?= e(url('index.php')) ?>">Home</a>
       <a class="btn btn--ghost" href="<?= e(url('events.php')) ?>">Upcoming events</a>
-      <a class="btn btn--ghost" href="<?= e(url('gear.php')) ?>">Gear &amp; resources</a>
+      <a class="btn btn--ghost" href="<?= e(url('gear.php')) ?>">Gear</a>
     </div>
   </div>
 </section>

@@ -270,6 +270,7 @@ class IcsParser
 
         $summary = isset($b['SUMMARY']) ? $this->unescapeText($b['SUMMARY']['value']) : '';
         $rawDesc = isset($b['DESCRIPTION']) ? $this->unescapeText($b['DESCRIPTION']['value']) : '';
+        $rawDesc = $this->stripConferencingBoilerplate($rawDesc);
 
         $e             = new AlpineEvent();
         $e->uid        = isset($b['UID']) ? $b['UID']['value'] : md5($summary . $start->format('c'));
@@ -287,6 +288,43 @@ class IcsParser
         $e->descriptionText = $this->htmlToText($rawDesc);
 
         return $e;
+    }
+
+    /**
+     * Drop the two lines Google Calendar writes into DESCRIPTION by itself when
+     * somebody ticks "Add Google Meet video conferencing".
+     *
+     * Nobody types these. They are:
+     *
+     *     Join with Google Meet: https://meet.google.com/xxx-xxxx-xxx
+     *     Learn more about Meet at: https://support.google.com/a/users/answer/9282720
+     *
+     * The club's own Ski Waxing Party had them as its ENTIRE public
+     * description, so the archive advertised a dead Meet room instead of the
+     * event. The join link goes too, not only the support link: this site has
+     * no deliberate way to publish a conferencing link, and a live Meet URL on
+     * a public page is an invitation to whoever finds it.
+     *
+     * Anchored to Google's exact wording and to a meet.google.com or
+     * support.google.com URL, so a human sentence that happens to mention Meet
+     * survives untouched. Whatever a person wrote around the boilerplate
+     * survives too -- only the matched lines are removed.
+     */
+    private function stripConferencingBoilerplate($text)
+    {
+        if (stripos($text, 'google') === false) { return $text; }
+
+        $text = preg_replace(
+            '~^[ \t]*Join with Google Meet:[ \t]*https://meet\.google\.com/\S*[ \t]*$~mi',
+            '', $text);
+        $text = preg_replace(
+            '~^[ \t]*Learn more about Meet at:[ \t]*https://support\.google\.com/\S*[ \t]*$~mi',
+            '', $text);
+
+        /* Collapse the blank lines the removals leave behind, then trim. */
+        $text = preg_replace("~\n{3,}~", "\n\n", $text);
+
+        return trim($text);
     }
 
     /* ===================================================================== */

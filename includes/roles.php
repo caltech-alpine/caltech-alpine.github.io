@@ -380,3 +380,43 @@ function alpine_number_word($n)
                           4 => 'four', 5 => 'five', 6 => 'six');
     return isset($words[$n]) ? $words[$n] : (string) $n;
 }
+
+/**
+ * WHO TO WRITE TO ABOUT A PARTICULAR JOB, and what to call them.
+ *
+ * Three pages need this and each had written the same loop: take the first
+ * holder who has an address, fall back to the club's shared mailbox. Written
+ * three times it can be got wrong in one of them, and the failure is silent --
+ * a page that quietly sends everybody to the general mailbox instead of the
+ * person who has the rack, or who keeps the sponsor list.
+ *
+ * Degrades in two steps and cannot produce a dead link: no address on the
+ * person -> the shared mailbox; nobody in the job at all -> the shared mailbox
+ * with no name printed.
+ *
+ * The title comes from the data too, so renaming the job renames it on every
+ * page that prints this. 'name' is '' when nobody holds the job, which is the
+ * flag a template tests before writing "the Gear Officer, X, at".
+ *
+ * @param  string $roleId a role_id from data/roles.csv, never a title
+ * @return array{email:string, name:string, title:string}
+ */
+function alpine_role_contact($roleId)
+{
+    $role    = alpine_role($roleId);
+    $holders = alpine_role_holders($roleId);
+
+    $email = cfg('links.officers');
+    foreach ($holders as $person) {
+        if ($person['email'] !== '') { $email = $person['email']; break; }
+    }
+
+    $names = array();
+    foreach ($holders as $person) { $names[] = $person['name']; }
+
+    return array(
+        'email' => $email,
+        'name'  => $names ? alpine_list_phrase($names) : '',
+        'title' => $role ? alpine_role_title($role, count($holders)) : '',
+    );
+}

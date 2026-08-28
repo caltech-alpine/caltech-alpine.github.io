@@ -25,9 +25,12 @@
 return array(
 
     'caltech_y' => array(
-        'title'  => 'Booked through the Caltech Y',
-        'blurb'  => 'Most items are about $1 per day. Pickup and return are at the '
-                  . 'Caltech Y during business hours.',
+        /* A heading on an inventory should say whose equipment it is, not
+           describe the paperwork. How each pool is booked is on gear.php, once
+           each; it was here as well, which is where the price and the notice
+           period ended up on the page twice. */
+        'title'  => 'Caltech Y gear',
+        'blurb'  => 'Rented from the Caltech Y.',
         'groups' => array(
 
             'Camping and backpacking' => array(
@@ -62,9 +65,8 @@ return array(
     ),
 
     'gear_officer' => array(
-        'title'  => 'Booked through the Gear Officer',
-        'blurb'  => 'Specialist equipment, held by the club rather than the Y. Booking '
-                  . 'goes through the reservation form, with 48 hours notice.',
+        'title'  => 'Alpine Club gear',
+        'blurb'  => 'Borrowed from the club through the reservation form.',
         'groups' => array(
 
             'Trad climbing' => array(
