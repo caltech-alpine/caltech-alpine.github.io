@@ -250,7 +250,8 @@ require __DIR__ . '/includes/header.php';
         <h3>Finding partners</h3>
         <p>
           Members use Slack to find partners and organize informal outings between
-          the scheduled trips.
+          the scheduled trips. The invite goes out on the
+          <a href="<?= e(url('join.php')) ?>">mailing list</a>.
         </p>
       </div>
     </div>

@@ -87,7 +87,8 @@ require __DIR__ . '/includes/header.php';
         <h2>Slack</h2>
         <p>
           Slack is where members find partners, ask questions, and organize informal
-          trips, with a separate channel per activity.
+          trips, with a separate channel per activity. The invite goes out on the
+          mailing list, so join that first.
         </p>
         <?php if ($slack): ?>
           <div class="step__action">
@@ -101,8 +102,7 @@ require __DIR__ . '/includes/header.php';
                    is nothing here for one to do. Set links.slack and the real
                    Join Slack button above appears. */ ?>
           <p class="step__hint">
-            The invite link goes out on the mailing list. If you have missed it, ask
-            the secretary at
+            If you have missed it, ask the secretary at
             <a href="mailto:<?= e(cfg('links.secretary')) ?>?subject=Slack+invite"><?=
               e(cfg('links.secretary')) ?></a>.
           </p>
