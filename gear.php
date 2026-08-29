@@ -85,12 +85,18 @@ require __DIR__ . '/includes/header.php';
           </p>
         </div>
         <div class="btn-row mt-lg">
-          <?php /* No "Caltech / JPL only" badge on the button. The callout above
-                   says it once, in bigger type, and a button whose accessible
-                   name reads "Rent from the Caltech Y Caltech / JPL only" is
-                   worse for a screen reader than for anybody. */ ?>
-          <a class="btn btn--primary" href="<?= e(alpine_outbound('gear_rental')) ?>" rel="noopener">
-            Rent from the Caltech Y <?= icon('external', 'icon icon--xs') ?>
+          <?php /* THE BADGE IS ON THE BUTTON because the people who most need
+                   the rule are the ones who read only the buttons, and this one
+                   sends them off the site. The callout above says it in bigger
+                   type; this says it at the last moment it can.
+
+                   It is a full phrase, not "Caltech / JPL only". Both spans are
+                   inside the link, so a screen reader announces them as one
+                   name: "Rent from the Caltech Y, Caltech and JPL affiliates
+                   only" is a sentence, where the terse version was a run-on. */ ?>
+          <a class="btn btn--primary btn--gated" href="<?= e(alpine_outbound('gear_rental')) ?>" rel="noopener">
+            <span class="btn__label">Rent from the Caltech Y <?= icon('external', 'icon icon--xs') ?></span>
+            <span class="btn__gate">Caltech and JPL affiliates only</span>
           </a>
         </div>
 
@@ -123,8 +129,9 @@ require __DIR__ . '/includes/header.php';
         </div>
         <?php if (cfg('links.gear_form')): ?>
           <div class="btn-row mt-lg">
-            <a class="btn btn--primary" href="<?= e(alpine_outbound('gear_form')) ?>" rel="noopener">
-              Request club gear <?= icon('external', 'icon icon--xs') ?>
+            <a class="btn btn--primary btn--gated" href="<?= e(alpine_outbound('gear_form')) ?>" rel="noopener">
+              <span class="btn__label">Request club gear <?= icon('external', 'icon icon--xs') ?></span>
+              <span class="btn__gate">Caltech and JPL affiliates only</span>
             </a>
           </div>
         <?php endif; ?>

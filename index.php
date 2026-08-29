@@ -166,7 +166,10 @@ require __DIR__ . '/includes/header.php';
           </p>
         </div>
         <div class="btn-row mt-lg">
-          <a class="btn btn--primary" href="<?= e(url('gear.php#rental')) ?>">Borrow gear</a>
+          <a class="btn btn--primary btn--gated" href="<?= e(url('gear.php#rental')) ?>">
+            <span class="btn__label">Borrow gear</span>
+            <span class="btn__gate">Caltech and JPL affiliates only</span>
+          </a>
           <a class="btn btn--ghost" href="<?= e(url('support.php#donate')) ?>">Donate gear</a>
         </div>
       </div>
