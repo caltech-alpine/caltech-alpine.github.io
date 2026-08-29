@@ -9,6 +9,46 @@ rather than describing it.
 
 ---
 
+## 2026-08-28 - the deploy that did not happen, and the port that let it
+
+**Who:** Kyle ran the commands; Claude diagnosed afterwards.
+**Deployed:** nothing. **Result: the daemon talked to a different daemon.**
+
+`python tools/portal_daemon.py --run "…/bin/deploy"` printed:
+
+```
+unknown method None
+```
+
+That string is not in this repository. It came from
+`hpc_monitor/nersc_daemon.py` in `1Research/HEA/vasp`, which was already
+listening on port 19923 and speaks `method` where this one speaks `op`.
+
+**Why the bind guard did not catch it.** `portal_daemon.py` set
+`SO_REUSEADDR` before binding a fixed 19923. On Linux that only clears
+TIME_WAIT. On Windows it lets a socket bind a port another **live** socket is
+already listening on, so the bind succeeded, the `except OSError` never fired,
+19923 went into the state file, and every `--run` reached the wrong process.
+The daemon was running, `--status` would have said so, and nothing was wrong
+except the answers.
+
+Fixed the same day: `LISTEN_PORT = 0`, the real port read back with
+`getsockname()`, and `SO_REUSEADDR` removed. A collision is now impossible by
+construction.
+
+**The second failure, and the worse one.** `verify_deploy.py` then reported
+**23 checks, 0 failed** against a staging copy that was several weeks stale:
+`/roles.php` returned **404**, `assets/images/logo.svg` and
+`assets/images/officers/julian-schmitt.jpg` both 404, and `about.php` still said
+"Getting people outside". It passed because `PAGES` never listed `roles.php`.
+A verifier cannot tell you a page is missing if it does not know the page
+exists. `roles.php` added to `PAGES`, with a note to add a row whenever a page
+is.
+
+**Still owed:** staging has not had any of the August 2026 work. Deploy it.
+
+---
+
 ## 2026-08-19 (later) - first deploy through the daemon: 21 of 21
 
 **Who:** Kyle authenticated; Claude ran the commands over `tools/portal_daemon.py`.

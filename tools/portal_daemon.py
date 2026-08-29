@@ -62,7 +62,19 @@ HOST = "portal.caltech.edu"
 KNOWN_HOST_FILE = HERE / ".portal-known-host"
 PORT = 22
 LISTEN_HOST = "127.0.0.1"
-LISTEN_PORT = 19923          # 19922 is the VASP daemon's; do not collide with it
+# NO FIXED PORT. This was 19923, picked to sit next to the VASP daemon's
+# 19922, with a bind guard meant to catch a collision. On Windows that guard
+# CANNOT fire: SO_REUSEADDR there lets a socket bind a port another LIVE socket
+# is already listening on, rather than only clearing TIME_WAIT as it does on
+# Linux. So on 2026-08-28 this daemon bound 19923 on top of a running
+# hpc_monitor/nersc_daemon.py, raised nothing, wrote 19923 into its state file,
+# and every --run went to the other daemon, which answered "unknown method
+# None". The deploy silently did not happen.
+#
+# Port 0 asks the OS for a free one and getsockname() reads back which. A
+# collision is then impossible by construction, and there is nothing left for
+# SO_REUSEADDR to be dangerous about.
+LISTEN_PORT = 0
 IDLE_LIMIT  = 4 * 3600       # shut down after four hours with nothing to do
 MAX_TIMEOUT = 900            # no single remote command may hold the lock longer
 
@@ -260,19 +272,18 @@ def serve(client, user):
     stopping  = threading.Event()
 
     listener = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    listener.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+    # Deliberately NO SO_REUSEADDR. See the LISTEN_PORT note: on Windows it is
+    # what let this bind on top of a different daemon.
     try:
         listener.bind((LISTEN_HOST, LISTEN_PORT))
-    except OSError:
-        raise SystemExit(
-            "Port %d is already in use - another daemon is probably running.\n"
-            "  python tools/portal_daemon.py --status\n"
-            "  python tools/portal_daemon.py --stop" % LISTEN_PORT)
+    except OSError as exc:
+        raise SystemExit("Could not open a local port: %s" % exc)
+    port = listener.getsockname()[1]          # the one the OS actually gave us
     listener.listen(8)
     listener.settimeout(5)
 
     write_state({
-        "pid": os.getpid(), "port": LISTEN_PORT, "token": token,
+        "pid": os.getpid(), "port": port, "token": token,
         "user": user, "host": HOST,
         "started_at": time.strftime("%Y-%m-%d %H:%M:%S"),
     })

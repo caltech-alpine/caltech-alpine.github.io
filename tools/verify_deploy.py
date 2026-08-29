@@ -17,8 +17,12 @@ import sys
 import urllib.error
 import urllib.request
 
+# EVERY PUBLIC PAGE. roles.php was missing until 2026-08-28, and the omission
+# is the reason this reported "23 checks, 0 failed" against a staging copy that
+# did not have the page at all. A verifier that does not know about a page
+# cannot tell you it is gone. Add a row here whenever a page is added.
 PAGES = ["/", "/index.php", "/events.php", "/join.php", "/gear.php",
-         "/about.php", "/support.php", "/sitemap.php"]
+         "/roles.php", "/about.php", "/support.php", "/sitemap.php"]
 
 # Paths .htaccess is supposed to refuse. If any of these come back 200 the
 # server is ignoring .htaccess, which means AllowOverride is off.
