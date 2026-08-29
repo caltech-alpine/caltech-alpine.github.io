@@ -1,15 +1,22 @@
 <?php
 /**
- * Get Involved — the jobs that run the club, and how you end up doing one.
+ * Get Involved — what each officer role does, which need somebody, and how to
+ * end up in one.
  *
- * Almost everything on this page is generated from data/roles.csv and
- * data/assignments.csv. The only hand-written prose is the opening section and the
- * "how you get one" block at the bottom, and both are written to stay true for
- * years. Nobody has to edit this file after an election.
+ * Almost everything here is generated from data/roles.csv and
+ * data/assignments.csv. The only hand-written prose is the hero sentence and
+ * the "how to become an officer" block at the bottom, and both are written to
+ * stay true for years. Nobody has to edit this file after an election.
  *
- * A page listing only the current officers reads as a closed shop. This is the
- * other half: the same information arranged around what a visitor could do
- * rather than around who is already doing it.
+ * WHAT THIS PAGE MUST NOT SAY: that any member can organize a club trip or
+ * event. It used to open with exactly that -- "any member can organize a trip
+ * or an event... ask an officer and we will help put it on the calendar" --
+ * which contradicts the rest of the site and the role descriptions on this very
+ * page, where climbing days belong to the Climbing Commodore, hikes to the
+ * Hiking Coordinator, the weekly run to the Trail Run Tyrant. The club's
+ * calendar is what its officers organize. Members finding each other on Slack
+ * and going out together is a real and good thing, and the homepage is where it
+ * is described, in one sentence, as the informal half.
  */
 
 require_once __DIR__ . '/includes/bootstrap.php';
@@ -20,7 +27,7 @@ require_once __DIR__ . '/includes/partials.php';
 $PAGE = array(
     'title'       => 'Get Involved',
     'description' => 'How to help run the Caltech Alpine Club: what each officer role does, '
-                   . 'which are open right now, and who to write to.',
+                   . 'which ones need somebody, and how to become one.',
     'nav'         => 'roles.php',
 );
 
@@ -44,66 +51,18 @@ require __DIR__ . '/includes/header.php';
 
 alpine_page_hero(array(
     'title'  => 'Get involved',
-    /* NO CLAIM ABOUT WHAT IS OPEN TODAY. This sentence used to branch on
-       $needed and say "some of those jobs are looking for somebody", which is a
-       statement about the world in the one place on the page that is not
-       derived from the data -- and the section below already lists exactly
-       which jobs, from data/roles.csv, or renders nothing. What belongs here is
-       the thing that is true every year. */
-    'lede'   => "The club runs on members volunteering to organize things. You don't "
-              . 'need to be an officer to help.',
+    /* ONE SENTENCE, and it says what the page is. No claim about what is
+       open today: that is a statement about the world, and the section below
+       already lists exactly which jobs from data/roles.csv, or renders nothing.
+       No motivational opening either -- the reader came here to find out what
+       the jobs are. */
+    'lede'   => "The Alpine Club is run by Caltech student officers who organize trips "
+              . "and events and look after the club's gear, finances, membership, and "
+              . 'other ongoing work.',
     'photo'  => 'photos/img-20200822-133229.jpg',
     'credit' => 'Club trip, August 2020',
 ));
 ?>
-
-<!-- ================================================== without a role ==== -->
-<?php /* FIRST, because it is true for almost everyone who reads this page, and
-         because leading with a list of officer posts turns a club into a
-         committee. */ ?>
-<section class="section">
-  <div class="wrap">
-    <div class="split split--wide-left">
-      <div>
-        <h2 class="h2">You don't need to be an officer</h2>
-        <div class="prose mt-lg">
-          <p>
-            Any member can organize a trip or an event. Want to lead a hike up
-            Mt.&nbsp;Islip next Saturday? Ask an officer and we will help put it on the
-            calendar.
-          </p>
-          <p>
-            You can also help without organizing anything: take tickets at the film
-            festival, set problems in the bouldering cave, or drive people to the
-            trailhead.
-          </p>
-          <p>
-            Officers handle the club's ongoing work, including finances, membership,
-            equipment, trips, and events.
-          </p>
-        </div>
-      </div>
-
-      <div>
-        <div class="note">
-          <?= icon('mail', 'icon icon--xs') ?>
-          <?php /* NO MAILTO ANYWHERE ON THIS PAGE. A contact link here used to
-                   open a mail client with a blank message to a shared mailbox,
-                   which is the least useful thing it could do: the reader does
-                   not know who they are writing to, and the About roster
-                   already shows every officer, what they look after and how to
-                   reach them. Send them there and let them choose. */ ?>
-          <p>
-            Interested? <a href="<?= e(url('about.php#officers')) ?>">Find an officer</a>
-            and tell them what you'd like to help with. There's no application form
-            and no deadline.
-          </p>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
 
 <!-- ======================================================== wanted ==== -->
 <?php /* ONE LIST, not two. This was split into "what the club needs right now"
@@ -126,15 +85,12 @@ alpine_page_hero(array(
 <section class="section section--tight section--tint" id="open">
   <div class="wrap">
 
-    <h2 class="h2">Ways to get involved right now</h2>
-
-    <div class="prose mt-lg">
-      <?php /* ONE CLAUSE about who can hold a role, not a paragraph, and it is
-               about the ROLES rather than about membership. Anyone can join the
-               club; the site says so on the homepage, on Join twice and in the
-               footer, and nothing here may be read as narrowing that. */ ?>
-      <p>These are the club's officer roles, and they're for current Caltech students.</p>
-    </div>
+    <?php /* No line under this heading about who may hold a role: the hero
+             sentence two inches up says "Caltech student officers", which is
+             the same fact in the place a reader meets first. Anyone can JOIN
+             the club, which the homepage, Join and the footer all say; nothing
+             here may be read as narrowing that. */ ?>
+    <h2 class="h2">What the club needs right now</h2>
 
     <?php
     /* Jobs nobody is doing first, then the ones that would take another pair
@@ -152,12 +108,6 @@ alpine_page_hero(array(
         </li>
       <?php endforeach; ?>
     </ul>
-
-    <p class="mt-lg">
-      <a class="arrow-link" href="<?= e(url('about.php#officers')) ?>">
-        Find an officer to talk to <?= icon('arrow-right', 'icon icon--xs') ?>
-      </a>
-    </p>
 
   </div>
 </section>

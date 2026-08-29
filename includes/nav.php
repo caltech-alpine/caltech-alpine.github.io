@@ -46,7 +46,7 @@ return array(
         'href'  => 'roles.php',
         'children' => array(
             array('label' => 'The roles',    'href' => 'roles.php#roles'),
-            array('label' => 'How to start', 'href' => 'roles.php#how'),
+            array('label' => 'Becoming an officer', 'href' => 'roles.php#how'),
         ),
     ),
 
