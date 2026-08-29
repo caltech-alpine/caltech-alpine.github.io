@@ -87,10 +87,16 @@ alpine_page_hero(array(
       <div>
         <div class="note">
           <?= icon('mail', 'icon icon--xs') ?>
+          <?php /* NO MAILTO ANYWHERE ON THIS PAGE. A contact link here used to
+                   open a mail client with a blank message to a shared mailbox,
+                   which is the least useful thing it could do: the reader does
+                   not know who they are writing to, and the About roster
+                   already shows every officer, what they look after and how to
+                   reach them. Send them there and let them choose. */ ?>
           <p>
-            Want to help? Email
-            <a href="mailto:<?= e(cfg('links.officers')) ?>"><?= e(cfg('links.officers')) ?></a>
-            and tell us what you're interested in. It reaches the current officers.
+            Interested? <a href="<?= e(url('about.php#officers')) ?>">Find an officer</a>
+            and tell them what you'd like to help with. There's no application form
+            and no deadline.
           </p>
         </div>
       </div>
@@ -100,63 +106,58 @@ alpine_page_hero(array(
 
 
 <!-- ======================================================== wanted ==== -->
-<?php /* Renders NOTHING when every job has the people it needs. There is no "no
-         vacancies at this time" placeholder, because a section that exists only
-         to say it has nothing to say is a section that will one day say it
-         wrongly.
+<?php /* ONE LIST, not two. This was split into "what the club needs right now"
+         and "could use more help", because a job nobody is doing and a job that
+         could take a second person are genuinely different news. They still
+         are, and the difference is still decided by min_people and max_people
+         in data/roles.csv rather than by anybody rewording anything. It is now
+         carried by the status beside each row ("Looking for someone" against
+         "Looking for another person") instead of by two headings, because two
+         headings made the second list read as the leftovers.
 
-         Two lists, and they are separated on purpose. The club being SHORT of a
-         film festival coordinator and the club having room for a second hiking
-         coordinator are both true and are not the same news; running them
-         together in one list makes the first sound routine and the second sound
-         like an emergency. Which list a job lands in is decided by min_people
-         and max_people in data/roles.csv, not by anybody rewording anything. */ ?>
+         What min/max still decide: which jobs the HOMEPAGE may mention, which
+         is only the ones the club is actually short of.
+
+         Renders NOTHING when every job has the people it needs. There is no
+         "no vacancies at this time" placeholder, because a section that exists
+         only to say it has nothing to say is a section that will one day say
+         it wrongly. */ ?>
 <?php if ($asking): ?>
 <section class="section section--tight section--tint" id="open">
   <div class="wrap">
 
-    <?php if ($needed): ?>
-      <?php /* The heading, then the list. The address was repeated here and it
-               is already in the note at the top of this page, four inches up
-               the screen, under "Want to help?". */ ?>
-      <h2 class="h2">What the club needs right now</h2>
+    <h2 class="h2">Ways to get involved right now</h2>
 
-      <ul class="wanted mt-lg">
-        <?php foreach ($needed as $r): ?>
-          <li class="wanted__item">
-            <a class="wanted__role" href="#<?= e($r['role_id']) ?>"><?= e(alpine_role_title($r)) ?></a>
-            <span class="wanted__note"><?= e(alpine_role_status_line($r)) ?></span>
-          </li>
-        <?php endforeach; ?>
-      </ul>
-    <?php endif; ?>
+    <div class="prose mt-lg">
+      <?php /* ONE CLAUSE about who can hold a role, not a paragraph, and it is
+               about the ROLES rather than about membership. Anyone can join the
+               club; the site says so on the homepage, on Join twice and in the
+               footer, and nothing here may be read as narrowing that. */ ?>
+      <p>These are the club's officer roles, and they're for current Caltech students.</p>
+    </div>
 
     <?php
-    /* The quieter half: jobs that are running, and would still welcome
-       somebody. Under its own heading when there is a "needs" list above it,
-       and promoted to the section's heading when there is not -- so a year in
-       which nothing is actually short does not open with an empty urgency. */
-    $spare = array();
-    foreach ($asking as $r) {
-        if ($r['state'] !== ALPINE_ROLE_NEEDED) { $spare[] = $r; }
-    }
+    /* Jobs nobody is doing first, then the ones that would take another pair
+       of hands, each keeping the order of data/roles.csv. This is where
+       min_people and max_people went when the two headings became one list. */
+    $ordered = array();
+    foreach ($asking as $r) { if ($r['state'] === ALPINE_ROLE_NEEDED) { $ordered[] = $r; } }
+    foreach ($asking as $r) { if ($r['state'] !== ALPINE_ROLE_NEEDED) { $ordered[] = $r; } }
     ?>
-    <?php if ($spare): ?>
-      <?php if ($needed): ?>
-        <h3 class="h3 mt-lg">Could use more help</h3>
-      <?php else: ?>
-        <h2 class="h2">Could use more help</h2>
-      <?php endif; ?>
+    <ul class="wanted mt-lg">
+      <?php foreach ($ordered as $r): ?>
+        <li class="wanted__item">
+          <a class="wanted__role" href="#<?= e($r['role_id']) ?>"><?= e(alpine_role_title($r)) ?></a>
+          <span class="wanted__note"><?= e(alpine_role_status_line($r)) ?></span>
+        </li>
+      <?php endforeach; ?>
+    </ul>
 
-      <ul class="wanted mt-lg">
-        <?php foreach ($spare as $r): ?>
-          <li class="wanted__item">
-            <a class="wanted__role" href="#<?= e($r['role_id']) ?>"><?= e(alpine_role_title($r)) ?></a>
-            <span class="wanted__note"><?= e(alpine_role_status_line($r)) ?></span>
-          </li>
-        <?php endforeach; ?>
-      </ul>
-    <?php endif; ?>
+    <p class="mt-lg">
+      <a class="arrow-link" href="<?= e(url('about.php#officers')) ?>">
+        Find an officer to talk to <?= icon('arrow-right', 'icon icon--xs') ?>
+      </a>
+    </p>
 
   </div>
 </section>
@@ -190,13 +191,14 @@ alpine_page_hero(array(
                  link. The id never changes, so neither does the link. */
               $anchor = $r['role_id'];
 
-              /* Who to write to about this job. The people doing it if anybody
-                 is; the club's shared mailbox if nobody is, because an empty
-                 contact line on the page that exists to recruit is the one
-                 place a dead end costs something. */
-              $holderLinks = array();
+              /* NAMES, NOT MAILTO LINKS. alpine_person_link() would make each
+                 one open a mail client; the About roster is where somebody
+                 decides who to write to, and it shows the face and the job
+                 alongside the address. Gear and Support still use the link,
+                 because there the reader has already decided. */
+              $holderNames = array();
               foreach ($r['holders'] as $person) {
-                  $holderLinks[] = alpine_person_link($person, alpine_role_title($r));
+                  $holderNames[] = e($person['name']);
               }
             ?>
             <article class="role<?= $r['state'] === ALPINE_ROLE_NEEDED ? ' role--wanted' : '' ?>"
@@ -216,15 +218,15 @@ alpine_page_hero(array(
                        data/people.csv through alpine_person_link(), the same way
                        the About page gets it, so there is one copy of it. */ ?>
               <p class="role__who">
-                <?php if ($holderLinks): ?>
+                <?php if ($holderNames): ?>
                   <span class="role__holders">
-                    Currently <?= alpine_list_phrase($holderLinks) ?>.
+                    Currently <?= alpine_list_phrase($holderNames) ?>.
                   </span>
                 <?php else: ?>
                   <span class="role__holders">
-                    Nobody at the moment. Write to
-                    <a href="mailto:<?= e(cfg('links.officers')) ?>?subject=<?= e(rawurlencode(alpine_role_title($r))) ?>"><?= e(cfg('links.officers')) ?></a>
-                    if you are interested.
+                    Currently open.
+                    <a href="<?= e(url('about.php#officers')) ?>">Talk to one of the officers</a>
+                    if you're interested.
                   </span>
                 <?php endif; ?>
 
@@ -239,11 +241,6 @@ alpine_page_hero(array(
       </div>
     <?php endforeach; ?>
 
-    <p class="mt-lg">
-      <a class="arrow-link" href="<?= e(url('about.php#officers')) ?>">
-        See the officers with their photographs <?= icon('arrow-right', 'icon icon--xs') ?>
-      </a>
-    </p>
   </div>
 </section>
 
@@ -267,9 +264,9 @@ alpine_page_hero(array(
                rule, a term length or a date. If an officer confirms the real
                procedure, replace this with it and record here who said so. */ ?>
       <p>
-        Email the officers if you're interested in a role, or the president directly if
-        you know who that is. Some positions are filled at elections; open coordinator
-        roles can often be picked up during the year.
+        Tell an officer you're interested, or the president directly if you know who
+        that is. Some positions are filled at elections; open coordinator roles can
+        often be picked up during the year.
       </p>
       <p>
         Most roles don't require previous club leadership or much outdoor experience.
@@ -277,15 +274,19 @@ alpine_page_hero(array(
       </p>
     </div>
 
-    <?php /* THE ADDRESS AND THE SUBJECT LINE, and nothing else. This was a
-             "Please include" list of three, two of which nobody needs before
-             somebody can help: what you have organized before (no role requires
-             it, so asking implies one does) and how long you expect to be
-             around (there is no written term or eligibility rule anywhere -- see
-             the note above -- so nothing could be done with the answer). The
-             third is in the paragraph above. Volunteering is not an
-             application. */ ?>
-    <?php alpine_write_to(cfg('links.officers'), 'Getting involved'); ?>
+    <?php /* A LINK TO THE PEOPLE, not a mailto. This was a "write to" block
+             with a shared address and a subject line, and before that a
+             "please include" list of three things: what you had organized
+             before (no role requires it, so asking implied one did) and how
+             long you expected to be around (there is no written term or
+             eligibility rule anywhere, so nothing could be done with the
+             answer). Volunteering is not an application, and it should not
+             start by opening a blank email to nobody in particular. */ ?>
+    <p class="mt-lg">
+      <a class="btn btn--primary" href="<?= e(url('about.php#officers')) ?>">
+        See the officers <?= icon('arrow-right', 'icon icon--xs') ?>
+      </a>
+    </p>
 
   </div>
 </section>

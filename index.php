@@ -66,14 +66,17 @@ require __DIR__ . '/includes/header.php';
 
 
 <!-- ======================================================= wanted ==== -->
-<?php /* ONE LINE, and only when there is something to say.
+<?php /* AN INVITATION, NOT A STAFFING NOTICE.
 
-         The club genuinely needs people, and somebody who never visits the
-         About page will never learn that. But a homepage that opens with a
-         grid of open positions reads as a job board, and the club is not
-         recruiting staff -- it is telling members that a job they might enjoy
-         is going spare. So: a single sentence on a rule, above the events,
-         naming the roles.
+         This said "The club is short a Film Festival Coordinator", which reads
+         as an org chart with a hole in it. What it is actually for is telling a
+         member that a job they might enjoy is going spare, so the heading says
+         that and the link goes to the page that explains what the jobs involve.
+
+         "Caltech student" is in the sentence because these are the club's
+         officer roles, and it is one clause rather than a paragraph. It does
+         NOT qualify membership: anyone can join, which the hero says two inches
+         above this and the footer says on every page.
 
          When every role is filled this renders nothing at all. That is the
          property that matters when nobody has touched the site for a year: the
@@ -84,23 +87,27 @@ require __DIR__ . '/includes/header.php';
     <?php
     /* Assembled in PHP and echoed as one string. Built inline in the markup it
        picked up a newline before every comma, so the rendered line read
-       "a President , Film Festival Coordinator , and a Talks Coordinator ."
-       Anything that has to come out as a single sentence should be one string
-       by the time it reaches the page.
+       "Film Festival Coordinator , and Talks Coordinator ." Anything that has
+       to come out as a single sentence should be one string by the time it
+       reaches the page.
 
        The link target is the role_id, so renaming a job does not break it. */
     $needs = array();
     foreach ($short as $r) {
         $needs[] = '<a href="' . e(url('roles.php#' . $r['role_id'])) . '">'
-                 . e(alpine_role_need_phrase($r)) . '</a>';
+                 . e(alpine_role_help_phrase($r)) . '</a>';
     }
     ?>
-    <p class="wanted-strip__text">
-      We're looking for <?= alpine_list_phrase($needs) ?>.
-    </p>
+    <div class="wanted-strip__text">
+      <p class="wanted-strip__title">Help run the Alpine Club</p>
+      <p>
+        We're looking for
+        <?= count($short) === 1 ? 'a Caltech student' : 'Caltech students' ?>
+        to take on <?= alpine_list_phrase($needs) ?>.
+      </p>
+    </div>
     <a class="arrow-link" href="<?= e(url('roles.php')) ?>">
-      <?= count($short) === 1 ? 'See the role' : 'See the roles' ?>
-      <?= icon('arrow-right', 'icon icon--xs') ?>
+      See ways to get involved <?= icon('arrow-right', 'icon icon--xs') ?>
     </a>
   </div>
 </div>

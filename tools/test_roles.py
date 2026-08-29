@@ -239,6 +239,29 @@ def role_block(pages, role_id):
     return text_of(m.group(0))
 
 
+def wanted_list(pages):
+    """The 'ways to get involved right now' list, or '' when it is absent.
+
+    Scoped for the same reason strip() is: every job is on this page somewhere,
+    with its description, whether or not the club is asking for somebody. What
+    is being advertised is a question about this list alone.
+    """
+    m = re.search(r'(?s)<ul class="wanted[^"]*">.*?</ul>', pages["roles.php"])
+    return text_of(m.group(0)) if m else ""
+
+
+def body_of(pages, page):
+    """One page without the site footer.
+
+    The footer carries the club's two shared addresses on every page, by
+    design. A check about what a PAGE does with contact links has to stop
+    before it, or it is really a check about the footer.
+    """
+    html = pages[page]
+    cut = html.find("<footer")
+    return html if cut < 0 else html[:cut]
+
+
 def in_link(pages, page, address, why):
     """An address reachable on this page, whether shown or behind a linked name."""
     check(why, ("mailto:" + address) in pages[page] or address in text_of(pages[page]),
@@ -283,8 +306,8 @@ def scenario_1_replace_an_officer(base):
     on_page(p, "about.php", "Alice Fell", "Alice is on the roster")
     in_link(p, "about.php", "afell@caltech.edu", "with her address, from people.csv")
     on_page(p, "roles.php", "Currently Alice Fell", "Get Involved names her too")
-    in_link(p, "roles.php", "afell@caltech.edu",
-            "and her address is reachable there too, without being typed twice")
+    on_page(p, "roles.php", "Alice Fell",
+            "and Get Involved names her, without linking her address")
     on_page(p, "about.php", "Through 2027", "Zach moved to Past officers")
     # The one that matters: his ADDRESS must be gone from the whole site, even
     # though his name is still on the alumni list.
@@ -309,7 +332,7 @@ def scenario_2_two_co_presidents(base):
     check("the homepage stopped asking for a second president",
           "President" not in strip(p), strip(p))
     check("and Get Involved stopped offering the seat",
-          "Room for" not in role_block(p, "president"), role_block(p, "president"))
+          "Looking for" not in role_block(p, "president"), role_block(p, "president"))
 
 
 def scenario_3_rename_the_title(base):
@@ -347,13 +370,13 @@ def scenario_5_change_the_staffing(base):
     edit_cell("roles.csv", "hiking,", "max_people", "2")
     p = render(base)
     check("two of two hiking coordinators is full, so nothing is offered",
-          "Room for" not in role_block(p, "hiking"), role_block(p, "hiking"))
+          "Looking for" not in role_block(p, "hiking"), role_block(p, "hiking"))
 
     edit_cell("roles.csv", "hiking,", "max_people", "3")
     data_ok()
     p = render(base)
     check("raising the maximum to 3 opens a place, with no code change",
-          "Room for one more" in role_block(p, "hiking"), role_block(p, "hiking"))
+          "Looking for another person" in role_block(p, "hiking"), role_block(p, "hiking"))
     check("but it is NOT on the homepage: having room is not being short",
           "Hiking" not in strip(p), strip(p))
 
@@ -361,14 +384,21 @@ def scenario_5_change_the_staffing(base):
 def scenario_6_a_role_with_nobody(base):
     """The film festival role has nobody, and it is below its minimum."""
     p = render(base)
-    check("the homepage says the club is short of it",
-          "a Film Festival Coordinator" in strip(p), strip(p))
+    check("the homepage invites somebody to take it on",
+          "take on" in strip(p) and "Film Festival Coordinator" in strip(p), strip(p))
+    check("and frames it as helping run the club, not as a staffing gap",
+          "Help run the Alpine Club" in strip(p), strip(p))
     check("Get Involved shows it as open",
-          "Open" in role_block(p, "film_festival"))
-    check("and gives a way to write in about it",
-          "Nobody at the moment" in role_block(p, "film_festival"))
-    in_link(p, "roles.php", "alpine@caltech.edu",
-            "with the club's shared mailbox as the route")
+          "Looking for someone" in role_block(p, "film_festival"),
+          role_block(p, "film_festival"))
+    check("and points at a person rather than a mailbox",
+          "Talk to one of the officers" in role_block(p, "film_festival"),
+          role_block(p, "film_festival"))
+    # NO MAILTO ON THIS PAGE AT ALL. The roster on About is where somebody
+    # decides who to write to; a blank message to a shared address is the least
+    # useful thing a "contact us" link can do.
+    check("and roles.php opens no mail client anywhere above the footer",
+          "mailto:" not in body_of(p, "roles.php"))
     not_on_page(p, "about.php", "Could be you",
                 "and the officers grid does not pretend it is a person")
 
@@ -376,16 +406,16 @@ def scenario_6_a_role_with_nobody(base):
 def scenario_7_an_optional_role(base):
     """Talks has min 0, so an empty one is an offer and not a gap."""
     p = render(base)
-    check("an optional empty role is offered gently",
-          "Open, if somebody wants it" in role_block(p, "talks"), role_block(p, "talks"))
+    check("an optional empty role is asked for in the same words as any other",
+          "Looking for someone" in role_block(p, "talks"), role_block(p, "talks"))
     check("and never reaches the homepage as something the club is short of",
           "Talks" not in strip(p), strip(p))
 
     # Raise its minimum to 1 and it must change register immediately.
     edit_cell("roles.csv", "talks,", "min_people", "1")
     p = render(base)
-    check("raising min_people to 1 makes it a real gap, with no other edit",
-          "a Talks Coordinator" in strip(p), strip(p))
+    check("raising min_people to 1 puts it on the homepage, with no other edit",
+          "Talks Coordinator" in strip(p), strip(p))
     edit_cell("roles.csv", "talks,", "min_people", "0")
 
 
@@ -399,9 +429,8 @@ def scenario_8_an_email_changes(base):
     in_link(p, "about.php", "forrest@caltech.edu", "the roster has the new address")
     in_link(p, "gear.php", "forrest@caltech.edu",
             "and so does the gear page, which names the gear officer")
-    in_link(p, "roles.php", "forrest@caltech.edu",
-            "and Get Involved, which lists the job")
-    on_page(p, "roles.php", before["name"], "and Get Involved still names him")
+    on_page(p, "roles.php", before["name"],
+            "and Get Involved names him, without linking his address")
     nowhere(p, before["email"],
             "the OLD address is gone from every page on the site")
 
@@ -417,7 +446,7 @@ def scenario_9_add_a_role(base):
     on_page(p, "roles.php", "Ski Touring Coordinator", "the new job is on Get Involved")
     on_page(p, "roles.php", "Organizes backcountry ski days.", "with its description")
     check("and the homepage counts it, because nobody is doing it",
-          "a Ski Touring Coordinator" in strip(p), strip(p))
+          "Ski Touring Coordinator" in strip(p), strip(p))
     check("its anchor is the role_id", 'id="ski_touring"' in p["roles.php"])
 
     # Now fill it, and every one of those notices must retract by itself.
@@ -497,13 +526,13 @@ def scenario_11_stop_recruiting(base):
           'class="wanted-strip"' not in p["index.php"])
     on_page(p, "roles.php", "Film Festival Coordinator",
             "but the job still appears on Get Involved with its description")
-    not_on_page(p, "roles.php", "What the club needs right now",
-                "and is not listed as something the club needs")
+    check("and is not listed as something to help with",
+          "Film Festival" not in wanted_list(p), wanted_list(p))
 
     edit_cell("roles.csv", "film_festival,", "recruiting", "")
     p = render(base)
     check("clearing the cell starts advertising it again",
-          "a Film Festival Coordinator" in strip(p), strip(p))
+          "Film Festival Coordinator" in strip(p), strip(p))
 
 
 def scenario_12_a_handover(base):

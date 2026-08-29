@@ -1698,10 +1698,10 @@ main  { flex: 1 0 auto; }
 @media (max-width: 640px) { .page-hero__credit { display: none; } }
 
 
-/* --- the homepage line ---------------------------------------------------
-   One sentence between the hero and the events. Rules above and below rather
-   than a filled box: it should read as the club saying something, not as an
-   advertisement placed on the page.                                         */
+/* --- the homepage invitation ---------------------------------------------
+   A heading and a sentence between the hero and the events. Rules above and
+   below rather than a filled box: it should read as the club saying something,
+   not as an advertisement placed on the page.                               */
 .wanted-strip {
   border-block: 1px solid var(--line-strong);
   background: var(--paper-2);
@@ -1709,15 +1709,21 @@ main  { flex: 1 0 auto; }
 .wanted-strip__inner {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
+  /* Centred, not baseline: the text block is two lines now, and a baseline
+     would pin the link beside the heading rather than beside the block. */
+  align-items: center;
   justify-content: space-between;
   gap: .6rem 1.5rem;
-  padding-block: .95rem;
+  padding-block: 1.05rem;
 }
 .wanted-strip__text {
-  margin: 0;
   font-size: var(--step-0);
   max-width: 60ch;
+}
+.wanted-strip__text p { margin: 0; }
+.wanted-strip__title {
+  font-weight: 700;
+  margin-bottom: .15rem !important;
 }
 .wanted-strip__text a {
   font-weight: 600;

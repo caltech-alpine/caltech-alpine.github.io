@@ -270,13 +270,6 @@ require __DIR__ . '/includes/header.php';
                  . '<a href="' . e(url('gear.php')) . '">what is available</a>.</p>',
         ),
         array(
-            'q' => 'How do I find people to go with?',
-            'a' => '<p>Most coordination happens on Slack: post what you want to do and when. '
-                 . 'The club\'s activity leaders also organize outings members can join. See '
-                 . '<a href="' . e(url('about.php#officers')) . '">who currently leads '
-                 . 'what</a>.</p>',
-        ),
-        array(
             'q' => 'How does the club handle safety?',
             /* CONCRETE PRACTICES ONLY. The question invites an institutional
                claim, and there is no written safety policy in this repository

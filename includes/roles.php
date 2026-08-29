@@ -301,39 +301,61 @@ function alpine_roles_needed()
 /**
  * How a role's staffing reads on a page, in plain words.
  *
+ * THREE PHRASES AND NOTHING ELSE:
+ *
+ *     ''                        somebody is doing it and the club is not asking
+ *     Looking for someone       nobody is doing it
+ *     Looking for another person  somebody is, and another would help
+ *
+ * (plus "Looking for N more people" when a job wants several, which is the same
+ * sentence with a number in it.)
+ *
+ * It used to say "Open" for a job the club was short of and "Open, if somebody
+ * wants it" for an optional one, which made the second sound like nobody would
+ * mind if it never happened. The difference between those two cases is real and
+ * it is still in the data; it is just not the visitor's problem. What decides
+ * whether the homepage mentions a job, and whether it leads the list here, is
+ * still min_people and max_people, not this wording.
+ *
  * Returns '' for anything with nothing to say, so a caller can print it
- * unconditionally. Deliberately never says "vacant", never says "nobody is
- * doing this", and never prints the minimum and maximum at a visitor: those two
- * numbers are how the site decides what to say, not something a reader needs.
+ * unconditionally. Deliberately never says "vacant" and never prints the
+ * minimum and maximum at a visitor.
  */
 function alpine_role_status_line($role)
 {
-    switch ($role['state']) {
-
-        case ALPINE_ROLE_NEEDED:
-            if ($role['filled'] === 0) { return 'Open'; }
-            /* Somebody IS doing it and the club wants more. "Open" here would
-               read as though nobody were, which is both wrong and rude to the
-               person doing the job. */
-            return $role['short'] === 1
-                ? 'Looking for one more person'
-                : 'Looking for ' . alpine_number_word($role['short']) . ' more people';
-
-        case ALPINE_ROLE_SPARE:
-            /* An optional job nobody is doing. The club is not short of it --
-               it would just be nice. That difference in tone is the entire
-               reason min_people and max_people are separate numbers. */
-            if ($role['filled'] === 0) { return 'Open, if somebody wants it'; }
-            return $role['spare'] === 1
-                ? 'Room for one more'
-                : 'Room for ' . alpine_number_word($role['spare']) . ' more';
-
-        case ALPINE_ROLE_HANDOVER:
-            return $role['recruiting'];             /* a human's own sentence */
-
-        default:
-            return '';
+    if ($role['state'] === ALPINE_ROLE_HANDOVER) {
+        return $role['recruiting'];                 /* a human's own sentence */
     }
+
+    if ($role['state'] !== ALPINE_ROLE_NEEDED && $role['state'] !== ALPINE_ROLE_SPARE) {
+        return '';
+    }
+
+    if ($role['filled'] === 0) { return 'Looking for someone'; }
+
+    /* Somebody IS doing it and another would help. Never "open" here: that
+       reads as though nobody were, which is wrong and rude to the person in
+       the job. */
+    $more = $role['state'] === ALPINE_ROLE_NEEDED ? $role['short'] : $role['spare'];
+
+    return $more === 1
+        ? 'Looking for another person'
+        : 'Looking for ' . alpine_number_word($more) . ' more people';
+}
+
+/**
+ * The same job inside the homepage sentence "we are looking for a Caltech
+ * student to take on ___".
+ *
+ * alpine_role_need_phrase() is the older cousin of this and puts an article on
+ * the front ("a Talks Coordinator", "a second President") because it was
+ * written for a different sentence. This one has to sit after "take on", where
+ * the article is wrong.
+ */
+function alpine_role_help_phrase($role)
+{
+    $title = alpine_role_title($role, $role['filled'] + 1);
+    return $role['filled'] === 0 ? $title : 'another ' . $title;
 }
 
 /**
