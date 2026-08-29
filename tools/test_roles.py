@@ -404,19 +404,26 @@ def scenario_6_a_role_with_nobody(base):
 
 
 def scenario_7_an_optional_role(base):
-    """Talks has min 0, so an empty one is an offer and not a gap."""
-    p = render(base)
-    check("an optional empty role is asked for in the same words as any other",
-          "Looking for someone" in role_block(p, "talks"), role_block(p, "talks"))
-    check("and never reaches the homepage as something the club is short of",
-          "Talks" not in strip(p), strip(p))
+    """min_people is the only thing that decides whether the homepage asks.
 
-    # Raise its minimum to 1 and it must change register immediately.
-    edit_cell("roles.csv", "talks,", "min_people", "1")
+    Talks is empty and has a minimum of one, so the club is short of it and the
+    homepage says so. Dropping the minimum to zero makes it a job that would be
+    nice to have: still offered on Get Involved, in the same words as any other,
+    and silent on the homepage. One cell, no code, no second edit anywhere.
+    """
     p = render(base)
-    check("raising min_people to 1 puts it on the homepage, with no other edit",
+    check("an empty role below its minimum is on the homepage",
           "Talks Coordinator" in strip(p), strip(p))
+    check("and it is asked for in the same words as any other role",
+          "Looking for someone" in role_block(p, "talks"), role_block(p, "talks"))
+
     edit_cell("roles.csv", "talks,", "min_people", "0")
+    p = render(base)
+    check("dropping min_people to 0 takes it off the homepage, with no other edit",
+          "Talks" not in strip(p), strip(p))
+    check("but Get Involved still offers it, in the same words",
+          "Looking for someone" in role_block(p, "talks"), role_block(p, "talks"))
+    edit_cell("roles.csv", "talks,", "min_people", "1")
 
 
 def scenario_8_an_email_changes(base):
@@ -517,13 +524,18 @@ def scenario_11_stop_recruiting(base):
     edit_cell("roles.csv", "film_festival,", "recruiting", "no")
     data_ok()
     p = render(base)
-    # Nothing else is below its minimum at this point, so the whole strip
-    # should have disappeared rather than merely stopped naming this job. Said
-    # explicitly, because "not in ''" would otherwise pass without looking.
     check("'recruiting = no' takes it off the homepage",
           "Film Festival" not in strip(p), strip(p))
-    check("and with nothing else short, the homepage notice vanishes entirely",
+
+    # Talks is also below its minimum, so the strip is still up for that. Quiet
+    # it too and the whole block must disappear rather than render empty. Worth
+    # saying explicitly: "not in ''" would pass without looking at anything, so
+    # this asks about the element and not about the text inside it.
+    edit_cell("roles.csv", "talks,", "recruiting", "no")
+    p = render(base)
+    check("and with nothing left short, the homepage notice vanishes entirely",
           'class="wanted-strip"' not in p["index.php"])
+    edit_cell("roles.csv", "talks,", "recruiting", "")
     on_page(p, "roles.php", "Film Festival Coordinator",
             "but the job still appears on Get Involved with its description")
     check("and is not listed as something to help with",
