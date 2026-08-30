@@ -1,36 +1,40 @@
 # How to publish the site
 
-The procedure for putting this repository onto Caltech hosting. Written for
-staging; the production cutover is the same procedure with a different target
-and an extra approval, and it is at the end.
+**The ordinary case is one command on the server, and it is [§A2](#a2-deploying-from-then-on).**
+[`../SECRETARY.md`](../SECRETARY.md) is the same thing written for somebody who
+has never done it. This file is the full account: what the command does, how the
+server was set up, the laptop route for the day GitHub is unreachable, and the
+production cutover.
 
-Read [SERVERS.md](SERVERS.md) first if you do not know what `portal.caltech.edu`
-is. Write down what happened in [DEPLOY-LOG.md](DEPLOY-LOG.md) when you are
-finished, including the parts that failed.
+Read [SERVERS.md](SERVERS.md) if you do not know what `portal.caltech.edu` is.
+Write down what happened in [DEPLOY-LOG.md](DEPLOY-LOG.md) when you are finished,
+including the parts that failed — those are the valuable entries.
 
-**Nothing here touches alpine.caltech.edu.** Staging is a separate document root
-on a separate server. The worst outcome of getting a step wrong is a broken
-staging page.
+**Nothing here touches `alpine.caltech.edu`.** As of 2026-08-30 that hostname
+still serves the Caltech Sites (Wagtail) page and nothing in this repository can
+reach it. What this publishes to is `staging.alpine.caltech.edu`, a separate
+document root. The worst outcome of getting a step wrong is a broken staging
+page. Moving production onto this repository is a decision plus an IMSS request:
+[the last section](#the-production-cutover).
 
 ---
 
-## Two ways to deploy, and which to use
+## Two ways to publish, and which to use
 
-**From the server (recommended).** An admin logs into `portal.caltech.edu` with
-PuTTY and runs one command. The server pulls the code from GitHub itself and
-publishes it. Nothing is needed on the admin's own computer beyond PuTTY and the
-VPN, which is the point: the ability to deploy stops depending on one person
-having a laptop set up correctly. → §A
+**From the server — this is the way.** Log into `portal.caltech.edu` with PuTTY
+and run one command. The server fetches the code from GitHub itself and
+publishes it. Nothing is needed on your own computer beyond PuTTY and the VPN,
+which is the entire point: **the ability to publish must not depend on one
+person having a laptop set up correctly**, because that person graduates.
+→ §A
 
-**From your own machine.** `tools/deploy.sh` sends the files over SSH from a
-clone on your laptop. Needs Git Bash, a clone, the VPN on "Tunnel All", and one
-round of password plus Duo. It is a single command — it remembers your username,
-checks the server is reachable before doing anything slow, uploads and sets
-permissions over one connection, and verifies the result itself. Use it to
-bootstrap the server-side setup, or if GitHub is unreachable. → §0 onwards.
+**From your own machine — the fallback.** `tools/deploy.sh` pushes the files over
+SSH from a clone on your laptop. It needs Git Bash, a clone, the VPN on "Tunnel
+All", and a password plus Duo. Two reasons to use it and no others: bootstrapping
+a brand-new server, and the day GitHub itself is unreachable. → §B
 
-Both publish exactly the same files and set the same permissions. Neither can
-touch `alpine.caltech.edu`.
+Both publish the same files and set the same permissions. Neither can touch
+`alpine.caltech.edu`.
 
 ---
 
@@ -115,23 +119,74 @@ maintain them, rather than only the person who set it up.
 /srv/www.alpine.caltech.edu/www/bin/deploy
 ```
 
-That takes whatever is on GitHub, backs up the current site, publishes, and sets
-the permissions. It always overwrites: the checkout is reset to match `origin/main`
-first, so anything edited by hand inside `repo/` is discarded without a prompt.
-GitHub is the source of truth; the server is a copy of it.
+That is the whole procedure. `bin/deploy` resets the server's checkout to match
+GitHub's `main` and then runs [`tools/server-deploy.sh`](../tools/server-deploy.sh)
+out of it, so the deploy logic is version controlled and updates itself: change
+that script, push, and the next deploy runs the new one.
+
+It does four things, and the last three are there because they are the ones a
+human skips.
+
+**1. It refuses to publish a commit GitHub has not passed.** Before anything
+else it asks GitHub whether the workflow run for this exact commit succeeded.
+
+| Answer | What happens |
+|---|---|
+| the push run succeeded | publishes |
+| the push run failed | **refuses**, and prints the link to the failure |
+| GitHub has not finished | **refuses**, and says to wait a minute |
+| GitHub cannot be reached | publishes, with a warning |
+
+That last row is deliberate: the gate **fails open**. A GitHub outage must not
+be the reason the club cannot update its own website. `--force` overrides the
+other two, and is for emergencies.
+
+It asks about the *push* run specifically
+(`/actions/runs?head_sha=...&event=push`), not about the commit's check-runs.
+The obvious endpoint is the wrong one: this repository's workflow also runs on a
+half-hourly schedule, so a commit that has been on `main` for a day carries
+dozens of check-runs and usually has one queued at any moment. A gate reading
+that list would have refused to deploy for most of every hour. Measured
+2026-08-30: 30 check-runs on one commit, one of them queued.
+
+**2. It backs up the document root** into `backups/`, keeping the newest five.
+
+**3. It publishes, and writes `docroot/version.txt`** — the commit, the subject,
+the time and who ran it. That file is readable at
+`https://staging.alpine.caltech.edu/version.txt`, which is how anybody can find
+out what is actually live without logging in.
+
+**4. It fetches the public address and checks the change landed**, printing
+whether the site is now serving the commit it just published. Publishing and
+verifying are one action because the second one is the one that gets skipped:
+on 2026-08-28 a verifier reported 23 checks and 0 failures against a staging
+copy that was weeks out of date.
+
+Everything it publishes comes from GitHub. Anything edited by hand inside
+`repo/`, or inside `docroot/`, is discarded without a prompt.
 
 ## A3. Rolling back
 
 ```bash
-git -C /srv/www.alpine.caltech.edu/www/repo checkout <commit>
+/srv/www.alpine.caltech.edu/www/bin/deploy --rollback
 ```
 
-```bash
-/srv/www.alpine.caltech.edu/www/bin/deploy
-```
+Puts the copy taken before the last deploy straight back. That is the whole
+recovery path at the moment somebody needs it.
 
-Return to normal with `git -C .../repo checkout main` and deploy again. The
-five automatic copies in `backups/` are the cruder fallback.
+Then fix it properly on GitHub — undo the change, wait for the green tick, and
+deploy again. **The rollback is a patch, not a fix:** the next ordinary deploy
+publishes whatever is on `main`, so if the bad change is still there it comes
+straight back.
+
+> ⚠ **The older instruction here did not work.** It said to
+> `git -C .../repo checkout <commit>` and then run `bin/deploy`. It cannot: the
+> `bin/deploy` wrapper runs `git reset --hard origin/main` before it reads
+> anything else, so the checkout was discarded one line before the deploy
+> script saw it. Found and fixed 2026-08-30, when `--rollback` was added. If you
+> genuinely need an arbitrary old version rather than the last one, put it back
+> on GitHub — that is the source of truth, and doing it there means the next
+> deploy agrees with you instead of undoing you.
 
 ## A4. Why not have it deploy itself on every push
 
@@ -144,6 +199,18 @@ command is better than a robot.
 ---
 
 # §B. Deploying from your own machine
+
+> **This is not the normal way to publish, and has not been since 2026-08-19.**
+> §A is. Use this only to bring up a **new server**, or on a day GitHub itself
+> is unreachable. It needs a clone, Git Bash and a laptop set up correctly — the
+> three things §A exists to stop the club depending on.
+>
+> Steps 1 and 2 are the *first-server* steps and were done once, on 2026-08-18.
+> They are kept for the next server, or for the day production gets a document
+> root of its own. If you are publishing a change, you want §A.
+>
+> This route has **no check gate, no version stamp and no `--rollback`**. Those
+> live in `tools/server-deploy.sh`, which only §A runs.
 
 ## 0. Before you start
 
@@ -262,7 +329,7 @@ the server, and why:
 |---|---|
 | `.git/`, `.github/` | The repository is not the website |
 | `_site/`, `_preview/` | Build output for the Pages pilot |
-| `docs/`, `README.md` | Notes for officers, not pages for visitors |
+| `docs/`, `README.md`, `SECRETARY.md` | Documentation, not pages for visitors. `.htaccess` denies `.md` anyway; this keeps them off the server entirely |
 | `cache/*` | The server writes its own; overwriting it is how you serve yesterday's calendar |
 | `includes/config.local.php` | The server's copy is the one holding any key. **Overwriting it is the one mistake here that is hard to undo.** |
 | `logs/*` | Written on the server |
@@ -320,13 +387,16 @@ behind a key, the way `preview.php` already works.
 
 ## 5. Verify from outside
 
-**`tools/deploy.sh` does this for you at the end of every deploy.** Run it by
-hand when you want to check the site without deploying — from your own machine,
-off the VPN if you can:
+**Both deploy routes check the site themselves at the end.** Run this by hand
+when you want to check without deploying — from your own machine, off the VPN if
+you can:
 
 ```bash
 python tools/verify_deploy.py https://staging.alpine.caltech.edu
 ```
+
+Add `--expect HEAD` inside a clone to assert that the server is running the
+commit you are sitting on. It reads that from `version.txt`, which §A2 writes.
 
 It checks every page returns 200, that the pages are HTML rather than PHP source,
 that events rendered, that `.htaccess` is in force (the security headers arrive,
@@ -359,22 +429,25 @@ time.
 | Every URL is a redirect loop | Something added a force-HTTPS rule. See [SERVERS.md](SERVERS.md), "Never force HTTPS in `.htaccess` on this host". |
 | PHP source is shown as text | PHP is not enabled for this document root. IMSS ticket. |
 | Directory listings appear | `.htaccess` is being ignored. `AllowOverride` is off. IMSS ticket. |
-| No events on the page | The calendar fetch failed, or the calendar has no future events. `php tools/check.php` on the server distinguishes the two. |
-| The site is slow | `cache/` is not writable, so every visitor triggers a call to Google. Step 4. |
-| A page 403s | Permissions. Step 4. |
-| "Connection refused" from `scp` | The VPN is not on Tunnel All. |
+| No events on the page | The calendar fetch failed, or the calendar has no future events. `php tools/check.php` on a laptop distinguishes the two; it cannot be run on the server. |
+| The site is slow | `cache/` is not writable, so every visitor triggers a call to Google. §B step 4. |
+| A page 403s | Permissions. §B step 4. |
+| "Connection refused" from `scp` or PuTTY | The VPN is not on Tunnel All. |
+| The site is not showing a change that was published | Read `<site>/version.txt`. It says which commit is live. If that is not the one you expected, the deploy did not happen or did not finish. |
+| `bin/deploy` refuses to publish | Read what it says. Either GitHub's checks failed on that commit, or they have not finished yet. Both are described in §A2. |
 
 ### Rollback
 
-There is no automatic rollback. There are three ways back, in order of how much
-you will wish you had used them:
+**`bin/deploy --rollback`**, on the server. See [§A3](#a3-rolling-back), which
+also records why the older instruction in this place — checkout an old commit,
+then deploy — could never have worked.
 
-1. **Re-deploy an older commit.** `git checkout <commit>`, run `tools/deploy.sh`,
-   `git checkout main`. This is why deploying uncommitted work is a bad idea.
-2. **Copy the document root before you overwrite it**, once there is anything
-   there worth keeping: `cp -a docroot docroot.bak-2026-08-18` on the server.
-3. **Do nothing.** Staging is not the club's site. `alpine.caltech.edu` is
-   untouched, and a broken staging page harms nobody.
+Two things underneath it, in order of how much you will wish you had used them:
+
+1. **The five automatic copies in `backups/`.** `--rollback` restores the newest.
+   An older one can be copied back by hand.
+2. **Do nothing.** Until the production cutover, staging is not the club's site.
+   `alpine.caltech.edu` is untouched, and a broken staging page harms nobody.
 
 ---
 
@@ -392,9 +465,27 @@ this is the checklist for the day it is made.
 - [ ] Office of Strategic Communications has been asked whether a club site off
       the Caltech Sites template is acceptable at a `caltech.edu` hostname.
       Cheap to ask now, expensive to discover afterwards.
-- [ ] **Someone other than Kyle can do this procedure.** Officer turnover is
-      annual and this is the step that decides whether the site survives it.
+- [ ] **Somebody who did not build this has done the procedure**, start to
+      finish, from [`../SECRETARY.md`](../SECRETARY.md) alone, without asking
+      anyone. Officer turnover is annual and this is the step that decides
+      whether the site survives it.
 - [ ] `noindex` comes off production and stays on staging. Two indexable copies
       of the same site compete with each other in search results.
 - [ ] The Wagtail site is left in place, not deleted, until the new one has been
       live for a term.
+
+**Three things in this repository change on the day, and only three.**
+
+- [ ] `URL=` at the top of [`../tools/server-deploy.sh`](../tools/server-deploy.sh) —
+      the one place the published address is written. The deploy prints it and
+      smoke-tests it, and `SECRETARY.md` deliberately never repeats it, so this
+      single line is what keeps every document honest.
+- [ ] `site.url` in [`../includes/config.php`](../includes/config.php), which
+      sets the canonical link.
+- [ ] The "which address is which, today" table at the top of
+      [`../SECRETARY.md`](../SECRETARY.md), and the matching one in
+      [`../README.md`](../README.md).
+
+Nothing else. `.htaccess` needs no edit: the `noindex` header is keyed on the
+hostname starting `staging.`, so the same committed file is already correct on
+both.

@@ -3,6 +3,7 @@
  verify_deploy.py - check a deployed copy of the site from outside.
 
      python tools/verify_deploy.py https://staging.alpine.caltech.edu
+     python tools/verify_deploy.py https://staging.alpine.caltech.edu --expect HEAD
 
  tools/check.php answers "is the data right" and has to run on the server.
  tools/audit.py answers "is the markup right" and needs PHP locally.
@@ -10,9 +11,15 @@
  assumed", using nothing but the public internet and the standard library, so
  it runs on any machine including one with no PHP installed.
 
+ --expect <sha|HEAD> also asserts that the copy out there is running that
+ commit, read from the version.txt the deploy writes. HEAD means "whatever this
+ clone is on". Without it the commit is reported but never fails the run,
+ because a laptop's HEAD is not necessarily what the club meant to publish.
+
  Exit status is 0 when nothing failed, 1 otherwise. Warnings do not fail.
 """
 
+import subprocess
 import sys
 import urllib.error
 import urllib.request
@@ -70,8 +77,37 @@ def get(url, method="GET"):
         return None, Headers([]), str(e)
 
 
-def main(base):
+def main(base, expect=None):
     base = base.rstrip("/")
+
+    # --- which commit is actually out there ------------------------------
+    # The deploy writes this. Before it existed, the only way to answer "did my
+    # change reach the server" was to read the page and hope you would notice
+    # the difference -- and on 2026-08-28 that produced a clean bill of health
+    # for a copy that was several weeks stale. A version stamp turns that into
+    # one line of fact.
+    status, _, version = get(base + "/version.txt")
+    live = ""
+    if status == 200 and version.startswith("commit"):
+        for row in version.splitlines():
+            if row.startswith("short"):
+                live = row.split()[1]
+        record(True, "reports which commit it is running", "commit " + live)
+    elif status == 404:
+        record(None, "reports which commit it is running",
+               "no version.txt - deployed before the stamp existed, or by hand")
+    else:
+        record(None, "reports which commit it is running", "HTTP %s" % status)
+
+    if expect:
+        if not live:
+            record(False, "running the expected commit",
+                   "it does not say which commit it is running")
+        elif expect.startswith(live) or live.startswith(expect):
+            record(True, "running the expected commit", live)
+        else:
+            record(False, "running the expected commit",
+                   "expected %s, the server says %s" % (expect[:9], live))
 
     # --- the pages themselves -------------------------------------------
     home_body = ""
@@ -174,7 +210,24 @@ def main(base):
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
+    args = sys.argv[1:]
+    want = None
+    if "--expect" in args:
+        i = args.index("--expect")
+        try:
+            want = args.pop(i + 1)
+        except IndexError:
+            print("--expect needs a commit, or the word HEAD")
+            sys.exit(2)
+        args.pop(i)
+        if want.upper() == "HEAD":
+            try:
+                want = subprocess.check_output(
+                    ["git", "rev-parse", "--short", "HEAD"]).decode().strip()
+            except Exception:
+                print("--expect HEAD needs to be run inside a clone of the repository")
+                sys.exit(2)
+    if len(args) != 1:
         print(__doc__)
         sys.exit(2)
-    sys.exit(main(sys.argv[1]))
+    sys.exit(main(args[0], want))

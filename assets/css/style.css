@@ -1116,10 +1116,19 @@ body.nav-open { overflow: hidden; }
    10. CREDIBILITY, SPONSORS, OFFICERS
    ========================================================================== */
 
+/* Three cards, and the number is a decision rather than an accident -- see the
+   comment above the grid in index.php. So the layout is stated, not derived:
+   three across when there is room, stacked when there is not, and never a
+   half-empty row. `auto-fit` was doing the derivation and it broke on three:
+   between roughly 640px and 900px it settled on TWO columns, which left the
+   third card alone beside a hole. Measured at 700px, 2026-08-30. */
 .pillars {
   display: grid;
   gap: 1.75rem 2.5rem;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  grid-template-columns: 1fr;
+}
+@media (min-width: 760px) {
+  .pillars { grid-template-columns: repeat(3, 1fr); }
 }
 .pillar__icon { color: var(--alpenglow); margin-bottom: .8rem; }
 .pillar h3 { font-size: var(--step-1); margin-bottom: .45rem; }

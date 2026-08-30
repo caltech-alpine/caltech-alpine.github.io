@@ -2,399 +2,69 @@
 
 The code behind [alpine.caltech.edu](https://alpine.caltech.edu).
 
-**A live pilot of this rebuild is at <https://caltech-alpine.github.io/>.** It is a
-static render of this repository, published by `.github/workflows/pages.yml` and
-rebuilt every 30 minutes so the calendar stays current. It is marked `noindex` so
-it cannot compete with the club's real site in search results. What the pilot
-gives up, and what running the dynamic PHP version on Caltech hosting would take,
-are both in [docs/HOSTING.md](docs/HOSTING.md).
+> ## Are you the Secretary, or an officer who needs to change something?
+> ## Read **[SECRETARY.md](SECRETARY.md)** instead. That is the whole job, in one page.
+>
+> This file is the developer's view: how the site is put together and why. You
+> need none of it to update the officers, the gear, the sponsors or the links.
+
+---
+
+## What this is
 
 Plain HTML, CSS, JavaScript and a small amount of PHP. There is **no build step,
-no npm, no database and no CMS**. If you can edit a text file and copy it to a
+no npm, no database and no CMS.** If you can edit a text file and copy it to a
 server, you can maintain this site.
 
 It is built on one assumption: **routine club operations should not require
 editing the website.** Events come from Google Calendar. Conversations happen on
-Slack. This site holds the things that stay true for years.
+Slack. This repository holds the things that stay true for years.
 
----
+### The three copies, and what each is for
 
-## How to update the website
-
-### To add an event
-
-**Add it to the club Google Calendar. That is the whole process.**
-
-The website reads the calendar every 5 minutes and builds the event cards
-itself. You do not touch this repository, and you do not create a page per trip.
-
-Write the title the way it should read on the website. There are no activity
-tags to remember.
-
-The site used to accept a `[HIKE]`-style prefix and turn it into a label on the
-card. That was removed in August 2026: the labels were not worth the table of
-activities, aliases and keyword guesses behind them. Old titles are not a
-problem — a leading `[BRACKET]` is still dropped from the displayed title, so
-`[RUN] Weekly trail run` reads as *Weekly trail run*. Nothing needs editing in
-the calendar.
-
-**Other things worth knowing:**
-
-- All-day, multi-day and repeating events all work.
-- Cancelling an event in Google Calendar shows a "Cancelled" badge rather than
-  making it vanish, so people who were planning to come find out.
-- Events move from "Upcoming" to "Past events" by themselves. Nobody has to
-  write a trip report for the archive to exist.
-- **Whatever you put in the event description appears on the card**, and every
-  event has a **Details** button that opens the full text in a pop-up. Links
-  survive there, so a sign-up sheet or a map pin in the description is
-  clickable.
-- **The first sentence is the one shown on the card**, so put the useful part
-  first: *"Meeting at the Chaney Trail gate at 7am, about 6 miles round trip"*,
-  not *"Come join us for a great morning out!"*. Everything after it still shows
-  in the pop-up. Write the event the way you would tell a friend about it — the
-  calendar is allowed to sound like club members, and the site does not tidy it
-  up.
-- **Do not leave a test event on the calendar.** The archive fills itself in
-  from the calendar and never forgets, so an event called `test` is on the
-  public website until somebody deletes it from Google Calendar. There is a
-  place to test without touching the club calendar: `preview.php`, which renders
-  any public calendar using the real site's components. See the top of that
-  file.
-- **Google Meet boilerplate is stripped automatically.** Ticking "Add Google
-  Meet video conferencing" makes Google write *"Join with Google Meet: ..."* and
-  *"Learn more about Meet at: ..."* into the description; the site removes both
-  lines and keeps anything you wrote yourself. See
-  `stripConferencingBoilerplate()` in `lib/calendar/IcsParser.php`.
-- **A repeating event shows only its next occurrence**, labelled "Weekly on
-  Tuesdays" or similar, so a standing weekly run does not bury everything else.
-  Editing or deleting a single week in Google Calendar works as you would
-  expect.
-
-## Changing the officers
-
-Three files, all in [`data/`](data). **Everything on this site that a person
-edits is in that one directory** — these three, plus the gear list, the
-sponsors and the member deals. There is no second place to look.
-
-Each fact is written in exactly **one** of the three, so changing an email
-address is one edit and every page follows.
-
-| File | What it says | You edit it when |
+| | Address | What it is |
 |---|---|---|
-| [`data/people.csv`](data/people.csv) | **who exists** — name, email, photo | somebody new joins the club's leadership, or an address changes |
-| [`data/roles.csv`](data/roles.csv) | **what the jobs are** — title, description, how many people | the club changes what a job is called, what it involves, or how many do it |
-| [`data/assignments.csv`](data/assignments.csv) | **who is doing which job** | after an election. Usually the only file that changes |
+| **Production** | <https://alpine.caltech.edu> | The club's live site. **Still the Caltech Sites (Wagtail) page** as of 2026-08-30; nothing here reaches it yet. Moving it is a decision plus an IMSS request - [docs/DEPLOY.md](docs/DEPLOY.md), *The production cutover*. |
+| **The Caltech copy of this repo** | <https://staging.alpine.caltech.edu> | This repository, running as real PHP on Caltech hosting. What `bin/deploy` publishes to. |
+| **The preview** | <https://caltech-alpine.github.io> | A static render of `main`, rebuilt by [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on every push and every 30 minutes. `noindex`, so it cannot compete with the real site in search. **This is the normal preview for content changes.** |
 
-They are spreadsheets. Open them in Excel, Sheets, Notepad, or the GitHub web
-editor. Lines starting with `#` are notes and are ignored, so each file carries
-its own instructions at the top.
+Use the preview for anything that is data or wording. Use the Caltech copy for
+anything that depends on the *server*: `.htaccess`, PHP behaviour, `preview.php`,
+caching, headers. [docs/HOSTING.md](docs/HOSTING.md) §2 is the full list of what
+a static render cannot show.
 
-**After any edit, run this.** It takes under a second, needs no network, and it
-catches the one class of mistake that is invisible on the finished page:
+### How a change reaches the website
 
-```bash
-php tools/check.php --data
 ```
+edit on GitHub  ->  the workflow checks it  ->  the preview rebuilds
+                                                        |
+                         somebody runs bin/deploy on portal.caltech.edu
+                                                        |
+                                              the Caltech copy updates
+```
+
+The checks are not advisory. `tools/server-deploy.sh` asks GitHub whether the
+commit it is about to publish passed, and **refuses to publish it if it did
+not.** Nobody has to remember to look.
 
 ---
 
-### The one durability rule: `role_id` is permanent, `title` is not
+## Where things are edited
 
-Every job has two names.
+The instructions are in [SECRETARY.md](SECRETARY.md). The map, so that this file
+is not a second source of truth for them:
 
-- **`role_id`** — `president`, `film_festival`, `gear`. Short, lowercase, never
-  shown to a visitor. It is what `data/assignments.csv` points at, what the page
-  anchors use, and what the website's own code looks for. **Pick it once and
-  never change it.**
-- **`title`** — `President`, `Film Festival Coordinator`. What the page prints.
-  **Change it as often as you like.**
-
-Nothing in the site decides anything by reading a title. You can rename
-*President* to *Co-President*, to *Presidents*, to *Chair*, and back again, and
-the only thing that changes is the words on the screen — the president stays
-attached to the job, the vacancy maths keeps working, the links keep working.
-
-The one edit that *does* break things is changing a `role_id`, and
-`php tools/check.php --data` will tell you exactly what it broke.
-
----
-
-### Replacing an officer
-
-Two edits, both in `data/assignments.csv`. Put the year in the `until` column of the
-person leaving, and add a row for the person arriving:
-
-```csv
-person_id,role_id,until,title_held
-zach-auvil,president,2027,
-alice-fell,president,,
-```
-
-If the new person is not in `data/people.csv` yet, add them there first:
-
-```csv
-person_id,name,email,photo
-alice-fell,"Alice Fell",afell@caltech.edu,alice-fell.jpg
-```
-
-**Never delete anybody.** The `until` year moves them to the *Past officers*
-list by itself, and the job starts showing as open by itself, and both undo
-themselves when the replacement is added. **Nobody ever types the word
-"vacant".**
-
-### Adding a co-officer
-
-One more row in `data/assignments.csv`:
-
-```csv
-alice-fell,president,,
-bob-ridge,president,,
-```
-
-If `data/roles.csv` gives that job a `title_shared`, both are titled with it
-automatically — two presidents become *Co-Presidents* without anyone editing a
-title. Drop back to one and it reads *President* again.
-
-Check `max_people` allows two. If it does not, the data check says so.
-
-### Renaming a role
-
-Change `title` in `data/roles.csv`. That is all. Leave `role_id` alone.
-
-```csv
-role_id,title,title_shared,...
-president,Chair,Co-Chair,...
-```
-
-### Changing how many people a job wants
-
-Two numbers in `data/roles.csv`, and they mean different things:
-
-- **`min_people`** — how many the club *needs*. Below this, the job is
-  advertised as open, on the homepage and everywhere else.
-- **`max_people`** — how many it can *use*. Between min and max the site offers
-  the place quietly instead of announcing a gap. **Leave it blank** for a job
-  that takes as many volunteers as turn up.
-
-That gives four different things the site can say, and you choose between them
-with two numbers rather than by rewording a notice:
-
-| `min` | `max` | People doing it | What the site says |
-|---:|---:|---:|---|
-| 1 | 2 | 0 | **Open** — and the homepage says the club is short one |
-| 1 | 2 | 1 | *Room for one more* — quietly, not on the homepage |
-| 1 | 2 | 2 | nothing |
-| 1 | *(blank)* | 2 | nothing — as many as turn up is never short |
-| **0** | 1 | 0 | *Open, if somebody wants it* — never on the homepage |
-
-That last row is the useful one. **`min_people = 0` means the job is not
-required.** An empty one is an invitation rather than a gap, and it never
-appears among the things the club is short of. Use it for anything the club is
-genuinely happy to go a year without.
-
-### Adding a new role
-
-One row in `data/roles.csv`, and a row in `data/assignments.csv` if somebody is already
-doing it. No template to edit — it appears on Get Involved, in the officer
-roster, and in the vacancy counting straight away.
-
-```csv
-role_id,title,title_shared,group,min_people,max_people,description,contact_for,recruiting
-ski_touring,"Ski Touring Coordinator",,"Activity Leaders",1,2,"Organizes backcountry ski days.","Ski touring",
-```
-
-**The order of the rows is the order on the page**, for the roles *and* for the
-officers holding them. Move a row to move both. There is no sort column.
-
-### Retiring a role
-
-Delete the row from `data/roles.csv`. **Nobody is lost** — the people who held it
-stay in `data/people.csv` and on the *Past officers* list, which is built from
-`data/assignments.csv` and deliberately outlives the jobs.
-
-One thing to do first: if anybody held that job in the past, make sure their
-`title_held` cell in `data/assignments.csv` says what the job was called. The row you
-are about to delete is the last record of it. `php tools/check.php --data` will
-stop you and name the people concerned if you forget.
-
-### Pausing recruitment for a role
-
-Put the word `no` in the `recruiting` column and the site stops asking for that
-job, even while it is empty. It still appears on Get Involved with its
-description; it just stops advertising. Clear the cell to start again.
-
-The same column does the opposite job when you write a sentence in it: for a
-role that is **filled and still needs somebody** — because the holder is
-leaving — write the reason in plain words, `stepping down in June`, and that
-sentence is what the site shows. It is the one case the site cannot work out by
-counting.
-
----
-
-### The rest of the columns
-
-`contact_for` in `data/roles.csv` is what makes the roster useful: it tells a visitor
-what to write to that officer about. It describes the **job**, so two people
-sharing one say the same thing, and it is written once.
-
-`email` in `data/people.csv` is optional but worth chasing — without it a visitor can
-only reach that officer through the shared mailbox. Club addresses are fine to
-publish; personal ones deserve a second thought. Wherever a person's name
-appears on the site it is a `mailto:` link, built from this one cell.
-
-`title_held` in `data/assignments.csv` is almost always blank. Fill it in only for
-somebody who has finished and whose title at the time was not what the job is
-called now, so the *Past officers* list stays honest instead of quietly
-restating history in this year's vocabulary.
-
-**Headshots** go in `assets/images/officers/`, cropped to roughly 4:5 and about
-500px wide, then named in the `photo` column of `data/people.csv`. Put the original
-in `assets/images/officers/raw/` and `python tools/prepare_officers.py` makes
-the cropped one. Somebody with no photo shows their initials, so nobody is left
-off the page while you chase a headshot.
-
-### If you want to be sure you have not broken anything
-
-```bash
-python tools/test_roles.py
-```
-
-That makes each of the changes above against the real data files, renders every
-page, and checks what actually came out — including whether the old name and the
-old address survive anywhere on the site. It puts the files back when it is
-done. It also runs on every push, so a broken roster cannot reach the live site.
-
----
-
-## Everything else on the site
-
-### To change the gear list
-
-Edit [`data/gear.php`](data/gear.php). It is split by how each item is booked —
-through the Caltech Y, or through the club's Gear Officer — and grouped by
-activity within that.
-
-Keep it honest rather than complete. Specific models are worth listing only
-where they change what someone can do with the item; ski lengths and binding
-ranges belong on the Caltech Y's listing, which is always more current. **If an
-item is retired or lost, delete the line** — a list promising equipment the club
-no longer has is worse than a short one.
-
-### To change a sponsor
-
-Edit [`data/sponsors.php`](data/sponsors.php). If you have a logo file, put it in
-`assets/images/sponsors/` and name it in the entry. **A sponsor with no logo file
-still displays**, as a wordmark, so you can list them the day they say yes.
-
-While the list is empty, the homepage's sponsor row is not rendered at all, and
-the closing section carries the invitation instead. Add one sponsor and the row
-appears.
-
-### To add or change photos
-
-Drop image files into `assets/images/`. The names matter, because the site looks
-for them:
-
-| File | Where it appears |
+| | |
 |---|---|
-| `hero.jpg` | The big homepage banner. Wide, high quality, people visible. |
-| `social.jpg` | The preview image when the site is shared on Slack or social media |
-| `officers/*.jpg` | Officer headshots, named in the `photo` column of `data/people.csv` |
-| `officers/raw/` | The ORIGINAL photos. Kept so a crop can be redone |
-| `sponsors/*.svg` | Sponsor logos, named in `data/sponsors.php` |
+| Events | the club's **Google Calendar** - never this repository |
+| Officers, roles, people | `data/people.csv`, `data/roles.csv`, `data/assignments.csv` |
+| Gear, sponsors, member deals | `data/gear.php`, `data/sponsors.php`, `data/benefits.csv` |
+| Links, addresses, calendar id, club facts | `includes/config.php` |
+| Photographs | `assets/images/` |
 
-**Every one of these is optional.** Where a photo is missing the site falls back
-to a drawn topographic pattern, which is a deliberate design, not a broken image.
-Add photos when you have good ones.
-
-Photographs of **people doing things outdoors** are worth far more here than
-empty landscapes. Resize them to about 2000px wide before uploading; a 6 MB
-photo straight off a camera will make the site slow.
-
-### To change the join links, the calendar, or contact details
-
-Edit [`includes/config.php`](includes/config.php). Everything that is a URL or a
-club fact lives in that one file: mailing list, Slack invite, email addresses,
-gear rental, donation page, and the calendar itself.
-
-**Three email addresses, and they are easy to confuse.** Getting this wrong once
-means accidentally mailing every member, so they are named for what they do:
-
-| Config key | Address | What it is |
-|---|---|---|
-| `links.officers` | `alpine@caltech.edu` | Shared mailbox reaching the officers. **Every "contact us" link uses this.** |
-| `links.list` | `alpineclub@caltech.edu` | The mailing list. Anything sent here goes to every member. Never wire a contact button to it. |
-| `links.secretary` | `alpine-secretary@caltech.edu` | Membership, including join requests from outside Caltech and JPL. |
-
-One link is currently blank and should be filled in when you have it:
-`links.slack`. It fails gracefully — the Join page shows a "request an invite"
-email link instead of a dead Slack button.
-
-**`links.secretary` needs checking before launch.** It is where membership
-requests from outside Caltech and JPL land, and an unanswered join request is
-the worst kind of broken link.
-
-### The logo
-
-The club mark is two crossed ice axes under a flame, and it lives in exactly one
-place: **`assets/images/logo.svg`**, a single path in the alpenglow accent.
-Everything else is generated from it, so nothing can drift out of step.
-
-| File | What it is |
-|---|---|
-| `logo.svg` | the mark. Masthead and footer. The source of record |
-| `favicon.svg` | the mark inset on a rounded ink tile, for the browser tab |
-| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | rasters, written by `tools/make_icons.py` |
-| `social-default.png` | the link preview, written by `tools/make_social.py` |
-
-**To change the mark:** replace the path in `logo.svg` and `favicon.svg`, then
-run both generators:
-
-```bash
-python tools/make_icons.py
-python tools/make_social.py
-```
-
-Do not edit a PNG by hand; the next run of either script overwrites it.
-
-**Why the colour is hardcoded rather than `currentColor`:** the mark is loaded
-with `<img>`, and an SVG used as an image has no parent to inherit from, so
-`currentColor` there resolves to black. If you change the `alpenglow` token in
-`assets/css/style.css`, change `logo.svg` and `favicon.svg` to match.
-
-**One colour, not two.** There was briefly an `accent-on-dark` variant for the
-dark pages. That token is the small-text lift for dark sections, not the accent;
-the palette names `alpenglow` for "fills, buttons, icons, large text,
-decoration", and using anything else put the mark a step lighter than every
-other accent on the same screen.
-
-Setting `site.logo` in `includes/config.php` to an empty string removes the mark
-from the masthead and leaves the wordmark, which still looks deliberate.
-
-### To deploy
-
-See [Deployment](#deployment) below.
-
----
-
-## Once a year, ideally
-
-Run the health check (see [Health check](#health-check)) and then:
-
-- [ ] Update `data/assignments.csv` after elections — that is also what makes
-      newly empty jobs show as open, so there is nothing separate to do about
-      those. Add anyone new to `data/people.csv` first
-- [ ] Check `data/roles.csv` still describes the jobs the club actually has, and
-      that `min_people` still reflects what the club genuinely needs rather than
-      what it once hoped for
-- [ ] `php tools/check.php --data` after any of the above
-- [ ] Update `data/sponsors.php`
-- [ ] Check anything in `data/benefits.csv` is still live and still advertisable
-- [ ] Check the mailing list and Slack links still work
-- [ ] Check the gear information is still accurate (prices, notice period, what is on the shelves)
-- [ ] Refresh the photographs
-- [ ] Make sure someone else knows this document exists
+**Those five rows are the whole editable surface.** Everything else in the
+repository is machinery, and changing it is development rather than
+administration.
 
 ---
 
@@ -431,8 +101,11 @@ includes/
   helpers.php        e(), cfg(), asset(), url(), icon()
   icons.php          Inline SVG icon sprite
 
-data/                >>> EVERYTHING A PERSON EDITS. Nothing else is in here,
-                     and nothing editable is anywhere else.
+data/                >>> THE LISTS A PERSON EDITS. Everything in here is
+                     content, and nothing in here is code. The only other
+                     editable file is includes/config.php, which holds the
+                     things that are single values rather than lists: the
+                     links, the addresses, the calendar id.
 
   people.csv         WHO EXISTS. One row per human, ever. Name, email, photo,
                      each written exactly once and read by every page.
@@ -463,25 +136,40 @@ assets/
 
 cache/               Cached calendar data. Git-ignored, must be writable.
 
-docs/                >>> Notes for whoever runs the site. Start at docs/README.md
-  ORIENTATION.md     >>> READ FIRST if you have just taken over the site
+SECRETARY.md         >>> THE OFFICER'S MANUAL. The only file most people who
+                     ever maintain this site need to open.
+
+docs/                Reference for whoever runs the site. Start at docs/README.md
+  DEVELOPER.md       Setting up a local copy, and the tests. Optional.
   ACCESS.md          Getting an account and an SSH key, and handing them back
-  DEPLOY.md          How to publish the site to the Caltech server
+  DEPLOY.md          How the site is published, in full
   SERVERS.md         The machines, hostnames, paths and permissions
   DEPLOY-LOG.md      What happened on each deploy, newest first
   HOSTING.md         Why it is hosted this way
   WRITING.md         How the copy should read
 
 tools/
-  deploy.sh          Uploads the site. See docs/DEPLOY.md.
+  server-deploy.sh   >>> THE DEPLOY. Run through bin/deploy on the server.
+                     Gate, backup, publish, version stamp, smoke test.
+  deploy.sh          The laptop route: uploads over SSH. Bootstrap and
+                     fallback only. See docs/DEPLOY.md.
+  portal_daemon.py   Holds one authenticated ssh session to portal so a run of
+                     server commands costs one Duo prompt instead of a dozen.
   probe.php          The one file to upload first to a new server
-  verify_deploy.py   Checks a deployed site from outside. No PHP needed.
+  verify_deploy.py   Checks a deployed site from outside, including which
+                     commit it is running. No PHP needed.
+  build_static.py    Renders the site to HTML for the Pages preview.
+  prepare_officers.py  Makes the 528x660 roster crop from a raw headshot.
   voice_check.py     Flags copy that reads as machine-written
+  audit.py           Checks the rendered markup. Needs PHP locally.
   check.php          Command-line health check. --data checks only the
                      officer CSVs, and is the one to run after editing them.
   test_roles.py      Makes next year's officer changes against the real data,
                      renders every page, and checks what came out. Runs in CI.
+  check_docs.py      Every relative link in every .md resolves, and SECRETARY.md
+                     links every file it tells an officer to edit. Runs in CI.
   make_topo.py       Regenerates the contour-map artwork.
+  make_icons.py      Regenerates the favicons and app icons from logo.svg.
   make_social.py     Regenerates the link-preview image.
   import_guides.py   One-off import of the old site's outdoor guides.
   import_photos.py   One-off import of the old site's photographs into
@@ -493,6 +181,7 @@ tools/
 
 **The things that matter to a new officer are `data/`, `assets/images/`,
 `includes/config.php`, and Google Calendar.** Everything else is machinery.
+
 
 ### What this site deliberately does not have
 
@@ -601,42 +290,29 @@ broken.
 
 ## Deployment
 
-**The procedure is [`docs/DEPLOY.md`](docs/DEPLOY.md).** It is a checklist, and
-following it in order matters more than understanding it. The machines it talks
-about are in [`docs/SERVERS.md`](docs/SERVERS.md), and what happened last time
-somebody deployed is in [`docs/DEPLOY-LOG.md`](docs/DEPLOY-LOG.md).
-
-Since 2026-08-18 there has been a staging site at
-**<https://staging.alpine.caltech.edu>**, provisioned by IMSS. That is where
-changes get tested. `alpine.caltech.edu` still runs the old Caltech Sites
-version, and nothing in this repository can affect it.
-
-Everything here is deployable as-is, with nothing to build or compile:
+**One command, run on the server, and it is documented in exactly one place:
+[`docs/DEPLOY.md`](docs/DEPLOY.md).**
 
 ```bash
-./tools/deploy.sh --dry-run YOUR_CALTECH_USERNAME    # stage and list, send nothing
-./tools/deploy.sh YOUR_CALTECH_USERNAME              # upload to staging
-python tools/verify_deploy.py https://staging.alpine.caltech.edu
+/srv/www.alpine.caltech.edu/www/bin/deploy
 ```
 
-You have to be on campus, or on the Caltech VPN with **Tunnel All**. The script
-sends what git has committed, leaves the server's `cache/` and
-`config.local.php` alone (that second one holds any API key, and overwriting it
-is the one mistake here that is annoying to undo), and sets the file permissions
-IMSS asks for.
+That wrapper resets the server's checkout to GitHub's `main` and runs
+[`tools/server-deploy.sh`](tools/server-deploy.sh), so the deploy logic is
+version controlled and updates itself. It refuses a commit whose GitHub checks
+failed or have not finished, backs the site up first, writes a `version.txt`
+saying what is live, and then fetches the public address to confirm the change
+landed. `--rollback` puts the previous copy back; `--force` overrides the check
+gate in an emergency.
 
-### What automated deployment could look like later
+There is a second route, `tools/deploy.sh`, which uploads from a laptop over
+SSH. It exists to bootstrap a new server, and for the day GitHub is unreachable.
+It is not the normal path - see [docs/DEPLOY.md](docs/DEPLOY.md) §B.
 
-When someone has the time, a GitHub Actions workflow triggered on pushes to
-`main` could run the same `rsync` over SSH, using a deploy key stored in the
-repository's Actions secrets. That requires IMSS to allow key-based SSH to the
-web host, so ask them first.
-
-A simpler intermediate step, if the web server has git: clone the repository on
-the server and run `git pull` to deploy. That gives you one-command deploys and
-an easy rollback (`git checkout <previous-commit>`) without needing CI at all.
-
-Do not put deploy credentials in this repository under any circumstances.
+GitHub Actions cannot do this for us: `portal.caltech.edu` answers only from
+campus or the Caltech VPN, and GitHub's runners are on the public internet. So
+publishing is a deliberate human command, which is a reasonable thing for it to
+be.
 
 ### Server requirements
 
@@ -661,6 +337,43 @@ two `<link>` tags in `includes/header.php` and drop `'Archivo',` from
 `--font-sans`; the fallback stack is close enough that nothing will break.
 
 ---
+
+### The logo
+
+The club mark is two crossed ice axes under a flame, and it lives in exactly one
+place: **`assets/images/logo.svg`**, a single path in the alpenglow accent.
+Everything else is generated from it, so nothing can drift out of step.
+
+| File | What it is |
+|---|---|
+| `logo.svg` | the mark. Masthead and footer. The source of record |
+| `favicon.svg` | the mark inset on a rounded ink tile, for the browser tab |
+| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | rasters, written by `tools/make_icons.py` |
+| `social-default.png` | the link preview, written by `tools/make_social.py` |
+
+**To change the mark:** replace the path in `logo.svg` and `favicon.svg`, then
+run both generators:
+
+```bash
+python tools/make_icons.py
+python tools/make_social.py
+```
+
+Do not edit a PNG by hand; the next run of either script overwrites it.
+
+**Why the colour is hardcoded rather than `currentColor`:** the mark is loaded
+with `<img>`, and an SVG used as an image has no parent to inherit from, so
+`currentColor` there resolves to black. If you change the `alpenglow` token in
+`assets/css/style.css`, change `logo.svg` and `favicon.svg` to match.
+
+**One colour, not two.** There was briefly an `accent-on-dark` variant for the
+dark pages. That token is the small-text lift for dark sections, not the accent;
+the palette names `alpenglow` for "fills, buttons, icons, large text,
+decoration", and using anything else put the mark a step lighter than every
+other accent on the same screen.
+
+Setting `site.logo` in `includes/config.php` to an empty string removes the mark
+from the masthead and leaves the wordmark, which still looks deliberate.
 
 ## A note on scope
 

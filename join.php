@@ -85,10 +85,15 @@ require __DIR__ . '/includes/header.php';
       <!-- Slack -------------------------------------------------------- -->
       <div class="step">
         <h2>Slack</h2>
+        <?php /* "their own informal outings", not "informal trips". The club's
+                 trips are organized by officers and announced on the calendar;
+                 what happens on Slack is members arranging their own. The two
+                 read as the same thing if this says "trips", and this is the
+                 page where somebody works out which is which. */ ?>
         <p>
-          Slack is where members find partners, ask questions, and organize informal
-          trips, with a separate channel per activity. The invite goes out on the
-          mailing list, so join that first.
+          Slack is where members find climbing, hiking, and running partners and
+          plan their own informal outings, with a separate channel per activity.
+          The invite goes out on the mailing list, so join that first.
         </p>
         <?php if ($slack): ?>
           <div class="step__action">

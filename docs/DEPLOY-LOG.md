@@ -9,6 +9,67 @@ rather than describing it.
 
 ---
 
+## 2026-08-30 - the deploy command changed, and the rollback never worked
+
+**Who:** Claude, reworking the repository for handover to a future secretary.
+**Deployed:** nothing. Everything below is committed and **not yet on staging.**
+
+**Staging is still stale, and now it is measurable.** From outside, with no VPN:
+
+```
+  FAIL  GET /roles.php     HTTP 404, text/html; charset=UTF-8, 16 bytes
+  24 checks, 1 failed, 0 could not be told
+```
+
+`roles.php` was added in August. The 2026-08-28 entry below said the August work
+had never been deployed; it still has not. **Whoever reads this next: run
+`bin/deploy`.**
+
+**The documented rollback could never have worked.** §A3 said to
+`git -C .../repo checkout <commit>` and then run `bin/deploy`. But `bin/deploy`
+is a wrapper that runs `git reset --hard origin/main` *before* it execs
+`server-deploy.sh`, so the checkout was discarded one line before the deploy
+logic saw it. It would have silently re-published `main` — the exact thing the
+person running it was trying to get away from. Nobody had tried it.
+
+Replaced with `bin/deploy --rollback`, which restores the newest folder from
+`backups/`. It lives inside `server-deploy.sh`, so it survives the wrapper's
+reset, and it needs no git knowledge at the moment somebody is frightened.
+
+**Four things `bin/deploy` now does that it did not:**
+
+1. **It asks GitHub whether the commit passed, and refuses if it did not.**
+   Or if the checks have not finished — the ordinary case when somebody edits
+   and deploys inside a minute. `--force` overrides both.
+2. **It writes `docroot/version.txt`**, so `<site>/version.txt` says what is
+   live without anyone logging in.
+3. **It fetches the public address afterwards** and says whether the change
+   landed.
+4. It excludes `SECRETARY.md` from the upload, like `README.md` and `docs/`.
+
+**The gate was nearly built on the wrong endpoint.** `/commits/<sha>/check-runs`
+is the obvious one and it is unusable here: the workflow also runs on a
+half-hourly schedule, so a commit that has been on `main` for a day accumulates
+check-runs and usually has one queued. Measured: **30 check-runs on one commit,
+one of them `queued`.** A gate reading that list would have refused to deploy
+for most of every hour. It asks `/actions/runs?head_sha=...&event=push` instead
+— the run that checked *this change* — which returned `total_count: 1` and a
+clean `completed`/`success`.
+
+The gate **fails open** if GitHub cannot be reached at all. A GitHub outage must
+not be why the club cannot update its own website.
+
+**Untested on the real server.** Everything above was exercised locally and
+against the live GitHub API; none of it has run on `portal.caltech.edu`, because
+that needs the VPN and a Duo push. The first person to deploy should expect to
+find something, and should write it here. Two specific unknowns: whether
+`portal` can reach `api.github.com` (if not, the gate prints its warning and
+publishes anyway, which is the designed behaviour) and whether it can reach
+`staging.alpine.caltech.edu` through Cloudflare for the smoke test (if not, it
+prints "could not check from here" and still exits 0).
+
+---
+
 ## 2026-08-28 - the deploy that did not happen, and the port that let it
 
 **Who:** Kyle ran the commands; Claude diagnosed afterwards.

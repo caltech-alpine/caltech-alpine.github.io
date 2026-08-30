@@ -16,11 +16,17 @@ Last measured **2026-08-18**.
 |---|---|---|---|
 | Address | https://alpine.caltech.edu | https://staging.alpine.caltech.edu | https://caltech-alpine.github.io |
 | What runs there | Caltech Sites (Wagtail CMS) | Apache + PHP, our files | Static HTML built by GitHub Actions |
-| Who controls the content | Caltech Sites editors | us, over SFTP | this repository, `main` branch |
+| Who controls the content | Caltech Sites editors | this repository, published by `bin/deploy` | this repository, `main` branch |
 | Indexed by search engines | yes | no, and it must stay that way - `.htaccess` sends `X-Robots-Tag` when the Host starts `staging.` | no (`noindex`) |
-| Status | live, untouched by any of this | **live, serving the PHP site** (verified 2026-08-19) | live |
+| Status | live, untouched by any of this | **live, serving the PHP site** (re-verified 2026-08-30) | live |
+| How current | n/a | whatever `bin/deploy` last published. Read `/version.txt` | `main`, within 30 min |
 
 Only production is the club's real site. Nothing done on staging changes it.
+
+> ⚠ **As of 2026-08-30 staging is behind `main`.** `roles.php` — a page added in
+> August — returns 404 there, so the last deploy predates it. The 2026-08-28
+> entry in [DEPLOY-LOG.md](DEPLOY-LOG.md) says the same thing and it is still
+> owed. This is exactly the failure `version.txt` was added to make visible.
 
 ---
 
@@ -194,7 +200,9 @@ rude to Google, but it serves. Two ways to fix it, in order of preference:
 1. **Ask IMSS to add `www-data` to `alpinewww`**, or to tell us which group the
    web tier can write as. This is the clean answer and it is one ticket. **Open
    as of 2026-08-18.**
-2. **`chmod 3777 cache logs`**, which `tools/deploy.sh` now does on every deploy.
+2. **`chmod 3777 cache logs`**, which both deploy routes now do on every deploy
+   (`tools/server-deploy.sh` for the normal one, `tools/deploy.sh` for the
+   laptop fallback).
    World writable, plus the sticky bit so only a file's owner can delete it. Both
    directories are denied over HTTP by their own `.htaccess`. A workaround, not a
    fix — revert it to `2775` once the ticket is answered.
@@ -206,16 +214,25 @@ two machines share no user list; and using the numeric UID instead fails anyway,
 because `setfacl` returns `Operation not supported` on this filesystem. Amazon
 EFS does not implement POSIX ACLs.
 
+### Settled since
+
+- **`AllowOverride` is on and `.htaccess` is read.** Confirmed 2026-08-19 and
+  re-confirmed 2026-08-30 by `tools/verify_deploy.py`: all three security headers
+  arrive, `/includes/`, `/cache/` and every `data/*.csv` return 403, a directory
+  with no index does not list, and the 404 page is ours rather than Apache's.
+  The earlier "0 of 3 headers" was the verifier's own bug — it looked headers up
+  case-sensitively and Cloudflare sends them lowercased.
+- **Outbound HTTP from the web tier works**, so the calendar is fetched live.
+
 ### Still unknown
 
-- Whether `AllowOverride` is on, so `.htaccess` is read. Only a real deploy
-  answers this, because the probe is a single file with no `.htaccess` beside it
 - Whether the club can have `alpine.caltech.edu` repointed here, and what
   happens to this docroot when it is
-- Whether IMSS backs up this document root, and for how long
 - Whether the staging hostname can later be repointed, or whether production
   means a second document root behind `alpine.caltech.edu`
-- Whether IMSS keeps backups of this document root, and for how long
+- Whether IMSS keeps backups of this document root, and for how long. **Not the
+  same question as our own backups**: `bin/deploy` keeps the last five copies of
+  `docroot/` in `backups/`, which covers a bad deploy but not a lost filesystem.
 
 ---
 
@@ -247,19 +264,32 @@ ever freezes, look at the Actions tab before looking at the code.
 
 ---
 
-## The workstation this gets deployed from
+## What a maintainer's own computer needs
 
-Kyle's machine, measured 2026-08-18. Recorded because two things are missing
-from it and the deployment instructions have to work around them.
+**For the ordinary job: nothing.** Content is edited on GitHub in a browser, and
+publishing is one command typed into PuTTY on the server. That is the whole
+point of the §A route in [DEPLOY.md](DEPLOY.md) — *the club's ability to update
+its website must not depend on one person's laptop being set up correctly*,
+because that person graduates.
 
-| | |
+What is needed, and when:
+
+| To | You need |
 |---|---|
-| OS | Windows 11 Pro, build 26200 |
-| Shell used for deploys | Git Bash |
-| SSH | OpenSSH 10.3p1. `scp` in this version speaks the SFTP protocol, so it works even against an SFTP-only server |
-| Also installed | PuTTY (`psftp`, `pscp`, `plink`), git 2.54.0, Python 3.14.6, GitHub CLI |
-| **No `rsync`** | The one-line `rsync` deploy in the older notes cannot run here. `tools/deploy.sh` uses `scp` instead |
-| **No PHP** | The site cannot be run on this machine. `php -S 127.0.0.1:8800`, `tools/check.php` and `tools/audit.py` all need PHP, so for now they run **on the server** |
+| Edit officers, gear, sponsors, links, photos | a browser. Nothing installed |
+| Publish to the Caltech server | **PuTTY**, and the Caltech VPN on **Tunnel All** |
+| Change the code, the design or the tools | Git, PHP 8, Python 3 — [DEVELOPER.md](DEVELOPER.md) |
+| Use the laptop deploy route (§B, fallback only) | Git Bash, a clone, an SSH key |
 
-Installing PHP locally would allow testing before uploading, which is worth
-doing before the production cutover. Until then, staging is the test.
+Two Windows facts that cost an afternoon each when they were first met, kept
+because they are properties of the tooling rather than of anyone's machine:
+
+- **`rsync` is not part of Git Bash.** The one-line `rsync` deploy in the
+  earliest notes could never have run there, which is why `tools/deploy.sh` uses
+  `scp`. The `rsync` that does the real work runs **on the server**, where it
+  exists. Git Bash's `scp` speaks SFTP, so it works against an SFTP-only host.
+- **ssh connection sharing (`ControlMaster`) does not work from Git Bash.** It
+  appears to — the socket is created and `ssh -O check` reports a master — and
+  then every session is refused, because the Unix-socket emulation cannot pass
+  file descriptors. `tools/portal_daemon.py` exists to solve the same problem a
+  different way. Detail in [ACCESS.md](ACCESS.md).

@@ -1,11 +1,24 @@
 # Getting access to the server
 
 Read this when you take over the website, or when a second officer needs to be
-able to deploy. It ends with how to hand access back when you leave, which is
+able to publish. It ends with how to hand access back when you leave, which is
 the part that usually gets skipped.
 
 Written 2026-08-18, from doing it. The mistakes listed here are ones that were
 actually made that day, not hypotheticals.
+
+> ## To publish the site you need two things and no more
+>
+> 1. A **Caltech account in the `alpinewww` group** — the ticket is below.
+> 2. **PuTTY**, and the Caltech VPN on the **"Tunnel All"** profile.
+>
+> You then log in with your Caltech password and a Duo push, and run the one
+> command in [DEPLOY.md](DEPLOY.md) §A2. **That is enough. Stop reading here.**
+>
+> Everything below about **SSH keys is optional.** A key saves you typing a
+> password, and it is what `tools/deploy.sh` — the laptop fallback route —
+> needs. Publishing normally does not need one, and a secretary who never wants
+> to think about SSH keys never has to.
 
 ---
 

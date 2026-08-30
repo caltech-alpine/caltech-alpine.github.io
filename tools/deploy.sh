@@ -35,6 +35,7 @@ EXCLUDE_PATTERNS=(
   '^\.gitignore$'
   '^docs/'
   '^README\.md$'
+  '^SECRETARY\.md$'
   '^tools/.*\.py$'
   '^tools/route\.json$'
   '^tools/deploy\.sh$'

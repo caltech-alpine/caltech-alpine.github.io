@@ -219,39 +219,44 @@ require __DIR__ . '/includes/header.php';
       </div>
     </div>
 
+    <?php /* THREE CARDS, AND THEY ARE ONE LIST: the things the club ORGANIZES.
+             There was a fourth, "Finding partners", about members using Slack to
+             arrange their own outings. It broke the list twice over -- it is a
+             membership resource rather than something the club runs, and saying
+             members "organize informal trips" beside a card about officer-led
+             trips blurs the one distinction on this page worth keeping. It was
+             also the third place on the homepage to mention the mailing list.
+             That information now lives where somebody looks for it: the Slack
+             step on join.php, and the membership line in the closing section.
+
+             Parallel by construction -- each card is what the club puts on, in
+             one sentence, with no history in one and logistics in another. The
+             grid is auto-fit, so three lay out as three; nothing here counts to
+             four. */ ?>
     <div class="pillars mt-lg">
       <div class="pillar">
         <?= icon('hike', 'icon icon--lg pillar__icon') ?>
         <h3>Trips</h3>
         <p>
-          Hikes, trail runs, climbing days, and longer trips, organized by officers
-          and announced on the
-          <a href="<?= e(url('join.php')) ?>">mailing list</a>.
+          Hikes, trail runs, climbing days, and longer trips organized by club
+          officers throughout the year.
         </p>
       </div>
       <div class="pillar">
         <?= icon('film', 'icon icon--lg pillar__icon') ?>
         <h3>Film festivals</h3>
         <p>
-          The club has hosted the Banff Mountain Film Festival on campus since
-          <?= e(cfg('facts.banff_since')) ?>, along with other mountain film
-          screenings.
+          The club has hosted the Banff Mountain Film Festival at Caltech since
+          <?= e(cfg('facts.banff_since')) ?>, along with other mountain and
+          adventure film screenings.
         </p>
       </div>
       <div class="pillar">
         <?= icon('talk', 'icon icon--lg pillar__icon') ?>
         <h3>Talks</h3>
         <p>
-          Talks on campus by club members and visiting climbers.
-        </p>
-      </div>
-      <div class="pillar">
-        <?= icon('social', 'icon icon--lg pillar__icon') ?>
-        <h3>Finding partners</h3>
-        <p>
-          Members use Slack to find partners and organize informal outings between
-          the scheduled trips. The invite goes out on the
-          <a href="<?= e(url('join.php')) ?>">mailing list</a>.
+          Talks and presentations by club members, visiting climbers, and others
+          from the outdoor community.
         </p>
       </div>
     </div>

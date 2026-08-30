@@ -41,7 +41,7 @@ not a degraded one.
 | Officer roster, alumni `until` logic, gear inventory, sponsors | computed at build | computed per request |
 | 404 page | `404.html`, served by Pages | `ErrorDocument` in `.htaccess` |
 | Sitemap | rendered to `sitemap.xml` | live `sitemap.php` |
-| **Calendar freshness** | as of the last build (30-min cron) | per request, 30-min cache |
+| **Calendar freshness** | as of the last build (30-min cron) | per request, 5-min cache |
 | **Editing `data/assignments.csv`** | push, wait for the build | upload, live immediately |
 | **`preview.php`** | **not available** | works |
 | **`.htaccess`** | **ignored** — no custom headers, no directory-listing block, no deny rules on `.md`/`.json` | fully applied |
@@ -91,18 +91,21 @@ ticket (help.caltech.edu) and ask for:
 
 ### 3.2 Deploying
 
-Documented in `README.md` under *Deployment*. In short:
+**This section used to carry its own `rsync` recipe. It has been removed** — it
+was written in August 2026 before the server existed, it did not match what was
+built, and two procedures for one job is how a club ends up doing neither
+correctly. There is one:
 
 ```bash
-rsync -av --delete \
-  --exclude '.git' --exclude '_site' --exclude 'cache/*' \
-  --exclude 'includes/config.local.php' \
-  ./ user@server.caltech.edu:/path/to/web/root/
+/srv/www.alpine.caltech.edu/www/bin/deploy
 ```
 
-Then once, on the server: `chmod 775 cache && php tools/check.php`.
-
-Never overwrite the server's `cache/` or its `config.local.php`.
+[DEPLOY.md](DEPLOY.md) is the only description of it. The recipe that was here
+was wrong in three ways worth recording, because each is a trap the real script
+had to be taught: `rsync` is not installed on the machine deploys were run from;
+`--delete` with those excludes would have removed the server's own `logs/`; and
+`php tools/check.php` cannot be run on the server at all, because
+`portal.caltech.edu` has no PHP. See [SERVERS.md](SERVERS.md).
 
 ### 3.3 What to turn back on once it is dynamic
 
@@ -111,12 +114,14 @@ Never overwrite the server's `cache/` or its `config.local.php`.
 - **`preview.php` returns.** Set `calendar.preview_key` in
   `includes/config.local.php` on the server if it should be key-protected;
   otherwise it stays unlisted and `noindex`.
-- **Verify `.htaccess` is being read.** Request a directory with no index file;
-  if you get a listing, `AllowOverride` is off and IMSS has to enable it.
-- **Re-run `php tools/check.php` from the server itself**, not from a laptop.
-  It checks PHP version, cURL, cache writability and every outbound link from
-  the machine that will actually serve the site — which is the only place the
-  answer counts.
+- **`.htaccess` is being read** — confirmed on staging 2026-08-19 and again
+  2026-08-30: all three security headers arrive and every protected path returns
+  403. `tools/verify_deploy.py` re-checks it on every deploy, so this needs
+  re-confirming on a *new* server and not otherwise.
+- **`php tools/check.php` cannot be run from the server**, which is what an
+  earlier version of this line asked for. There is no PHP on the machine we can
+  log into, and no shell on the machine that runs PHP. Run it on a laptop, and
+  use `tools/verify_deploy.py` for everything visible over HTTP.
 
 ### 3.4 Clean URLs, if wanted
 

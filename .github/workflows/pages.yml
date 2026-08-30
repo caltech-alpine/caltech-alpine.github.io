@@ -1,6 +1,13 @@
 # =============================================================================
-#  Publish the site to GitHub Pages
+#  Check every change, and rebuild the preview
 # =============================================================================
+#  This is the green tick or the red X a secretary sees beside their commit,
+#  and it is the thing tools/server-deploy.sh refuses to publish past. It does
+#  two jobs in one: it CHECKS the change (the officer data adds up, next year's
+#  roster edits still render, every page comes out of PHP without an error in
+#  it), and then it REBUILDS the preview at caltech-alpine.github.io so the
+#  change can be looked at before it goes anywhere near the club's server.
+#
 #  GitHub Pages does not execute PHP, and this site is server-rendered PHP. So
 #  the workflow runs the site against PHP's own dev server, saves every page as
 #  HTML, and publishes that. tools/build_static.py does the rendering and
@@ -22,10 +29,16 @@
 #  becomes the production home. See docs/HOSTING.md.
 # =============================================================================
 
-name: Publish to Pages
+name: Check and preview
 
 on:
   push:
+    branches: [main]
+  # A change proposed as a pull request gets the same checks. Without this it
+  # would get NONE of them: the reviewer would see a clean-looking diff, the
+  # checks would first run after the merge, and the person who has to read the
+  # failure is then the one who did not write it.
+  pull_request:
     branches: [main]
   schedule:
     - cron: "*/30 * * * *"      # keep the calendar current
@@ -68,8 +81,21 @@ jobs:
       - name: Try next year's officer changes
         run: python3 tools/test_roles.py
 
+      # The documentation is the product here -- SECRETARY.md is followed
+      # literally by somebody who was promised they would never have to search
+      # this repository. A link into thin air breaks that promise, and renaming
+      # a file is how it happens.
+      - name: Check the documentation points at things that exist
+        run: python3 tools/check_docs.py
+
+      # Only on a real publish. On a pull request there is nothing to publish
+      # to, and this action asks GitHub's Pages API for the site's address --
+      # which a pull request from a fork is not allowed to do, and the failure
+      # would read as "your change broke the build" when it did no such thing.
+      # The render below falls back to the known address.
       - name: Configure Pages
         id: pages
+        if: github.event_name != 'pull_request'
         uses: actions/configure-pages@v5
 
       - name: Prepare officer headshots
@@ -83,8 +109,9 @@ jobs:
 
       - name: Render the site
         run: |
+          BASE="${{ steps.pages.outputs.base_url }}"
           python3 tools/build_static.py \
-            --base-url "${{ steps.pages.outputs.base_url }}" \
+            --base-url "${BASE:-https://caltech-alpine.github.io}" \
             --noindex
 
       # Cheap insurance: the build is only as good as the pages it produced, and
@@ -106,11 +133,16 @@ jobs:
           echo "built $(find _site -type f | wc -l) files"
 
       - uses: actions/upload-pages-artifact@v3
+        if: github.event_name != 'pull_request'
         with:
           path: _site
 
   deploy:
     needs: build
+    # A pull request is checked, not published. The preview at
+    # caltech-alpine.github.io always shows what is on main, so that a link
+    # given to somebody means one thing rather than whichever branch built last.
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
