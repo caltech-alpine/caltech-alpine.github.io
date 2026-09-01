@@ -21,6 +21,7 @@
 
 import io
 import os
+import sys
 
 from PIL import Image, ImageDraw, ImageFont
 
@@ -29,14 +30,28 @@ ROOT = os.path.dirname(HERE)
 IMAGES = os.path.join(ROOT, "assets", "images")
 OUT = os.path.join(IMAGES, "social-default.png")
 
+sys.path.insert(0, HERE)
+import palette                                          # noqa: E402
+
 W, H = 1200, 630
-INK = (20, 24, 26)
-PAPER = (236, 231, 221)
-MUTED = (150, 156, 150)
-# Exactly the alpenglow token from assets/css/style.css, hsl(15 62% 46%). It
-# was (192, 82, 45) here, two points off, which is invisible alone and is a
-# visible seam next to the mark that is drawn from the real value.
-ALPENGLOW = (190, 81, 45)
+
+# NO COLOUR LITERALS. Every one of these is read from assets/css/style.css by
+# tools/palette.py, because all four were hand-typed here and three had drifted:
+#
+#   ALPENGLOW  was (192, 82, 45) against --alpenglow's (190, 81, 45). Found
+#              2026-08-27, as a visible seam beside a mark drawn from the real
+#              value.
+#   PAPER      was (236, 231, 221) against --on-dark's (237, 232, 222). One
+#              point off on all three channels.
+#   MUTED      was (150, 156, 150) against --on-dark-mute's (163, 168, 164),
+#              which is not a near-miss but a different, darker grey.
+#
+# This image is the first thing most people see of the site, in a Slack unfurl
+# beside nothing that would give the drift away. Ask for the token.
+INK = palette.rgb("ink")
+PAPER = palette.rgb("on-dark")               # body text on a dark field
+MUTED = palette.rgb("on-dark-mute")          # the eyebrow and the URL
+ALPENGLOW = palette.rgb("alpenglow")         # the accent rule and the tagline
 
 
 def mark_layer(size):

@@ -129,10 +129,16 @@ lib/calendar/        The Google Calendar integration. You should never need to
   IcsParser.php
   Sources.php
 
-assets/
-  css/style.css      One stylesheet. All colors and sizes are tokens at the top.
+assets/              THE SERVED TREE. Both deploy routes copy this wholesale,
+  css/style.css      so nothing belongs in here that a browser never asks for.
+                     One stylesheet; all colors and sizes are tokens at the top.
   js/site.js         Menu, dropdowns, FAQ. The site works without it.
-  images/
+  images/            Including logo.svg, favicon.svg and logo-full.svg, which
+                     are GENERATED from art/ - see "The logo" below.
+
+art/                 The logo drawings, as drawn. Source for tools/trace_logo.py,
+                     committed because a traced SVG cannot be re-traced from
+                     itself, and excluded from both deploys.
 
 cache/               Cached calendar data. Git-ignored, must be writable.
 
@@ -161,7 +167,12 @@ tools/
   build_static.py    Renders the site to HTML for the Pages preview.
   prepare_officers.py  Makes the 528x660 roster crop from a raw headshot.
   voice_check.py     Flags copy that reads as machine-written
-  audit.py           Checks the rendered markup. Needs PHP locally.
+  audit.py           Checks the rendered markup, and that no colour in the
+                     logo files is one style.css does not declare. Needs PHP.
+  palette.py         The site's colours, read from style.css. Every tool that
+                     draws asks this rather than carrying a hex literal.
+  trace_logo.py      Traces art/*.png into logo.svg, favicon.svg and
+                     logo-full.svg, recolouring to the site palette.
   check.php          Command-line health check. --data checks only the
                      officer CSVs, and is the one to run after editing them.
   test_roles.py      Makes next year's officer changes against the real data,
@@ -169,7 +180,7 @@ tools/
   check_docs.py      Every relative link in every .md resolves, and SECRETARY.md
                      links every file it tells an officer to edit. Runs in CI.
   make_topo.py       Regenerates the contour-map artwork.
-  make_icons.py      Regenerates the favicons and app icons from logo.svg.
+  make_icons.py      Regenerates the favicons and app icons from the SVGs.
   make_social.py     Regenerates the link-preview image.
   import_guides.py   One-off import of the old site's outdoor guides.
   import_photos.py   One-off import of the old site's photographs into
@@ -340,37 +351,57 @@ two `<link>` tags in `includes/header.php` and drop `'Archivo',` from
 
 ### The logo
 
-The club mark is two crossed ice axes under a flame, and it lives in exactly one
-place: **`assets/images/logo.svg`**, a single path in the alpenglow accent.
-Everything else is generated from it, so nothing can drift out of step.
+The club mark is a torch in front of three peaks, inside a disc. **The source of
+record is the drawing, not the SVG:** the artwork lives in
+`art/`, and everything the site serves is generated from it, so
+nothing can drift out of step.
 
-| File | What it is |
-|---|---|
-| `logo.svg` | the mark. Masthead and footer. The source of record |
-| `favicon.svg` | the mark inset on a rounded ink tile, for the browser tab |
-| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | rasters, written by `tools/make_icons.py` |
-| `social-default.png` | the link preview, written by `tools/make_social.py` |
+```
+art/badge.png     the mark, as drawn. Orange sky, dark rock, light torch
+art/lockup.png    the same mark above CALTECH / ALPINE CLUB
+```
 
-**To change the mark:** replace the path in `logo.svg` and `favicon.svg`, then
-run both generators:
+`art/` sits outside `assets/`, and is excluded by both deploy routes, because
+`assets/` is the served tree and these are 1.4 MB of source nobody requests
+over HTTP. Same reason `docs/` and `tools/` are not in there.
+
+| File | Built from | What it is |
+|---|---|---|
+| `logo.svg` | `art/badge.png` | the mark. Masthead and footer |
+| `favicon.svg` | `art/badge.png` | the same mark, for the browser tab |
+| `logo-full.svg` | `art/lockup.png` | mark plus wordmark, for anything that needs the name in the artwork |
+| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | the SVGs | rasters, written by `tools/make_icons.py` |
+| `social-default.png` | `logo.svg` | the link preview, written by `tools/make_social.py` |
+
+**To change the mark:** drop the new drawing into `art/` under the
+same filename, then run the three generators in this order:
 
 ```bash
+python tools/trace_logo.py
 python tools/make_icons.py
 python tools/make_social.py
 ```
 
-Do not edit a PNG by hand; the next run of either script overwrites it.
+`trace_logo.py` traces each flat colour as its own layer, recolours it to the
+site's palette on the way through, and prints how far each traced layer is from
+the drawing it came from. Under about 2% is fine; the current mark is 0.16%.
+`--check` reports without writing.
 
-**Why the colour is hardcoded rather than `currentColor`:** the mark is loaded
+Do not edit an SVG or a PNG in `assets/images/` by hand. The next run of a
+generator overwrites it.
+
+**Why the colours are hardcoded rather than `currentColor`:** the mark is loaded
 with `<img>`, and an SVG used as an image has no parent to inherit from, so
-`currentColor` there resolves to black. If you change the `alpenglow` token in
-`assets/css/style.css`, change `logo.svg` and `favicon.svg` to match.
+`currentColor` there resolves to black. The site's colours are copied into
+`SITE_PALETTE` at the top of `tools/trace_logo.py`; if you change `alpenglow`,
+`ink` or `paper` in `assets/css/style.css`, change them there and re-run it.
+`tools/audit.py` fails if the two disagree.
 
-**One colour, not two.** There was briefly an `accent-on-dark` variant for the
-dark pages. That token is the small-text lift for dark sections, not the accent;
-the palette names `alpenglow` for "fills, buttons, icons, large text,
-decoration", and using anything else put the mark a step lighter than every
-other accent on the same screen.
+**The mark carries its own background, and that is the point.** The crossed-axes
+mark before it was one path in the accent colour with nothing behind it, so it
+needed an argument about which orange to use on the dark pages and a second
+token that turned out to be the wrong one. A filled disc reads the same on the
+ink masthead, the ink footer and a paper page, and there is one file.
 
 Setting `site.logo` in `includes/config.php` to an empty string removes the mark
 from the masthead and leaves the wordmark, which still looks deliberate.

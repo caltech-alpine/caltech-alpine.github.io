@@ -34,6 +34,7 @@ EXCLUDE_PATTERNS=(
   '^\.github/'
   '^\.gitignore$'
   '^docs/'
+  '^art/'                   # the logo drawings. Source for tools/trace_logo.py
   '^README\.md$'
   '^SECRETARY\.md$'
   '^tools/.*\.py$'

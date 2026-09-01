@@ -185,9 +185,54 @@ def contrast_check():
                          "or --alpenglow-hover" % sel)
 
 
+# --------------------------------------------------------------- the mark --
+# EVERY COLOUR IN THE LOGO FILES MUST BE ONE THE STYLESHEET DECLARES.
+#
+# The artwork is drawn in somebody else's orange (#fd6901 on the badge,
+# #ef5c17 on the lockup) and tools/trace_logo.py remaps it to the site's
+# palette on the way through. That remapping is invisible once it has run: the
+# SVGs are generated files nobody reads, and a near-miss orange in the masthead
+# beside a correct orange button is exactly the kind of thing that survives for
+# a year, because each of them looks right on its own.
+#
+# The first version of that script carried the palette as three hex literals
+# typed out of the :root block, and one was two points off across three
+# channels. So this checks the SHIPPED files rather than trusting the
+# generator: pull every fill out of the SVGs and require it to be a colour that
+# some --token in style.css actually resolves to.
+LOGO_SVGS = ("logo.svg", "favicon.svg", "logo-full.svg")
+
+
+def logo_palette_check():
+    css_path = os.path.join(ROOT, "assets", "css", "style.css")
+    css = open(css_path, encoding="utf-8").read()
+
+    declared = {}
+    for m in re.finditer(
+            r"--([a-z0-9-]+):\s*hsl\(\s*([\d.]+)\s+([\d.]+)%\s+([\d.]+)%\s*\)", css):
+        r, g, b = colorsys.hls_to_rgb(
+            float(m.group(2)) / 360.0, float(m.group(4)) / 100.0,
+            float(m.group(3)) / 100.0)
+        declared["#%02x%02x%02x" % (round(r * 255), round(g * 255),
+                                    round(b * 255))] = m.group(1)
+
+    for name in LOGO_SVGS:
+        path = os.path.join(ROOT, "assets", "images", name)
+        if not os.path.exists(path):
+            warns.append("logo: %s is missing" % name)
+            continue
+        svg = open(path, encoding="utf-8").read()
+        for fill in sorted(set(re.findall(r'fill="(#[0-9a-fA-F]{6})"', svg))):
+            if fill.lower() not in declared:
+                fails.append(
+                    "logo: %s fills with %s, which no token in style.css "
+                    "resolves to — re-run tools/trace_logo.py" % (name, fill))
+
+
 def main():
     base = (sys.argv[1] if len(sys.argv) > 1 else "http://127.0.0.1:8800").rstrip("/")
     contrast_check()
+    logo_palette_check()
     for page in PAGES:
         html = get(base, page)
         print("  %-12s %6d bytes" % (page, len(html)))

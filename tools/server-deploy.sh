@@ -268,6 +268,7 @@ rsync -a --delete \
   --exclude '.github/' \
   --exclude '.gitignore' \
   --exclude 'docs/' \
+  --exclude 'art/' \
   --exclude 'README.md' \
   --exclude 'SECRETARY.md' \
   --exclude '_site/' \
