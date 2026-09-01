@@ -6,7 +6,7 @@ this repository, so each line carries the date it was measured and the command
 that measured it. If you are reading this a year from now, re-run the commands
 before trusting a number.
 
-Last measured **2026-08-18**.
+Last measured **2026-08-18**, except the editor survey, which is 2026-08-31.
 
 ---
 
@@ -172,6 +172,57 @@ it would have told us, both over HTTP.
 real answer rather than a hopeful one: three other people already hold the
 access, and the setgid bit on the docroot means files one of them uploads stay
 editable by the others.
+
+### There is no text editor on portal except `vi`
+
+Measured 2026-08-31, on the machine:
+
+```bash
+for e in nano vi vim emacs ed pico micro joe python3 perl; do
+  command -v $e >/dev/null && echo "yes  $e" || echo "no   $e"; done
+```
+
+```
+no   nano      no   emacs     no   micro     yes  python3
+yes  vi        no   ed        no   joe       yes  perl
+no   vim       no   pico
+```
+
+`vi` with no `vim` means `vim-minimal`, which is what RHEL 9 installs in its
+core set. **nano is a separate package and nobody on this box has root to add
+one**, so asking for it is not a five-minute fix; it is an IMSS ticket for
+something you should not need.
+
+**You should not need one, because nothing on portal is a file you edit.**
+`bin/deploy` runs `git reset --hard origin/main` and then `rsync --delete`, so
+anything hand-edited under `repo/` or `docroot/` is discarded on the next
+deploy, silently. That is invariant 1 in the [main README](../README.md): the
+server is a copy, not a place. Edit on GitHub, push, deploy.
+
+**The one real exception is `includes/config.local.php`**, which is gitignored,
+excluded from the rsync, and therefore exists only here. It is the file that
+would hold a Google API key or the `preview_key` that locks `preview.php` and
+`stats.php`. Write it without an editor:
+
+```bash
+cat > /srv/www.alpine.caltech.edu/www/docroot/includes/config.local.php <<'PHP'
+<?php
+return array(
+    'calendar' => array(
+        'preview_key' => 'a-random-string',
+    ),
+);
+PHP
+chmod 640 /srv/www.alpine.caltech.edu/www/docroot/includes/config.local.php
+```
+
+`cat` it back to check it. To change one value, rewrite the whole file; it is
+six lines, and a heredoc is more reliable than an editor nobody here uses often
+enough to be fluent in.
+
+**If you do end up in `vi`:** `i` to start typing, `Esc` to stop, `:wq` to save
+and quit, `:q!` to quit and discard everything. `:q!` is the one worth
+remembering, because it is the way out of a file you opened by accident.
 
 ### What the probe found, 2026-08-18
 
