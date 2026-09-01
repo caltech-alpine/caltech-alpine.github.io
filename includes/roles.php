@@ -299,30 +299,44 @@ function alpine_roles_needed()
 }
 
 /**
- * How a role's staffing reads on a page: a COUNT when seats are unfilled, a
- * short phrase when they are not.
+ * How a role's staffing reads on a page. ONE SHAPE, EVERYWHERE: seats filled
+ * over seats that exist.
  *
- *     ''                  somebody is doing it and the club is not asking
- *     0/1 filled          nobody is doing a job that needs one person
- *     1/2 filled          one of the two people the job needs
- *     Room for one more   the job has what it needs and could use another
+ *     ''            somebody is doing it and the club is not asking
+ *     0/1 filled    nobody is doing a job with one seat
+ *     0/2 filled    nobody is doing a job with two
+ *     1/2 filled    one of the two seats taken -- e.g. a single President
  *
- * TWO DIFFERENT FACTS, SO TWO DIFFERENT SHAPES (2026-08-31). The fraction is
- * filled over MIN_PEOPLE -- how many the club needs -- and it only appears
- * while a job is short of that. It answers the question a reader arriving at
- * a vacancy actually has: how many seats, how many empty.
+ * ONE FORMAT, BECAUSE THE COLUMN IS READ DOWN (Kyle, 2026-08-31, from the
+ * rendered page). This used to mix a fraction with two prose phrases: "0/1
+ * filled", then "Open", then "Room for one more". Three rows, three formats,
+ * and a reader comparing them had to translate two of the three before they
+ * could see which job was emptiest. A fraction is comparable at a glance and
+ * the phrases were not, so the phrases are gone.
  *
- * A job that is not short does NOT get a fraction, and that is the whole
- * reason min and max are separate columns. President is min 1 / max 2 with one
- * president: fully staffed, and "1/2 filled" would read as understaffed and as
- * a reproach to the person in the job. Several roles also leave max_people
- * blank -- as many volunteers as turn up -- so there is no denominator to
- * print for them at all. Those get the phrase.
+ * THE DENOMINATOR IS WHICHEVER NUMBER ANSWERS THE READER'S QUESTION, and
+ * which question they are asking depends on whether anyone is doing the job.
  *
- * The wording before this was "Looking for someone" / "Looking for another
- * person": a sentence beside a role name that already sat under a heading
- * saying what the club needs. A status belongs in the smallest form that
- * carries it; the structure around it says the rest.
+ *   BELOW the minimum -> min_people. The question is "how short are you", and
+ *   the honest answer for an empty Film Festival Coordinator post is 0/1: the
+ *   club needs one. Printing 0/2 there -- because two people COULD share it --
+ *   advertises a need the club does not have (Kyle, 2026-08-31, who asked
+ *   where it was stated that two were needed; nowhere, was the answer).
+ *
+ *   AT OR ABOVE it -> max_people. The shortfall is zero, so "how short" has
+ *   no answer left, and the live question becomes "is there room". One
+ *   President out of two seats is 1/2, which is the case that made a fraction
+ *   worth having at all -- min alone gave 1/1 and the row fell back to prose.
+ *
+ * ONE SHAPE EITHER WAY, which is the point: the column is read top to bottom
+ * and two rows in different units cannot be compared at a glance. Both
+ * branches print filled-over-a-number, so they can.
+ *
+ * A blank max_people means as many volunteers as turn up. Such a role only
+ * reaches the second branch if it is staffed, and a staffed role with no
+ * ceiling is ALPINE_ROLE_STAFFED, which never gets here -- so the fallback
+ * below is unreachable in practice and present so the function cannot divide
+ * by a null.
  *
  * Returns '' for anything with nothing to say, so a caller can print it
  * unconditionally. Deliberately never says "vacant".
@@ -333,26 +347,21 @@ function alpine_role_status_line($role)
         return $role['recruiting'];                 /* a human's own sentence */
     }
 
-    /* Short of what the club needs: say how short, in seats. */
-    if ($role['state'] === ALPINE_ROLE_NEEDED) {
-        return $role['filled'] . '/' . $role['min'] . ' filled';
+    if ($role['state'] !== ALPINE_ROLE_NEEDED
+        && $role['state'] !== ALPINE_ROLE_SPARE) {
+        return '';
     }
 
-    if ($role['state'] !== ALPINE_ROLE_SPARE) { return ''; }
+    /* Short of the minimum: say how short. Otherwise: say how many seats. */
+    $seats = ($role['filled'] < $role['min'])
+        ? $role['min']
+        : (($role['max'] !== null) ? $role['max'] : $role['min']);
 
-    /* SPARE with nobody in it is the optional job -- min_people 0, a job the
-       club would like doing and does not need. It is open in the plain sense,
-       and the fraction cannot say so: its denominator is the minimum, and the
-       minimum is zero. "0/0 filled" is not a status, and "Room for one more"
-       would claim somebody is already doing it. */
-    if ($role['filled'] === 0) { return 'Open'; }
+    /* A job with no seats at all has no fraction to print: "0/0 filled" is
+       not a status. Only reachable with min_people 0 and a blank max. */
+    if ($seats < 1) { return 'Open'; }
 
-    /* It has what it needs and could take another. No fraction here -- see the
-       note above on why min is the only honest denominator, and why a job that
-       has met its minimum has no shortfall to print. */
-    return $role['spare'] === 1
-        ? 'Room for one more'
-        : 'Room for ' . alpine_number_word($role['spare']) . ' more';
+    return $role['filled'] . '/' . $seats . ' filled';
 }
 
 /* alpine_role_help_phrase() and alpine_role_need_phrase() lived here. Both
@@ -376,17 +385,10 @@ function alpine_roles_sentence(array $roles)
     return alpine_list_phrase($names);
 }
 
-/**
- * Small numbers as words, because "Looking for 2 more people" reads like a
- * form. Anything above six stays a digit: spelling out "eleven" in a club this
- * size would be a stranger sight than the number.
- */
-function alpine_number_word($n)
-{
-    static $words = array(1 => 'one', 2 => 'two', 3 => 'three',
-                          4 => 'four', 5 => 'five', 6 => 'six');
-    return isset($words[$n]) ? $words[$n] : (string) $n;
-}
+/* alpine_number_word() lived here. It spelled a small numeral as a word for
+   "Room for two more", and it went with that sentence on 2026-08-31 when every
+   staffing status became a fraction. Nothing on the site now writes a number
+   into prose, so nothing needs one spelled. */
 
 /**
  * WHO TO WRITE TO ABOUT A PARTICULAR JOB, and what to call them.

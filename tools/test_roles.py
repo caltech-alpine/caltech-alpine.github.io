@@ -378,15 +378,15 @@ def scenario_5_change_the_staffing(base):
     edit_cell("roles.csv", "hiking,", "max_people", "2")
     p = render(base)
     check("two of two hiking coordinators is full, so nothing is offered",
-          "Room for" not in role_block(p, "hiking"), role_block(p, "hiking"))
+          "filled" not in role_block(p, "hiking"), role_block(p, "hiking"))
 
     edit_cell("roles.csv", "hiking,", "max_people", "3")
     data_ok()
     p = render(base)
     check("raising the maximum to 3 opens a place, with no code change",
-          "Room for one more" in role_block(p, "hiking"), role_block(p, "hiking"))
-    check("and it does NOT say Open, because two people are doing it",
-          "Open" not in role_block(p, "hiking"), role_block(p, "hiking"))
+          "2/3 filled" in role_block(p, "hiking"), role_block(p, "hiking"))
+    check("and the two people doing it are still counted, not erased",
+          "0/3" not in role_block(p, "hiking"), role_block(p, "hiking"))
     check("but it is NOT on the homepage: having room is not being short",
           "Hiking" not in strip(p), strip(p))
 
@@ -423,6 +423,9 @@ def scenario_6_a_role_with_nobody(base):
     # only roles the club is short of reach this block.
     check("without a sentence explaining that they are open",
           "Looking for" not in strip(p) and "Open" not in strip(p), strip(p))
+    # An EMPTY job is measured against min_people, not max: Film Festival has
+    # room for two, but the club needs one, and 0/2 would advertise a need
+    # nobody stated. max only becomes the denominator once the minimum is met.
     check("Get Involved shows the seats it is short",
           "0/1 filled" in role_block(p, "film_festival"),
           role_block(p, "film_festival"))
@@ -457,13 +460,13 @@ def scenario_7_an_optional_role(base):
     p = render(base)
     check("dropping min_people to 0 takes it off the homepage, with no other edit",
           "Talks" not in strip(p), strip(p))
-    # An optional job with nobody in it is open in the plain sense, and the
-    # fraction cannot say so -- its denominator is the minimum, and here the
-    # minimum is zero. It must not print "0/0 filled", and it must not print
-    # "Room for one more", which would claim somebody is already doing it.
-    check("but Get Involved still offers it, as Open",
-          "Open" in role_block(p, "talks"), role_block(p, "talks"))
-    check("...and not as a nonsense fraction or as an occupied seat",
+    # An optional job with nobody in it still has a SEAT, so it still gets a
+    # fraction: min_people 0 only says the club can survive without it, and
+    # max_people 1 says there is one place to take. What it must never print
+    # is "0/0 filled", which is not a status -- see alpine_role_status_line().
+    check("but Get Involved still offers it, as a seat count",
+          "0/1 filled" in role_block(p, "talks"), role_block(p, "talks"))
+    check("...and not as a nonsense fraction or as prose",
           "0/0" not in role_block(p, "talks")
           and "Room for" not in role_block(p, "talks"), role_block(p, "talks"))
     edit_cell("roles.csv", "talks,", "min_people", "1")

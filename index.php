@@ -40,23 +40,35 @@ require __DIR__ . '/includes/header.php';
 
   <div class="wrap">
     <div class="hero__inner">
-      <p class="hero__eyebrow">Pasadena, California · Founded <?= e(cfg('facts.founded')) ?></p>
+      <?php /* THE MARK SAYS THE NAME, SO NOTHING HERE SAYS IT TWICE.
 
-      <?php /* THE NAME, THEN WHAT IT IS. Two earlier versions of this hero got
-               it wrong in opposite directions: a slogan ("Less lab. More
-               mountains."), which the club president disliked and which named
-               nobody, and then the identity line alone, which read well but
-               left the club's name to the masthead, the tab title and the
-               logo. Somebody who lands here from a search result or a pasted
-               link should not have to infer whose site this is, so the h1 says
-               it outright and the line under it says what the club does.
+               Three earlier versions of this hero got it wrong in three
+               different ways: a slogan ("Less lab. More mountains."), which
+               the club president disliked and which named nobody; the identity
+               line alone, which read well but left the club's name to the
+               masthead and the tab title; and then the name set at --step-5 as
+               live text, which named the club but stacked FOUR typographic
+               levels -- eyebrow, name, sentence, buttons -- in front of a
+               visitor who wanted one of the buttons.
+
+               The horizontal logo is now the first thing the eye meets and it
+               already reads "CALTECH ALPINE CLUB", so the level-one heading is
+               .sr-only: present for the document outline, for search results
+               and for heading navigation, printed nowhere. The <img> is
+               DECORATIVE -- alt="" -- because the hidden h1 is already its
+               accessible name, and giving it alt text as well would announce
+               the club twice to a screen reader.
+
+               "Pasadena, California · Founded 1987" used to sit above all of
+               this. It is gone from the hero: the founding year is a
+               historical fact, it is already in the About band further down
+               this same page, and it was costing a whole typographic level
+               before the visitor reached the club's name.
 
                ONE description, not two. There is no second introductory
                sentence stacked under this: the deck below is the only one, and
                the paragraph that used to sit under the buttons is gone. */ ?>
-      <h1 class="display hero__title">
-        Caltech Alpine Club
-      </h1>
+      <h1 class="display hero__title">Caltech Alpine Club</h1>
 
       <p class="hero__text">
         Outdoor adventures for Caltech, JPL, and the extended Caltech community.

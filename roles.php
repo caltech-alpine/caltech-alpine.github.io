@@ -99,16 +99,21 @@ alpine_page_hero(array(
     foreach ($asking as $r) { if ($r['state'] === ALPINE_ROLE_NEEDED) { $ordered[] = $r; } }
     foreach ($asking as $r) { if ($r['state'] !== ALPINE_ROLE_NEEDED) { $ordered[] = $r; } }
     ?>
-    <?php /* ROLE, WHO IS IN IT, STATUS -- three fields, no sentences. The
-             status was "Looking for someone" against "Looking for another
-             person", which is the heading above restated once per row. It is
-             now "Open" and "Room for one more", set beside the name rather than
-             under it, so the column of statuses can be read down.
+    <?php /* ROLE, WHO IS IN IT, STATUS -- three fields, no sentences, set on
+             one line so the column of statuses can be read straight down.
 
-             The holders are named because "Room for one more" beside a role
-             with nobody in it and beside a role with a president in it are
-             different facts, and the name is what tells them apart without a
-             sentence explaining the difference. */ ?>
+             THE STATUS IS ALWAYS A FRACTION (2026-08-31). It was prose once
+             ("Looking for someone"), then a fraction for short roles and prose
+             for the rest ("Open", "Room for one more"). Both mixed formats
+             failed the same way: this is a COLUMN, a reader compares it
+             top-to-bottom, and two rows in different units cannot be compared
+             at a glance. One shape -- filled over seats -- and the comparison
+             is free. alpine_role_status_line() owns the wording.
+
+             The holders are still named, because "1/2 filled" beside a job
+             with a president in it and beside a job with nobody in it are
+             different facts, and the name is what separates them without a
+             sentence doing the explaining. */ ?>
     <ul class="wanted mt-lg">
       <?php foreach ($ordered as $r): ?>
         <?php

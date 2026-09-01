@@ -148,6 +148,30 @@ def trim_to_content(im, field_rgb, pad=0):
     return Image.fromarray(out, "RGBA").crop(box)
 
 
+def pad_to_square(im):
+    """Centre the artwork on a square, transparent canvas.
+
+    A FAVICON IS SQUARE WHETHER OR NOT THE DRAWING IS. Every consumer of this
+    file -- a browser tab, an iOS home screen, make_icons.py -- renders it into
+    a square box, and cairosvg is given output_width == output_height, so a
+    non-square viewBox is not letterboxed but STRETCHED. The new mark trims to
+    512x561, so without this it would ship 9% too short and nothing would say
+    so: the trace succeeds, the fit is measured against the squashed source,
+    and the icon simply looks wrong.
+
+    The padding is transparent, so this changes the canvas and never a pixel of
+    the mark. The wordmark does NOT get this treatment -- it is a wide lockup
+    placed by height, and squaring it would put empty space inside every <img>
+    on the site, which is the exact thing trim_to_content() exists to remove.
+    """
+    side = max(im.width, im.height)
+    if (im.width, im.height) == (side, side):
+        return im
+    out = Image.new("RGBA", (side, side), (0, 0, 0, 0))
+    out.paste(im, ((side - im.width) // 2, (side - im.height) // 2))
+    return out
+
+
 # ------------------------------------------------------------------- trace --
 
 def trace(mask, turdsize, alphamax, opttolerance):
@@ -242,6 +266,8 @@ def load(spec):
         im = crop_to_disc(im, spec["disc"])
     elif spec.get("trim") is not None:
         im = trim_to_content(im, spec["trim"])
+    if spec.get("square"):
+        im = pad_to_square(im)
 
     # Width is what is specified; height follows the artwork's own aspect, so
     # a wordmark is not squeezed into a square it was never drawn for.
@@ -279,6 +305,14 @@ def build(spec, check_only=False):
 
     for out_name, overrides, header in spec["outputs"]:
         body = []
+        # A FULL-BLEED GROUND, for a mark that has to survive being composited
+        # onto something it did not choose. Only the favicon asks for this --
+        # see the note on its spec -- and it is the drawing's own white field
+        # kept rather than an invention.
+        if spec.get("background"):
+            body.append('  <rect width="%d" height="%d" fill="%s"/>'
+                        % (w, h, palette.hexof(
+                            overrides.get("background", spec["background"]))))
         for name, token, d in traced:
             tok = overrides.get(name, token)
             body.append('  <path fill="%s" d="%s"/>' % (palette.hexof(tok), d))
@@ -378,8 +412,8 @@ LOGO = dict(
     width=1024,
     layers=[
         ("field",  (254, 254, 254), None),      # keyed out, never drawn
-        ("sun",    (249,  91,  17), "alpenglow"),
-        ("figure", ( 17,  18,  17), "ink"),
+        ("sun",    (254,  87,  13), "alpenglow"),
+        ("figure", ( 16,  16,  16), "ink"),
     ],
     outputs=[
         ("logo.svg",         {},                   HEADER_LOGO),
@@ -387,18 +421,40 @@ LOGO = dict(
     ],
 )
 
-# FAVICON -- a disc on a white field, where the field is also the colour of the
-# ridgeline inside the disc, so crop_to_disc() finds the circle before anything
-# is classified.
-FAVICON_SUN = (253, 82, 1)
+# FAVICON -- an open orange C-ring with a mountain breaking out of it, on a
+# white field that is keyed out.
+#
+# IT IS NOT A DISC ANY MORE, AND IT IS NOT CROPPED LIKE ONE (2026-08-31).
+# The previous drawing was a filled sun with the mountain contained inside it,
+# so crop_to_disc() could recover the circle from the accent's own extremes and
+# mask everything outside it. The mountain in this drawing extends past the
+# ring on the right: measured against that circle, 30.0% of the dark layer
+# falls outside it, and crop_to_disc() would have cut that flank off WITHOUT
+# failing -- the trace succeeds, the fit looks fine, and the icon is simply
+# missing a third of its mountain. If a future drawing goes back to a
+# contained disc, put `disc=FAVICON_SUN` back; the function is still there.
+#
+# NO `snow` LAYER, BUT STILL A BACKGROUND. The white inside the old disc was
+# drawn snow and had to be painted as a layer. Here the only white IS the
+# field, so it is keyed out with everything outside the mark -- and then put
+# back underneath as one full-bleed rect via `background`.
+#
+# THAT RECT IS NOT DECORATION. Keying the field out and stopping there ships an
+# ink mountain on transparency, and make_icons.py renders apple-touch-icon.png
+# onto --ink: measured 2026-08-31, the iOS icon came out as a bare orange ring
+# with the mountain invisible inside it. A dark browser tab strip does the same
+# thing. The old mark was an opaque disc for exactly this reason.
+FAVICON_SUN = (253, 84, 10)
 FAVICON = dict(
     src="favicon.png",
-    disc=FAVICON_SUN,
+    trim=(253, 253, 253),
+    square=True,        # see pad_to_square(); make_icons.py forces a square
+    background="paper", # see the note above; without it the mountain vanishes
     width=512,
     layers=[
-        ("sun",  FAVICON_SUN,       "alpenglow"),
-        ("rock", ( 21,  20,  20),   "ink"),
-        ("snow", (254, 253, 253),   "paper"),
+        ("field", (253, 253, 253),  None),      # keyed out, never drawn
+        ("sun",   FAVICON_SUN,      "alpenglow"),
+        ("rock",  ( 19,  19,  19),  "ink"),
     ],
     outputs=[("favicon.svg", {}, HEADER_FAVICON)],
 )

@@ -73,11 +73,36 @@
   --glacier:        hsl(190 42% 32%);
 
   /* --- Type --------------------------------------------------------------
-     One family. Character comes from weight, scale and spacing rather than
-     from collecting fonts. If Archivo fails to load, the stack below is a
-     close enough grotesque that nothing reflows badly.                      */
-  --font-sans: 'Archivo', -apple-system, BlinkMacSystemFont, 'Segoe UI',
-               Roboto, 'Helvetica Neue', Arial, sans-serif;
+     ONE family, and it is the whole typographic system: Inter, everywhere —
+     body, navigation, buttons, cards, labels, footer and every heading.
+     Character comes from WEIGHT, SCALE and SPACING rather than from
+     collecting fonts.
+
+     WHY NO DISPLAY FACE (2026-08-31). The club's mark already contains a
+     strong condensed bold wordmark. Setting the headings in a second display
+     family would put two typographic identities on the same page and make
+     the site argue with its own logo. The website is the quiet half of that
+     pair on purpose. Adding Barlow Condensed, Anton, Oswald or similar here
+     is the change this comment exists to prevent.
+
+     If Inter fails to load, the stack below is a close enough grotesque that
+     nothing reflows badly. Loaded as a single variable file — see the
+     comment above the <link> in includes/header.php.                        */
+  --font-sans: 'Inter', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+
+  /* --- Tracking ----------------------------------------------------------
+     Optical letter-spacing, keyed to SIZE rather than to element: the bigger
+     the type, the tighter it sets. These are the only tracking values on the
+     site outside the uppercase labels, and a heading picks the one that
+     matches its step. Body text takes a hair off the default, which is where
+     Inter wants to be at 16-17px.                                           */
+  --track-body:    -0.008em;
+  --track-h4:      -0.008em;   /* step-1 */
+  --track-h3:      -0.013em;   /* step-2 */
+  --track-h2:      -0.020em;   /* step-3 */
+  --track-h1:      -0.025em;   /* step-4 */
+  --track-display: -0.032em;   /* step-5 */
+  --track-label:    0.12em;    /* uppercase eyebrows and labels only         */
 
   --step--1: clamp(0.82rem, 0.80rem + 0.10vw, 0.88rem);
   --step-0:  clamp(1.00rem, 0.97rem + 0.16vw, 1.08rem);
@@ -136,6 +161,7 @@ body {
   font-family: var(--font-sans);
   font-size: var(--step-0);
   line-height: 1.6;
+  letter-spacing: var(--track-body);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
@@ -187,35 +213,66 @@ hr {
    3. TYPOGRAPHY
    ========================================================================== */
 
+/* HIERARCHY COMES FROM SIZE, WEIGHT AND TRACKING — never from a second font
+   family. Three things vary together down the scale: the type gets smaller,
+   it gets LIGHTER, and it tracks LOOSER. Nothing here is above 750, because
+   the mark in the masthead is the heaviest thing on the page and it should
+   stay that way.
+
+   WEIGHT AND TRACKING KEY OFF THE SIZE CLASS, NOT THE ELEMENT. The site
+   routinely writes <h2 class="h3"> to keep the outline correct while setting
+   the type a step down, so an element-driven rule would give that heading h2
+   weight at h3 size. The element rule below is only the fallback for a
+   heading that names no size class. */
 h1, h2, h3, h4 {
   font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -0.022em;
+  line-height: 1.12;
+  letter-spacing: var(--track-h2);
   text-wrap: balance;
 }
 
 /* The biggest size on the site. One user: the homepage h1. Right for a two- or
-   three-word line, wrong for a sentence — see .hero__title in section 7. */
+   three-word line, wrong for a sentence -- see .hero__title in section 7.
+
+   750, not 800. The masthead logo is the heaviest thing on any page here and
+   should stay that way; the hero name sits just under it rather than beside
+   it. Tracking is -0.032em because Inter at 5rem needs the air taken out. */
 .display {
   font-size: var(--step-5);
-  font-weight: 800;
-  line-height: .98;
-  letter-spacing: -0.038em;
+  font-weight: 750;
+  line-height: 1.0;
+  letter-spacing: var(--track-display);
 }
 
-.h1 { font-size: var(--step-4); }
-.h2 { font-size: var(--step-3); }
-.h3 { font-size: var(--step-2); }
-.h4 { font-size: var(--step-1); letter-spacing: -0.012em; }
+.h1 { font-size: var(--step-4); font-weight: 720; letter-spacing: var(--track-h1); }
+.h2 { font-size: var(--step-3); font-weight: 700; letter-spacing: var(--track-h2); }
+.h3 { font-size: var(--step-2); font-weight: 670; letter-spacing: var(--track-h3); }
+.h4 { font-size: var(--step-1); font-weight: 650; letter-spacing: var(--track-h4); }
 
-/* The small capitalised label above a heading. Used a lot; keep it quiet. */
+/* Headings whose size comes from a component rule rather than a size class.
+   They get the treatment that matches the STEP they are set at, so a step-1
+   heading tracks like .h4 wherever it turns up and the page reads as one
+   system. Add to these lists rather than inventing a third setting. */
+.prose h2, .step h2, .empty-state h3 {
+  font-weight: 670;
+  letter-spacing: var(--track-h3);
+}
+.prose h3, .pillar h3 {
+  font-weight: 650;
+  letter-spacing: var(--track-h4);
+}
+
+/* The small capitalised label above a heading. Used a lot; keep it quiet.
+   Uppercase is the ONE place tracking goes positive — caps need the air that
+   lowercase does not. .12em sits mid-range; it was .15em, which read as
+   spaced-out rather than as a label. Ordinary headings are never uppercased. */
 .eyebrow {
   display: flex;
   align-items: center;
   gap: .5em;
   font-size: var(--step--1);
   font-weight: 600;
-  letter-spacing: .15em;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--accent-text);
   margin-bottom: .9rem;
@@ -473,8 +530,8 @@ h1, h2, h3, h4 {
 .btn__label { display: inline-flex; align-items: center; gap: .55em; }
 .btn__gate {
   font-size: .72em;
-  font-weight: 700;
-  letter-spacing: .07em;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
 }
 
@@ -577,15 +634,20 @@ h1, h2, h3, h4 {
   margin-right: auto;
   padding-block: .55rem;
 }
-/* SIZED BY HEIGHT, width auto. The logo is a wide lockup (about 3.9:1), so
-   fixing both dimensions would squash it, and fixing the width would make the
-   type size depend on how much room the bar happens to have.
+/* SIZED BY HEIGHT, width auto. The logo is a wide lockup (3.492:1), so fixing
+   both dimensions would squash it, and fixing the width would make the type
+   size depend on how much room the bar happens to have.
 
-   2.75rem is 44px, which puts "ALPINE CLUB" at a 13px cap height and the
-   smaller "CALTECH" line at 5.6px. Measured, not guessed: those two lines are
-   30.1% and 12.8% of the artwork's height. Below about 40px the small line
-   stops being readable and becomes texture; if that matters more than the bar
-   being compact, raise this and the width in includes/header.php together.
+   2.75rem is 44px, which puts "ALPINE CLUB" at a 13.6px cap height and
+   "CALTECH" at 14.6px. Measured off art/logo.png, not guessed: those lines are
+   30.9% and 33.3% of the artwork's height.
+
+   THE SMALL-LINE CAVEAT IS GONE (2026-08-31). The previous drawing set
+   "CALTECH" at 12.8% of the art, i.e. 5.6px in this bar -- texture rather than
+   type, and unreadable on a phone. In this drawing the two lines are within a
+   few percent of each other, so there is no longer a size below which half the
+   name disappears first. If the aspect changes again, re-measure rather than
+   assuming, and update the width in includes/header.php with it.
 
    The colours live in the SVG, not here: it is loaded with <img>, so it cannot
    inherit anything from this stylesheet. That is why the dark bar gets
@@ -749,47 +811,46 @@ body.nav-open { overflow: hidden; }
   max-width: 60rem;
 }
 
-.hero__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  gap: .6em;
-  font-size: var(--step--1);
-  font-weight: 600;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--on-dark-mute);
-  margin-bottom: 1.4rem;
-}
-.hero__eyebrow::before {
-  content: '';
-  width: 2.2rem; height: 1px;
-  background: var(--alpenglow);
-}
+/* THE HERO IS LIVE TEXT, NOT THE ARTWORK (2026-08-31).
 
-/* The club's name, at .display. Three words, which is exactly what --step-5
-   and a line-height of .98 are for.
+   The horizontal mark was tried as the hero headline and dropped: the masthead
+   already carries it, and repeating it 80px lower made the top of the page
+   read as the same object twice. So the club's name is set as type again, and
+   the artwork stays in the bar where it identifies every page rather than one.
 
-   Briefly (2026-08-31) this was the identity SENTENCE instead, set a step down
-   because 42 characters at --step-5 filled the hero and left no room for the
-   buttons. That sentence is now .hero__text below and the name is back in the
-   h1, so the display setting is right again. If a future heading here is a
-   sentence rather than a name, drop it to --step-4 and give it a max-width;
-   do not leave a long line at this size. */
+   WHAT DID CHANGE is the level above it. The hero used to open with a spaced
+   uppercase eyebrow -- "PASADENA, CALIFORNIA · FOUNDED 1987" -- putting four
+   typographic levels between the visitor and a button. It is gone. The
+   founding year is still on this page, in the About band further down, which
+   is where a historical fact belongs; it was never worth the line above the
+   club's own name.
+
+   The name is set in Inter, like everything else here. That is not a
+   compromise for the sake of one family: the logo's own wordmark is a bold
+   neo-grotesque -- flat-cut terminals, moderate width, not condensed -- so
+   Inter at 750 is the closest live-text match to it that exists. A condensed
+   display face would have been the thing that clashed. */
 .hero__title {
   color: var(--white);
   margin-bottom: 1.1rem;
 }
 
-/* The line under the name: what the club is, in one sentence. It is the only
+/* The line under the mark: what the club is, in one sentence. It is the only
    introductory sentence in the hero -- there is no second paragraph under the
-   buttons, and adding one is what this comment exists to prevent. */
+   buttons, and adding one is what this comment exists to prevent.
+
+   IT MUST NOT COMPETE WITH THE LOGO. Noticeably larger than body copy and
+   much quieter than the artwork: 500 rather than 600+, the page's own light
+   text colour rather than the accent, sentence case, no tracking games. */
 .hero__text {
   font-size: var(--step-1);
-  line-height: 1.5;
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: var(--track-body);
   color: var(--on-dark);
   opacity: .92;
   max-width: 46ch;
-  margin-bottom: 2.2rem;
+  margin-bottom: 2.5rem;
   text-wrap: pretty;
 }
 
@@ -872,8 +933,8 @@ body.nav-open { overflow: hidden; }
 
 .event-card__month {
   font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .13em;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--accent-text);
 }
@@ -1038,9 +1099,12 @@ body.nav-open { overflow: hidden; }
   border: 1px solid currentColor;
   border-radius: 100px;
   font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .12em;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
+  /* NOTE: a hex literal, which nothing else in this file is. It measures
+     5.66:1 on a white card, so it passes AA and was left alone by the
+     typography pass -- but it belongs in a token. See tools/palette.py. */
   color: #b4402c;
 }
 .event-card--cancelled .event-card__title { text-decoration: line-through; }
@@ -1189,8 +1253,8 @@ body.nav-open { overflow: hidden; }
 .sponsor__name { font-weight: 700; font-size: 1.02rem; letter-spacing: -0.015em; }
 .sponsor__tier {
   font-size: .68rem;
-  font-weight: 700;
-  letter-spacing: .13em;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--text-mute);
 }
@@ -1221,8 +1285,8 @@ body.nav-open { overflow: hidden; }
 }
 .inventory__group {
   font-size: .72rem;
-  font-weight: 700;
-  letter-spacing: .13em;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--accent-text);
   margin-top: 1.3rem;
@@ -1256,8 +1320,8 @@ body.nav-open { overflow: hidden; }
 .officer-group + .officer-group { margin-top: 2.75rem; }
 .officer-group__title {
   font-size: var(--step--1);
-  font-weight: 700;
-  letter-spacing: .15em;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--text-mute);
   padding-bottom: .7rem;
@@ -1302,8 +1366,8 @@ body.nav-open { overflow: hidden; }
 .alumni__year + .alumni__year { margin-top: 1.75rem; }
 .alumni__heading {
   font-size: .82rem;
-  font-weight: 700;
-  letter-spacing: .1em;
+  font-weight: 600;
+  letter-spacing: var(--track-label);
   text-transform: uppercase;
   color: var(--accent-text);
   margin-bottom: .7rem;

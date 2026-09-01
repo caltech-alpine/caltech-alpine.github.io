@@ -90,12 +90,24 @@ $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
 <?php endif; ?>
 <meta name="twitter:card" content="summary_large_image">
 
-<?php /* One webfont, one request. Everything falls back to a good system
-         stack if it fails to load — see --font-sans in style.css. */ ?>
+<?php /* ONE webfont, ONE request, ONE file. Inter, as a VARIABLE font:
+         `wght@400..750` makes Google serve a single woff2 per subset whose
+         weight axis is continuous, so the 650 and 720 the headings ask for
+         cost nothing extra. Listing static weights instead (400;500;600;700)
+         would be four files for fewer weights.
+
+         WHY INTER AND NOTHING ELSE. The club's mark already carries a strong
+         condensed bold treatment of its own. A second display face on the
+         page would put two typographic identities in front of the same
+         visitor, so the website is deliberately quiet and the logo does the
+         talking. Do not add a display family here.
+
+         Everything falls back to a good system stack if this fails to load —
+         see --font-sans in style.css. */ ?>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&display=swap">
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400..750&display=swap">
 
 <link rel="stylesheet" href="<?= e(asset('css/style.css')) ?>">
 
@@ -140,7 +152,7 @@ $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
     <a class="brand" href="<?= e(url('index.php')) ?>">
       <?php if (cfg('site.logo_dark') && alpine_has_image(cfg('site.logo_dark'))): ?>
         <img class="brand__logo" src="<?= e(asset('images/' . cfg('site.logo_dark'))) ?>"
-             alt="<?= e(cfg('site.logo_alt')) ?>" width="170" height="44">
+             alt="<?= e(cfg('site.logo_alt')) ?>" width="154" height="44">
       <?php else: ?>
         <span class="brand__text">
           <span class="brand__caltech">Caltech</span>
