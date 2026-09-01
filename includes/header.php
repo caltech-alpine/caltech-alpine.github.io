@@ -124,19 +124,29 @@ $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
 <header class="masthead">
   <div class="wrap masthead__inner">
 
+    <?php /* THE NAME IS IN THE LOGO NOW, so it is not also set as text beside
+             it. The mark used to be wordless and the masthead supplied
+             "Caltech / Alpine Club" in two spans; the artwork carries both
+             lines itself as of 2026-08-31, and printing them again would be
+             the club's name twice in one bar.
+
+             The dark-background file, because this bar is ink. logo.svg is
+             its light-background twin, same trace, one token different.
+
+             The spans are still here as the FALLBACK for an empty site.logo.
+             That setting exists so somebody can drop the mark and keep a
+             wordmark, and with the words inside the image an empty setting
+             would otherwise leave the masthead with no name at all. */ ?>
     <a class="brand" href="<?= e(url('index.php')) ?>">
-      <?php if (cfg('site.logo') && alpine_has_image(cfg('site.logo'))): ?>
-        <img class="brand__logo" src="<?= e(asset('images/' . cfg('site.logo'))) ?>"
-             alt="<?= e(cfg('site.logo_alt')) ?>" width="40" height="40">
+      <?php if (cfg('site.logo_dark') && alpine_has_image(cfg('site.logo_dark'))): ?>
+        <img class="brand__logo" src="<?= e(asset('images/' . cfg('site.logo_dark'))) ?>"
+             alt="<?= e(cfg('site.logo_alt')) ?>" width="170" height="44">
+      <?php else: ?>
+        <span class="brand__text">
+          <span class="brand__caltech">Caltech</span>
+          <span class="brand__name">Alpine Club</span>
+        </span>
       <?php endif; ?>
-      <?php /* No fallback image. This used to point at a placeholder ice-axe
-               mark, which was deleted when the real logo landed; a fallback
-               that names a file nobody keeps is a broken image waiting for
-               somebody to clear site.logo. The wordmark below stands alone. */ ?>
-      <span class="brand__text">
-        <span class="brand__caltech">Caltech</span>
-        <span class="brand__name">Alpine Club</span>
-      </span>
     </a>
 
     <nav class="nav" aria-label="Main">

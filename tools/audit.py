@@ -82,7 +82,13 @@ def check(page, html):
     for m in re.finditer(r"<a\b([^>]*)>(.*?)</a>", html, re.S):
         attrs, text = m.group(1), re.sub(r"<[^>]+>", "", m.group(2)).strip()
         href = (re.search(r'href="([^"]*)"', attrs) or [None, ""])[1]
-        if not text and "aria-label" not in attrs:
+        # A link whose only child is an image is named by that image's alt, and
+        # that is a correct, common pattern: the masthead brand link is a logo
+        # with the club's name drawn into it. So an <img> carrying a non-empty
+        # alt counts as the link's text. An empty or missing alt still fails,
+        # which is the case that actually leaves a screen reader reading a URL.
+        img_alt = re.search(r'<img\b[^>]*\balt="([^"]+)"', m.group(2))
+        if not text and "aria-label" not in attrs and not img_alt:
             fails.append("%s: link with no text: %s" % (page, href))
         if href.startswith("http") and "rel=" not in attrs and "caltech.edu" not in href:
             warns.append("%s: external link without rel: %s" % (page, href[:60]))
@@ -200,7 +206,7 @@ def contrast_check():
 # channels. So this checks the SHIPPED files rather than trusting the
 # generator: pull every fill out of the SVGs and require it to be a colour that
 # some --token in style.css actually resolves to.
-LOGO_SVGS = ("logo.svg", "favicon.svg", "logo-full.svg")
+LOGO_SVGS = ("logo.svg", "logo-on-dark.svg", "favicon.svg")
 
 
 def logo_palette_check():

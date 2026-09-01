@@ -56,10 +56,15 @@ import palette                                          # noqa: E402
 # floating in a dark box that nobody chose. Filling the corners with --ink
 # makes that box deliberate, and it is the same treatment the previous favicon
 # used when the mark had no background of its own.
+# EVERY SQUARE ICON COMES FROM favicon.svg, INCLUDING logo-512.png. The logo
+# is a wide lockup now (about 3.9:1) and rendering it into a 512 square either
+# squashes it or leaves it a thin strip in a lot of nothing. The square mark is
+# what somebody asking for "the logo, as a PNG" for an avatar or a print job
+# actually wants; anyone who wants the lockup wants logo.svg, at its own shape.
 JOBS = [
     ("favicon.svg", "apple-touch-icon.png", 180, palette.hexof("ink")),
     ("favicon.svg", "favicon-32.png", 32, None),
-    ("logo.svg", "logo-512.png", 512, None),
+    ("favicon.svg", "logo-512.png", 512, None),
 ]
 
 

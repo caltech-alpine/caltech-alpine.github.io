@@ -351,33 +351,50 @@ two `<link>` tags in `includes/header.php` and drop `'Archivo',` from
 
 ### The logo
 
-The club mark is a torch in front of three peaks, inside a disc. **The source of
-record is the drawing, not the SVG:** the artwork lives in
-`art/`, and everything the site serves is generated from it, so
-nothing can drift out of step.
+The club logo is a sun behind a mountain range, followed by the club's name.
+**The source of record is the drawing, not the SVG:** the artwork lives in
+`art/`, and everything the site serves is generated from it, so nothing can
+drift out of step.
 
 ```
-art/badge.png     the mark, as drawn. Orange sky, dark rock, light torch
-art/favicon.png   the same idea reduced to one peak, for small sizes
-art/lockup.png    the mark above CALTECH / ALPINE CLUB
+art/logo.png      the logo, as drawn: sun, mountains, CALTECH / ALPINE CLUB
+art/favicon.png   a sun behind one peak, in a disc, with no words
 ```
 
-**The favicon is a different drawing, not a smaller render of the mark.** At 16
-pixels the torch is four grey dots and three ridgelines are one, so the tab
-shows a smudge; the favicon keeps only the disc and a capped peak. That is why
-a favicon has always been a separate file.
+**The name is inside the logo.** Anywhere `logo.svg` or `logo-on-dark.svg` is
+placed must not also print "Caltech Alpine Club" as text beside it. The
+masthead used to do exactly that, because the older mark had no words; the
+`.brand__text` spans in `includes/header.php` are now only the fallback for an
+empty `site.logo_dark`.
+
+**The favicon is a different drawing, not a smaller render of the logo.** At 16
+pixels a wordmark is a smudge, so the favicon keeps only the disc, the sun and
+a capped peak. That is why a favicon has always been a separate file: 16px is a
+different design problem, not a smaller one.
 
 `art/` sits outside `assets/`, and is excluded by both deploy routes, because
-`assets/` is the served tree and these are 1.4 MB of source nobody requests
+`assets/` is the served tree and these are megabytes of source nobody requests
 over HTTP. Same reason `docs/` and `tools/` are not in there.
 
 | File | Built from | What it is |
 |---|---|---|
-| `logo.svg` | `art/badge.png` | the mark. Masthead and footer |
-| `favicon.svg` | `art/favicon.png` | the simplified mark, for the browser tab |
-| `logo-full.svg` | `art/lockup.png` | mark plus wordmark, for anything that needs the name in the artwork |
-| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | the SVGs | rasters, written by `tools/make_icons.py` |
-| `social-default.png` | `logo.svg` | the link preview, written by `tools/make_social.py` |
+| `logo.svg` | `art/logo.png` | the logo, dark type. **For light backgrounds** |
+| `logo-on-dark.svg` | `art/logo.png` | the same, light type. Masthead and footer, which are ink |
+| `favicon.svg` | `art/favicon.png` | the wordless disc, for the browser tab |
+| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | `favicon.svg` | square rasters, written by `tools/make_icons.py` |
+| `social-default.png` | `favicon.svg` | the link preview, written by `tools/make_social.py` |
+
+**The light and dark logos are one trace, not two drawings.** `trace_logo.py`
+traces the artwork once and writes it twice, swapping a single token, so the
+pair cannot disagree with each other. `currentColor` would be the obvious
+alternative and does not work: the logo is loaded with `<img>`, and an SVG used
+as an image has no parent to inherit from.
+
+**Every square icon comes from `favicon.svg`**, including `logo-512.png`. The
+logo is about 3.9:1, so rendering it into a 512 square either squashes it or
+leaves a thin strip in a lot of nothing. Somebody asking for "the logo as a
+PNG" for an avatar wants the mark; somebody who wants the lockup wants
+`logo.svg`, at its own shape.
 
 **To change the mark:** drop the new drawing into `art/` under the
 same filename, then run the three generators in this order:
@@ -390,27 +407,30 @@ python tools/make_social.py
 
 `trace_logo.py` traces each flat colour as its own layer, recolours it to the
 site's palette on the way through, and prints how far each traced layer is from
-the drawing it came from. Under about 2% is fine; the current mark is 0.16%.
+the drawing it came from. Under about 2% is fine; the current logo is 0.43%.
 `--check` reports without writing.
 
 Do not edit an SVG or a PNG in `assets/images/` by hand. The next run of a
 generator overwrites it.
 
-**Why the colours are hardcoded rather than `currentColor`:** the mark is loaded
-with `<img>`, and an SVG used as an image has no parent to inherit from, so
-`currentColor` there resolves to black. The site's colours are copied into
-`SITE_PALETTE` at the top of `tools/trace_logo.py`; if you change `alpenglow`,
-`ink` or `paper` in `assets/css/style.css`, change them there and re-run it.
-`tools/audit.py` fails if the two disagree.
+**No tool carries a colour literal.** `tools/palette.py` reads the `hsl()`
+tokens out of `assets/css/style.css` and converts them; `trace_logo.py`,
+`make_social.py` and `audit.py` ask it by name. That is not tidiness: the three
+had grown their own copies and three of those copies had drifted, one of them
+by a single point on each channel, which is invisible alone and a visible seam
+where the two colours meet. Change a token in the stylesheet and re-run the
+generators. `tools/audit.py` fails the build if a fill in a logo file is not a
+colour some token resolves to.
 
-**The mark carries its own background, and that is the point.** The crossed-axes
-mark before it was one path in the accent colour with nothing behind it, so it
-needed an argument about which orange to use on the dark pages and a second
-token that turned out to be the wrong one. A filled disc reads the same on the
-ink masthead, the ink footer and a paper page, and there is one file.
+**The favicon carries its own background; the logo does not.** The disc is
+opaque, so one file reads on the ink masthead, on a paper page and on whatever
+colour a browser paints its tab strip. The logo's field is keyed out, including
+the ridgeline between the sun and the mountain, so that gap is the page showing
+through and is right on both.
 
-Setting `site.logo` in `includes/config.php` to an empty string removes the mark
-from the masthead and leaves the wordmark, which still looks deliberate.
+Setting `site.logo_dark` in `includes/config.php` to an empty string removes the
+logo from the masthead and falls back to setting the club's name as text, which
+is what the masthead did before the artwork had words in it.
 
 ## A note on scope
 

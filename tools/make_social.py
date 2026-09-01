@@ -55,13 +55,19 @@ ALPENGLOW = palette.rgb("alpenglow")         # the accent rule and the tagline
 
 
 def mark_layer(size):
-    """The club mark, rasterised from assets/images/logo.svg.
+    """The club mark, rasterised from assets/images/favicon.svg.
+
+    THE WORDLESS MARK, not logo.svg. This panel sets "CALTECH" and "ALPINE
+    CLUB" as type on the left; logo.svg has both words drawn into it, so using
+    it here would print the club's name twice on one image. It is also a wide
+    lockup and this slot is a square.
+
 
     Imported here rather than at module scope: cairosvg is the one dependency
     this script has that is awkward to install, and the rest of the image is
     still worth generating without it.
     """
-    svg = os.path.join(IMAGES, "logo.svg")
+    svg = os.path.join(IMAGES, "favicon.svg")
     if not os.path.exists(svg):
         return None
     try:
