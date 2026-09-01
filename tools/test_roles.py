@@ -212,14 +212,19 @@ def not_on_page(pages, page, needle, why):
 
 
 def strip(pages):
-    """Just the homepage recruitment line, or '' when it is not rendering.
+    """Just the homepage recruitment block, or '' when it is not rendering.
 
     Scoped on purpose. Asking whether the whole homepage mentions "Film
     Festival" answers the wrong question -- the page has a section ABOUT the
     film festivals, and always will. What matters is whether the club is asking
     for somebody to run them.
+
+    Matched to the closing tag of the outer div rather than to the first
+    "</div></div>" it can find: the block became a heading plus a <ul> of role
+    names on 2026-08-31, so the lazy match stopped inside it and every check
+    below silently narrowed to the heading.
     """
-    m = re.search(r'(?s)<div class="wanted-strip">.*?</div>\s*</div>', pages["index.php"])
+    m = re.search(r'(?s)<div class="wanted-strip">.*?\n</div>', pages["index.php"])
     return text_of(m.group(0)) if m else ""
 
 
@@ -308,7 +313,10 @@ def scenario_1_replace_an_officer(base):
     on_page(p, "roles.php", "Currently Alice Fell", "Get Involved names her too")
     on_page(p, "roles.php", "Alice Fell",
             "and Get Involved names her, without linking her address")
-    on_page(p, "about.php", "Through 2027", "Zach moved to Past officers")
+    # The Past officers heading is the 'until' year alone. It was "Through
+    # 2027", which asked the reader to work out through-to-when from a column
+    # that holds one number.
+    on_page(p, "about.php", "2027", "Zach moved to Past officers")
     # The one that matters: his ADDRESS must be gone from the whole site, even
     # though his name is still on the alumni list.
     nowhere(p, outgoing["email"],
@@ -332,7 +340,7 @@ def scenario_2_two_co_presidents(base):
     check("the homepage stopped asking for a second president",
           "President" not in strip(p), strip(p))
     check("and Get Involved stopped offering the seat",
-          "Looking for" not in role_block(p, "president"), role_block(p, "president"))
+          "Room for" not in role_block(p, "president"), role_block(p, "president"))
 
 
 def scenario_3_rename_the_title(base):
@@ -370,13 +378,15 @@ def scenario_5_change_the_staffing(base):
     edit_cell("roles.csv", "hiking,", "max_people", "2")
     p = render(base)
     check("two of two hiking coordinators is full, so nothing is offered",
-          "Looking for" not in role_block(p, "hiking"), role_block(p, "hiking"))
+          "Room for" not in role_block(p, "hiking"), role_block(p, "hiking"))
 
     edit_cell("roles.csv", "hiking,", "max_people", "3")
     data_ok()
     p = render(base)
     check("raising the maximum to 3 opens a place, with no code change",
-          "Looking for another person" in role_block(p, "hiking"), role_block(p, "hiking"))
+          "Room for one more" in role_block(p, "hiking"), role_block(p, "hiking"))
+    check("and it does NOT say Open, because two people are doing it",
+          "Open" not in role_block(p, "hiking"), role_block(p, "hiking"))
     check("but it is NOT on the homepage: having room is not being short",
           "Hiking" not in strip(p), strip(p))
 
@@ -384,15 +394,41 @@ def scenario_5_change_the_staffing(base):
 def scenario_6_a_role_with_nobody(base):
     """The film festival role has nobody, and it is below its minimum."""
     p = render(base)
-    check("the homepage invites somebody to take it on",
-          "take on" in strip(p) and "Film Festival Coordinator" in strip(p), strip(p))
-    check("and frames it as helping run the club, not as a staffing gap",
-          "Help run the Alpine Club" in strip(p), strip(p))
-    check("Get Involved shows it as open",
-          "Looking for someone" in role_block(p, "film_festival"),
+    check("the homepage names it",
+          "Film Festival Coordinator" in strip(p), strip(p))
+    check("and names the thing being joined, not a vague kind of helping",
+          "Join the officer team" in strip(p), strip(p))
+    # THE ELIGIBILITY LINE IS LOAD-BEARING. Officer positions are held by
+    # Caltech students; club membership is not restricted that way. If this
+    # sentence is ever lost from the block, the homepage invites the whole
+    # Caltech/JPL community into a job it cannot have.
+    check("and says who the officer positions are for, in the block itself",
+          "for Caltech students" in strip(p), strip(p))
+    # THE COUNT IS DERIVED. A hard-coded number goes wrong the day a seat is
+    # filled, and it goes wrong silently, so the test compares the sentence
+    # against the list rendered directly beneath it.
+    listed = strip(p).count(" filled")
+    check("and the count in the sentence equals the roles listed under it",
+          ("We have %d open officer position%s" % (listed, "" if listed == 1 else "s"))
+          in strip(p), strip(p))
+    check("with a seat count on each opening",
+          "0/1 filled" in strip(p), strip(p))
+    # ...and the restriction must not leak into the general membership copy.
+    home = text_of(p["index.php"])
+    check("while the hero still describes a club wider than the student body",
+          "extended Caltech community" in home
+          and "Caltech affiliation is not required to join" in home, home[:300])
+    # The names ARE the message here. A sentence around them would be the
+    # heading restated, so the homepage says nothing about status at all --
+    # only roles the club is short of reach this block.
+    check("without a sentence explaining that they are open",
+          "Looking for" not in strip(p) and "Open" not in strip(p), strip(p))
+    check("Get Involved shows the seats it is short",
+          "0/1 filled" in role_block(p, "film_festival"),
           role_block(p, "film_festival"))
-    check("and points at a person rather than a mailbox",
-          "Talk to one of the officers" in role_block(p, "film_festival"),
+    check("...and says so ONCE, not three ways at once",
+          "Currently open" not in role_block(p, "film_festival")
+          and "Talk to one of the officers" not in role_block(p, "film_festival"),
           role_block(p, "film_festival"))
     # NO MAILTO ON THIS PAGE AT ALL. The roster on About is where somebody
     # decides who to write to; a blank message to a shared address is the least
@@ -415,14 +451,21 @@ def scenario_7_an_optional_role(base):
     check("an empty role below its minimum is on the homepage",
           "Talks Coordinator" in strip(p), strip(p))
     check("and it is asked for in the same words as any other role",
-          "Looking for someone" in role_block(p, "talks"), role_block(p, "talks"))
+          "0/1 filled" in role_block(p, "talks"), role_block(p, "talks"))
 
     edit_cell("roles.csv", "talks,", "min_people", "0")
     p = render(base)
     check("dropping min_people to 0 takes it off the homepage, with no other edit",
           "Talks" not in strip(p), strip(p))
-    check("but Get Involved still offers it, in the same words",
-          "Looking for someone" in role_block(p, "talks"), role_block(p, "talks"))
+    # An optional job with nobody in it is open in the plain sense, and the
+    # fraction cannot say so -- its denominator is the minimum, and here the
+    # minimum is zero. It must not print "0/0 filled", and it must not print
+    # "Room for one more", which would claim somebody is already doing it.
+    check("but Get Involved still offers it, as Open",
+          "Open" in role_block(p, "talks"), role_block(p, "talks"))
+    check("...and not as a nonsense fraction or as an occupied seat",
+          "0/0" not in role_block(p, "talks")
+          and "Room for" not in role_block(p, "talks"), role_block(p, "talks"))
     edit_cell("roles.csv", "talks,", "min_people", "1")
 
 
@@ -535,12 +578,47 @@ def scenario_11_stop_recruiting(base):
     p = render(base)
     check("and with nothing left short, the homepage notice vanishes entirely",
           'class="wanted-strip"' not in p["index.php"])
-    edit_cell("roles.csv", "talks,", "recruiting", "")
     on_page(p, "roles.php", "Film Festival Coordinator",
             "but the job still appears on Get Involved with its description")
     check("and is not listed as something to help with",
           "Film Festival" not in wanted_list(p), wanted_list(p))
+    # A quiet, empty job has no holders AND no status, so the line that carries
+    # them must not render as an empty paragraph under the description.
+    check("a quiet empty job renders no staffing line at all",
+          "Currently" not in role_block(p, "film_festival")
+          and "Open" not in role_block(p, "film_festival"),
+          role_block(p, "film_festival"))
 
+    # EVERY ROLE SETTLED. The state the site spends most of a good year in, and
+    # the one nobody looks at, so it is worth an assertion: with nothing open
+    # anywhere, the sections that advertise openings have to disappear rather
+    # than render a heading over an empty list.
+    #
+    # Done by quieting EVERY row rather than naming the ones that happen to be
+    # asking today. The scenarios above accumulate -- a co-president here, a
+    # raised maximum there -- so a list of role_ids written now is a list that
+    # goes wrong the next time somebody adds a scenario, and it fails by
+    # checking nothing rather than by failing.
+    settled = read("roles.csv")
+    for row in read("roles.csv").split("\n"):
+        if row.startswith("#") or not row.strip():
+            continue
+        cells = split_csv(row)
+        if cells[0] == "role_id":
+            continue
+        edit_cell("roles.csv", cells[0] + ",", "recruiting", "no")
+    p = render(base)
+    check("with nothing open anywhere, Get Involved drops the whole section",
+          'id="open"' not in p["roles.php"])
+    check("and the About page drops its invitation band",
+          "join-callout" not in p["about.php"])
+    check("...and offers the roles page instead, so About is not a dead end",
+          "What each of these jobs involves" in text_of(p["about.php"]))
+    on_page(p, "roles.php", "The roles",
+            "while the roles themselves are still described in full")
+    write("roles.csv", settled)
+
+    edit_cell("roles.csv", "talks,", "recruiting", "")
     edit_cell("roles.csv", "film_festival,", "recruiting", "")
     p = render(base)
     check("clearing the cell starts advertising it again",

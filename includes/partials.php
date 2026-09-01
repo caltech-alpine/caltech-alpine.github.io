@@ -11,7 +11,18 @@
 /**
  * Instructions for writing an email, printed as text.
  *
- *  ***  Use this for every "get in touch" on the site. Never a mailto button. ***
+ *  ***  THE RULE IS THE ADDRESS, NOT THE BLOCK: wherever the site asks
+ *  ***  somebody to write, the address must be readable and selectable on the
+ *  ***  page, never only inside a link's href.
+ *
+ * NOTHING CALLS THIS TODAY (2026-08-31). Its one caller was a section on Join
+ * headed "Joining from outside Caltech", which said in a paragraph what the
+ * card above it had already said in a heading and a sentence; the card
+ * absorbed it and now prints the address as a line of its own beside a button
+ * that pre-fills the same mail. That satisfies the rule above with three lines
+ * instead of a definition list. It is kept because the next page that needs to
+ * ask for a written reply with several prompts should use it rather than
+ * inventing a fourth shape for the same thing.
  *
  * A mailto: link is not a reliable way to ask someone to write to you. For
  * anyone reading their mail in a browser tab — which is most people, and every

@@ -299,27 +299,33 @@ function alpine_roles_needed()
 }
 
 /**
- * How a role's staffing reads on a page, in plain words.
+ * How a role's staffing reads on a page: a COUNT when seats are unfilled, a
+ * short phrase when they are not.
  *
- * THREE PHRASES AND NOTHING ELSE:
+ *     ''                  somebody is doing it and the club is not asking
+ *     0/1 filled          nobody is doing a job that needs one person
+ *     1/2 filled          one of the two people the job needs
+ *     Room for one more   the job has what it needs and could use another
  *
- *     ''                        somebody is doing it and the club is not asking
- *     Looking for someone       nobody is doing it
- *     Looking for another person  somebody is, and another would help
+ * TWO DIFFERENT FACTS, SO TWO DIFFERENT SHAPES (2026-08-31). The fraction is
+ * filled over MIN_PEOPLE -- how many the club needs -- and it only appears
+ * while a job is short of that. It answers the question a reader arriving at
+ * a vacancy actually has: how many seats, how many empty.
  *
- * (plus "Looking for N more people" when a job wants several, which is the same
- * sentence with a number in it.)
+ * A job that is not short does NOT get a fraction, and that is the whole
+ * reason min and max are separate columns. President is min 1 / max 2 with one
+ * president: fully staffed, and "1/2 filled" would read as understaffed and as
+ * a reproach to the person in the job. Several roles also leave max_people
+ * blank -- as many volunteers as turn up -- so there is no denominator to
+ * print for them at all. Those get the phrase.
  *
- * It used to say "Open" for a job the club was short of and "Open, if somebody
- * wants it" for an optional one, which made the second sound like nobody would
- * mind if it never happened. The difference between those two cases is real and
- * it is still in the data; it is just not the visitor's problem. What decides
- * whether the homepage mentions a job, and whether it leads the list here, is
- * still min_people and max_people, not this wording.
+ * The wording before this was "Looking for someone" / "Looking for another
+ * person": a sentence beside a role name that already sat under a heading
+ * saying what the club needs. A status belongs in the smallest form that
+ * carries it; the structure around it says the rest.
  *
  * Returns '' for anything with nothing to say, so a caller can print it
- * unconditionally. Deliberately never says "vacant" and never prints the
- * minimum and maximum at a visitor.
+ * unconditionally. Deliberately never says "vacant".
  */
 function alpine_role_status_line($role)
 {
@@ -327,56 +333,35 @@ function alpine_role_status_line($role)
         return $role['recruiting'];                 /* a human's own sentence */
     }
 
-    if ($role['state'] !== ALPINE_ROLE_NEEDED && $role['state'] !== ALPINE_ROLE_SPARE) {
-        return '';
+    /* Short of what the club needs: say how short, in seats. */
+    if ($role['state'] === ALPINE_ROLE_NEEDED) {
+        return $role['filled'] . '/' . $role['min'] . ' filled';
     }
 
-    if ($role['filled'] === 0) { return 'Looking for someone'; }
+    if ($role['state'] !== ALPINE_ROLE_SPARE) { return ''; }
 
-    /* Somebody IS doing it and another would help. Never "open" here: that
-       reads as though nobody were, which is wrong and rude to the person in
-       the job. */
-    $more = $role['state'] === ALPINE_ROLE_NEEDED ? $role['short'] : $role['spare'];
+    /* SPARE with nobody in it is the optional job -- min_people 0, a job the
+       club would like doing and does not need. It is open in the plain sense,
+       and the fraction cannot say so: its denominator is the minimum, and the
+       minimum is zero. "0/0 filled" is not a status, and "Room for one more"
+       would claim somebody is already doing it. */
+    if ($role['filled'] === 0) { return 'Open'; }
 
-    return $more === 1
-        ? 'Looking for another person'
-        : 'Looking for ' . alpine_number_word($more) . ' more people';
+    /* It has what it needs and could take another. No fraction here -- see the
+       note above on why min is the only honest denominator, and why a job that
+       has met its minimum has no shortfall to print. */
+    return $role['spare'] === 1
+        ? 'Room for one more'
+        : 'Room for ' . alpine_number_word($role['spare']) . ' more';
 }
 
-/**
- * The same job inside the homepage sentence "we are looking for a Caltech
- * student to take on ___".
- *
- * alpine_role_need_phrase() is the older cousin of this and puts an article on
- * the front ("a Talks Coordinator", "a second President") because it was
- * written for a different sentence. This one has to sit after "take on", where
- * the article is wrong.
- */
-function alpine_role_help_phrase($role)
-{
-    $title = alpine_role_title($role, $role['filled'] + 1);
-    return $role['filled'] === 0 ? $title : 'another ' . $title;
-}
-
-/**
- * How one role reads inside "the club is short ___" on the homepage.
- *
- * The distinction is mechanical, so no template should have to make it: a job
- * nobody holds needs "a Talks Coordinator", while a job with one of its two
- * presidents needs "a SECOND President".
- *
- * The title is used here as WORDS -- to pick "a" or "an" -- and never to decide
- * anything. That is the line this file does not cross.
- */
-function alpine_role_need_phrase($role)
-{
-    $title = alpine_role_title($role, $role['filled'] + 1);
-    $an    = (strpos('aeiouAEIOU', substr($title, 0, 1)) !== false) ? 'an ' : 'a ';
-
-    if ($role['filled'] === 0) { return $an . $title; }
-    if ($role['filled'] === 1) { return 'a second ' . $title; }
-    return 'another ' . $title;
-}
+/* alpine_role_help_phrase() and alpine_role_need_phrase() lived here. Both
+   existed to bend a role title into the middle of a sentence -- "to take on
+   another President", "the club is short a Talks Coordinator" -- and both went
+   with the sentence on 2026-08-31, when the homepage notice became a heading
+   and a list of role names. A role title now only ever appears as itself, so
+   nothing has to inflect one, and this file has one less reason to look at the
+   words in a title. */
 
 /**
  * "Film Festival Coordinator and Talks Coordinator" -- role titles as one

@@ -42,12 +42,24 @@ require __DIR__ . '/includes/header.php';
     <div class="hero__inner">
       <p class="hero__eyebrow">Pasadena, California · Founded <?= e(cfg('facts.founded')) ?></p>
 
+      <?php /* THE NAME, THEN WHAT IT IS. Two earlier versions of this hero got
+               it wrong in opposite directions: a slogan ("Less lab. More
+               mountains."), which the club president disliked and which named
+               nobody, and then the identity line alone, which read well but
+               left the club's name to the masthead, the tab title and the
+               logo. Somebody who lands here from a search result or a pasted
+               link should not have to infer whose site this is, so the h1 says
+               it outright and the line under it says what the club does.
+
+               ONE description, not two. There is no second introductory
+               sentence stacked under this: the deck below is the only one, and
+               the paragraph that used to sit under the buttons is gone. */ ?>
       <h1 class="display hero__title">
-        Less lab.<em>More mountains.</em>
+        Caltech Alpine Club
       </h1>
 
       <p class="hero__text">
-        Trips, shared gear, and people to go with.
+        Outdoor adventures for Caltech, JPL, and the extended Caltech community.
       </p>
 
       <div class="btn-row hero__actions">
@@ -66,48 +78,74 @@ require __DIR__ . '/includes/header.php';
 
 
 <!-- ======================================================= wanted ==== -->
-<?php /* AN INVITATION, NOT A STAFFING NOTICE.
+<?php /* OFFICER RECRUITMENT. FIVE THINGS, IN FIVE LINES, IN THIS ORDER.
 
-         This said "The club is short a Film Festival Coordinator", which reads
-         as an org chart with a hole in it. What it is actually for is telling a
-         member that a job they might enjoy is going spare, so the heading says
-         that and the link goes to the page that explains what the jobs involve.
+         A Caltech student who has never seen this site has to get all of it at
+         a glance: these are officer positions · they are open now · the club
+         wants Caltech students for them · a role name will explain itself ·
+         there are more roles than these. Each line does exactly one of those,
+         and none of them is a paragraph. The role descriptions belong on Get
+         Involved; this block advertises the vacancies and nothing else.
 
-         "Caltech student" is in the sentence because these are the club's
-         officer roles, and it is one clause rather than a paragraph. It does
-         NOT qualify membership: anyone can join, which the hero says two inches
-         above this and the footer says on every page.
+         WHY THE HEADING IS NOT "Help run the club" (2026-08-31, second
+         attempt). That heading, and "Get involved" before it, both name a
+         category far wider than what is underneath: helping run the club could
+         mean driving people to a trailhead, working a film-festival door, or
+         donating a tent. A reader then meets two bare role names with no frame
+         to hang them on. "Join the officer team" names the thing, so the names
+         under it read as posts on that team.
 
-         When every role is filled this renders nothing at all. That is the
-         property that matters when nobody has touched the site for a year: the
-         failure mode is silence, not a stale banner. */ ?>
+         THE ONE DISTINCTION THIS BLOCK EXISTS TO KEEP: the CLUB is open to
+         Caltech, JPL and the wider Caltech community -- which the hero says
+         four inches above -- while the OFFICER POSITIONS are held by Caltech
+         students. It is carried by PLACEMENT: "Caltech students" appears in
+         this block and nowhere else on the page, so nothing here can be read
+         as narrowing who may join the club. DO NOT add a paragraph explaining
+         the difference, and do not put "Caltech students" into any general
+         membership sentence elsewhere.
+
+         THE COUNT IS DERIVED, NEVER TYPED. count($short) is the number of
+         roles listed directly below it, so the sentence and the list cannot
+         disagree -- which is the failure a hard-coded "two" produces the day
+         somebody fills one. Same rule as every other claim on this site: a
+         number a human has to re-assert is a number that goes stale.
+
+         $short is alpine_roles_needed(), not alpine_roles_asking(): a job with
+         one of its two presidents is not an OPEN position, so it is offered on
+         Get Involved and never counted here. The link target is the role_id,
+         so renaming a job does not break it.
+
+         When every seat is filled this renders nothing at all -- including the
+         eligibility line, which is correct: there is no claim about who may be
+         an officer on a page that is not asking for one. That is the property
+         that matters when nobody has touched the site for a year: the failure
+         mode is silence, not a stale banner. */ ?>
 <?php if ($short): ?>
 <div class="wanted-strip">
   <div class="wrap wanted-strip__inner">
-    <?php
-    /* Assembled in PHP and echoed as one string. Built inline in the markup it
-       picked up a newline before every comma, so the rendered line read
-       "Film Festival Coordinator , and Talks Coordinator ." Anything that has
-       to come out as a single sentence should be one string by the time it
-       reaches the page.
-
-       The link target is the role_id, so renaming a job does not break it. */
-    $needs = array();
-    foreach ($short as $r) {
-        $needs[] = '<a href="' . e(url('roles.php#' . $r['role_id'])) . '">'
-                 . e(alpine_role_help_phrase($r)) . '</a>';
-    }
-    ?>
     <div class="wanted-strip__text">
-      <p class="wanted-strip__title">Help run the Alpine Club</p>
-      <p>
-        We're looking for
-        <?= count($short) === 1 ? 'a Caltech student' : 'Caltech students' ?>
-        to take on <?= alpine_list_phrase($needs) ?>.
+      <p class="wanted-strip__title">Join the officer team</p>
+      <p class="wanted-strip__who">
+        <?php /* "position" / "positions" is the one word here that is not
+                 fixed copy, and it has to follow the count or the sentence is
+                 ungrammatical the month only one seat is open. */ ?>
+        We have <?= count($short) ?> open officer
+        position<?= count($short) === 1 ? '' : 's' ?> for Caltech students.
       </p>
+      <ul class="wanted-strip__roles">
+        <?php foreach ($short as $r): ?>
+          <li class="wanted-strip__role">
+            <a href="<?= e(url('roles.php#' . $r['role_id'])) ?>"><?=
+              e(alpine_role_title($r, $r['min'])) ?></a>
+            <?php /* The seat count, from the same function Get Involved uses,
+                     so the two pages cannot describe one role differently. */ ?>
+            <span class="wanted-strip__count"><?= e(alpine_role_status_line($r)) ?></span>
+          </li>
+        <?php endforeach; ?>
+      </ul>
     </div>
     <a class="arrow-link" href="<?= e(url('roles.php')) ?>">
-      See ways to get involved <?= icon('arrow-right', 'icon icon--xs') ?>
+      See all officer roles <?= icon('arrow-right', 'icon icon--xs') ?>
     </a>
   </div>
 </div>
@@ -165,6 +203,12 @@ require __DIR__ . '/includes/header.php';
             directly.
           </p>
         </div>
+        <?php /* THE BADGE STAYS ON THIS BUTTON. It came off on 2026-08-31 as a
+                 duplicate of the note beside it and went back the same day
+                 (Kyle). The rule belongs on the control, not only in the prose
+                 near it: somebody who reads the buttons and nothing else is
+                 exactly the person the rule is for. Same decision as the two
+                 booking buttons on gear.php. */ ?>
         <div class="btn-row mt-lg">
           <a class="btn btn--primary btn--gated" href="<?= e(url('gear.php#rental')) ?>">
             <span class="btn__label">Borrow gear</span>
@@ -193,31 +237,26 @@ require __DIR__ . '/includes/header.php';
 <section class="section" id="about">
   <div class="wrap">
 
-    <div class="split split--wide-left">
-      <div>
-        <h2 class="h2">About the club</h2>
-        <div class="prose mt-lg">
-          <?php /* Two sentences. The homepage does not need the club's
-                   biography -- the founder, the 1950 records and the full
-                   activity list are on About, one click away. */ ?>
-          <p>
-            The Caltech Alpine Club has organized outdoor trips since
-            <?= e(cfg('facts.founded')) ?>. Members include students, postdocs,
-            faculty, staff, JPL employees, and people from outside Caltech.
-          </p>
-        </div>
-      </div>
-
-      <?php /* The stats block that used to sit here repeated "1987" and
-               "hundreds" from the prose beside it, and pushed this section past
-               a screen. The numbers still appear on the About page, where that
-               detail belongs. */ ?>
-      <div>
-        <blockquote class="pull">
-          &ldquo;<?= e(rtrim(cfg('facts.mission'), '.')) ?>.&rdquo;
-        </blockquote>
-      </div>
+    <h2 class="h2">About the club</h2>
+    <div class="prose mt-lg">
+      <?php /* Two sentences. The homepage does not need the club's biography --
+               the founder, the 1950 records and the full activity list are on
+               About, one click away. */ ?>
+      <p>
+        The Caltech Alpine Club has organized outdoor trips since
+        <?= e(cfg('facts.founded')) ?>. Members include students, postdocs,
+        faculty, staff, JPL employees, and people from outside Caltech.
+      </p>
     </div>
+
+    <?php /* THE MISSION STATEMENT IS ON ABOUT, ONCE. It was set as a pull
+             quote in a second column here as well, so the same sentence met
+             a visitor twice on a five-page site. It belongs on the page whose
+             job is saying what the club is, and this section's job is getting
+             somebody to that page. Removing it left this block one column
+             wide, which is what it always was: one paragraph and three cards.
+             The split wrapper went with the quote rather than being filled
+             with something. */ ?>
 
     <?php /* THREE CARDS, AND THEY ARE ONE LIST: the things the club ORGANIZES.
              There was a fourth, "Finding partners", about members using Slack to

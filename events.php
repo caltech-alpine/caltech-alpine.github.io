@@ -72,15 +72,16 @@ echo json_encode(count($ld) === 1 ? $ld[0] : $ld, JSON_UNESCAPED_SLASHES);
 <section class="section" id="upcoming">
   <div class="wrap">
 
+    <?php /* NO COUNT. "1 event scheduled" sat beside this heading with one
+             event card directly underneath it, which is a number describing
+             something the reader can already see. It was not useless at every
+             size -- a page with fourteen cards is a different case -- but a
+             count that only earns its place sometimes is a rule with a
+             threshold in it, and the cards are the answer at any length. */ ?>
     <div class="section-head">
       <div class="section-head__text">
         <h2 class="h2">Upcoming events</h2>
       </div>
-      <?php if ($upcoming): ?>
-        <p class="lede" style="margin:0;font-size:var(--step-0)">
-          <?= count($upcoming) ?> event<?= count($upcoming) === 1 ? '' : 's' ?> scheduled
-        </p>
-      <?php endif; ?>
     </div>
 
     <?php if (AlpineCalendar::isUnavailable()): ?>

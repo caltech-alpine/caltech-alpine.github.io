@@ -34,8 +34,14 @@ require __DIR__ . '/includes/header.php';
 
 <?php alpine_page_hero(array(
     'title'  => 'Support the Alpine Club',
-    'lede'   => 'Sponsorship and donations support club trips, shared equipment, and the '
-              . "club's film festivals.",
+    /* This deck and the first line of the Sponsorship section below said the
+       same thing twice -- "sponsorship and donations support club trips..."
+       then "the club welcomes sponsorship from companies and other
+       organizations". One line at the top names everybody the page is for,
+       including the alumni the donations half is written for, and the section
+       under it starts with what to give. */
+    'lede'   => 'The club welcomes support from companies, organizations, alumni, and '
+              . 'friends of the club.',
     /* dsc02582-hero.jpg is dsc02582.jpg with 221px cropped off the right edge.
        The hero is a wide letterbox, so background-size:cover scales the photo
        by width and a horizontal background-position does nothing at desktop
@@ -65,19 +71,48 @@ require __DIR__ . '/includes/header.php';
                part of it is one clause, and it is the last line here. */ ?>
       <h2 class="h2">Sponsorship</h2>
       <div class="prose mt-lg">
-        <p>
-          The club welcomes sponsorship from companies and other organizations.
-        </p>
-
+        <?php /* "The club welcomes sponsorship from companies and other
+                 organizations" opened this section and is now the page deck,
+                 broadened to cover the donations half as well. It is not
+                 repeated here. */ ?>
         <h3>Ways to support the club</h3>
-        <ul>
-          <li>Donate new or used gear to the loan inventory</li>
-          <li>Offer a discount to members</li>
-          <li>Run an equipment demo at a club event</li>
-          <li>Help cover film festival licensing, venue, or ticket costs</li>
-          <li>Fund a trip, or contribute directly</li>
-        </ul>
+      </div>
 
+      <?php /* FIVE CATEGORIES, EACH NAMED. This was five bullets of the form
+               "Help cover film festival licensing, venue, or ticket costs" --
+               a verb phrase per line, so a reader scanning for the one that
+               applies to them had to read all five to the end. The kind of
+               support is now the label and the sentence is the detail, which
+               is what a definition list is. Reusing .contact-list rather than
+               adding a component: same two-column shape, already responsive,
+               already styled. */ ?>
+      <dl class="contact-list mt-lg">
+        <div>
+          <dt>Gear</dt>
+          <dd>New or used outdoor gear that the club can lend to members.</dd>
+        </div>
+        <div>
+          <dt>Discounts and demos</dt>
+          <dd>Discounts, demo equipment, or other opportunities for members to try
+              outdoor gear.</dd>
+        </div>
+        <div>
+          <dt>Film festivals</dt>
+          <dd>Support for screening licenses, venue costs, and other film festival
+              expenses.</dd>
+        </div>
+        <div>
+          <dt>Trips</dt>
+          <dd>Support for transportation and other costs that make club trips more
+              accessible.</dd>
+        </div>
+        <div>
+          <dt>Direct support</dt>
+          <dd>Financial contributions can support club equipment, trips, and events.</dd>
+        </div>
+      </dl>
+
+      <div class="prose mt-lg">
         <?php /* WHAT THE CLUB CAN ACTUALLY DELIVER, and nothing else. The
                  website roster is real (data/sponsors.php renders it on this
                  page and on the homepage), event materials and the festival
@@ -85,8 +120,11 @@ require __DIR__ . '/includes/header.php';
                  no officer has committed to. */ ?>
         <p>
           Depending on the arrangement, the club can name sponsors on this website, in
-          event materials, and at the film festival screenings. There are no fixed
-          tiers, so the terms depend on the kind of support.
+          event materials, and at the film festival screenings.
+        </p>
+        <p>
+          We don't have fixed sponsorship tiers. If you'd like to support the club,
+          email us and we can figure out what makes sense.
         </p>
         <p>
           Email <?php if ($partner['name'] !== ''): ?>the club's

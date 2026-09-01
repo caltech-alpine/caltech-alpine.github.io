@@ -8,13 +8,20 @@
     <div class="site-footer__brand">
       <img class="site-footer__mark" src="<?= e(asset('images/logo.svg')) ?>"
            alt="" width="32" height="32" aria-hidden="true">
-      <?php /* ONE LINE. This block identifies the site to somebody who has
-               scrolled to the bottom; it is not a second About page. "Founded
-               1987" was here too, on all eight pages, and it is on the homepage
-               hero and on About already. */ ?>
+      <?php /* IDENTITY AND TWO ADDRESSES. This block tells somebody who has
+               scrolled to the bottom of any page what site they are on and
+               where to write; it is not a second About page, and it is not a
+               place to keep repeating a membership rule.
+
+               "Membership is open beyond Caltech" was appended to the line
+               below, and "Including membership requests from outside Caltech
+               and JPL" under the second address -- on all eight pages, so a
+               visitor reading three pages met the same fact six times. It
+               belongs on Home and on Join, which is where somebody is deciding
+               whether they can join, and it is on both. "Founded 1987" went the
+               same way earlier, for the same reason. */ ?>
       <p class="site-footer__blurb">
-        Trips, shared gear, and people to go with. Membership is open beyond
-        Caltech.
+        Trips, shared gear, and people to go with.
       </p>
 
       <dl class="site-footer__contact">
@@ -27,9 +34,6 @@
           <dt>Membership</dt>
           <dd>
             <a href="mailto:<?= e(cfg('links.secretary')) ?>"><?= e(cfg('links.secretary')) ?></a>
-            <span class="note-small">
-              Including membership requests from outside Caltech and JPL.
-            </span>
           </dd>
         <?php endif; ?>
       </dl>

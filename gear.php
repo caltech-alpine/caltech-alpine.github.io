@@ -68,11 +68,10 @@ require __DIR__ . '/includes/header.php';
                  second sentence. */ ?>
         <div class="gate mt-lg">
           <p class="gate__headline">
-            Gear rentals and loans are limited to Caltech and JPL affiliates.
+            Gear loans are for Caltech and JPL affiliates.
           </p>
           <p class="gate__detail">
-            Other members are welcome on club trips and events, but need to bring their
-            own gear.
+            Members outside Caltech and JPL need to bring their own gear.
           </p>
         </div>
 
@@ -87,8 +86,12 @@ require __DIR__ . '/includes/header.php';
         <div class="btn-row mt-lg">
           <?php /* THE BADGE IS ON THE BUTTON because the people who most need
                    the rule are the ones who read only the buttons, and this one
-                   sends them off the site. The callout above says it in bigger
-                   type; this says it at the last moment it can.
+                   sends them off the site to a booking system that will not
+                   check until they are standing at the counter. It was removed
+                   on 2026-08-31 as a duplicate of the callout above and put
+                   back the same day (Kyle): the callout is the page saying it,
+                   the badge is the control saying it, and only one of those is
+                   read by somebody who scrolled straight to the button.
 
                    It is a full phrase, not "Caltech / JPL only". Both spans are
                    inside the link, so a screen reader announces them as one

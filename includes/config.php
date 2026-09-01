@@ -25,7 +25,19 @@ return array(
     'site' => array(
         'name'        => 'Caltech Alpine Club',
         'short'       => 'Alpine Club',
-        'tagline'     => 'Less lab. More mountains.',
+        /* Used in ONE place: the browser tab and search result for the
+           homepage, "Caltech Alpine Club — <tagline>". It was the slogan "Less
+           lab. More mountains.", which came off the hero on 2026-08-31 and was
+           not replaced. This is now the same sentence the homepage hero prints
+           under the club's name, so the tab and the page agree. Do not put a
+           slogan back here without putting one on the page; a title that
+           promises something the page does not say is worse than a plain one.
+
+           It makes a 95-character <title>, which search results will truncate.
+           That is deliberate: the first 60 characters are still "Caltech
+           Alpine Club — Outdoor adventures for Caltech, JPL", which is the part
+           that has to survive. */
+        'tagline'     => 'Outdoor adventures for Caltech, JPL, and the extended Caltech community.',
         /* Search results and link previews only. Deliberately NOT the same as the
            hero line: this one has to carry the activity words somebody would
            actually type into a search box. */

@@ -51,14 +51,13 @@ require __DIR__ . '/includes/header.php';
 
 alpine_page_hero(array(
     'title'  => 'Get involved',
-    /* ONE SENTENCE, and it says what the page is. No claim about what is
+    /* TWO SENTENCES, and they say what the page is. No claim about what is
        open today: that is a statement about the world, and the section below
        already lists exactly which jobs from data/roles.csv, or renders nothing.
        No motivational opening either -- the reader came here to find out what
        the jobs are. */
-    'lede'   => "The Alpine Club is run by Caltech student officers who organize trips "
-              . "and events and look after the club's gear, finances, membership, and "
-              . 'other ongoing work.',
+    'lede'   => 'The Alpine Club is run by Caltech student officers. They organize club '
+              . 'trips and events and handle the gear, finances, and membership.',
     'photo'  => 'photos/img-20200822-133229.jpg',
     'credit' => 'Club trip, August 2020',
 ));
@@ -70,9 +69,9 @@ alpine_page_hero(array(
          could take a second person are genuinely different news. They still
          are, and the difference is still decided by min_people and max_people
          in data/roles.csv rather than by anybody rewording anything. It is now
-         carried by the status beside each row ("Looking for someone" against
-         "Looking for another person") instead of by two headings, because two
-         headings made the second list read as the leftovers.
+         carried by the status beside each row ("Open" against "Room for one
+         more") instead of by two headings, because two headings made the
+         second list read as the leftovers.
 
          What min/max still decide: which jobs the HOMEPAGE may mention, which
          is only the ones the club is actually short of.
@@ -100,10 +99,29 @@ alpine_page_hero(array(
     foreach ($asking as $r) { if ($r['state'] === ALPINE_ROLE_NEEDED) { $ordered[] = $r; } }
     foreach ($asking as $r) { if ($r['state'] !== ALPINE_ROLE_NEEDED) { $ordered[] = $r; } }
     ?>
+    <?php /* ROLE, WHO IS IN IT, STATUS -- three fields, no sentences. The
+             status was "Looking for someone" against "Looking for another
+             person", which is the heading above restated once per row. It is
+             now "Open" and "Room for one more", set beside the name rather than
+             under it, so the column of statuses can be read down.
+
+             The holders are named because "Room for one more" beside a role
+             with nobody in it and beside a role with a president in it are
+             different facts, and the name is what tells them apart without a
+             sentence explaining the difference. */ ?>
     <ul class="wanted mt-lg">
       <?php foreach ($ordered as $r): ?>
+        <?php
+          $holderNames = array();
+          foreach ($r['holders'] as $person) { $holderNames[] = e($person['name']); }
+        ?>
         <li class="wanted__item">
-          <a class="wanted__role" href="#<?= e($r['role_id']) ?>"><?= e(alpine_role_title($r)) ?></a>
+          <div class="wanted__who">
+            <a class="wanted__role" href="#<?= e($r['role_id']) ?>"><?= e(alpine_role_title($r)) ?></a>
+            <?php if ($holderNames): ?>
+              <span class="wanted__holders"><?= alpine_list_phrase($holderNames) ?></span>
+            <?php endif; ?>
+          </div>
           <span class="wanted__note"><?= e(alpine_role_status_line($r)) ?></span>
         </li>
       <?php endforeach; ?>
@@ -160,30 +178,38 @@ alpine_page_hero(array(
                 <p class="role__what"><?= e($r['description']) ?></p>
               <?php endif; ?>
 
-              <?php /* WHO DOES IT, AND HOW TO WRITE TO THEM -- both, in the same
-                       place. This page used to name the person and stop there,
-                       which sent anybody who wanted to ask them about it back to
-                       the About page to look up an address the site already knew.
-                       The address is not repeated in this file: it comes from
-                       data/people.csv through alpine_person_link(), the same way
-                       the About page gets it, so there is one copy of it. */ ?>
-              <p class="role__who">
-                <?php if ($holderNames): ?>
-                  <span class="role__holders">
-                    Currently <?= alpine_list_phrase($holderNames) ?>.
-                  </span>
-                <?php else: ?>
-                  <span class="role__holders">
-                    Currently open.
-                    <a href="<?= e(url('about.php#officers')) ?>">Talk to one of the officers</a>
-                    if you're interested.
-                  </span>
-                <?php endif; ?>
+              <?php /* ONE STATUS TREATMENT PER ROLE. An empty job used to carry
+                       three: "Currently open", then "Talk to one of the
+                       officers if you're interested", then "Looking for
+                       someone" -- one fact, an invitation, and the same fact
+                       again, stacked under a heading that had already said it.
+                       What is left is the holders when there are any, and a
+                       one- or two-word status when there is something to say.
+                       The invitation is the "How to become an officer" section
+                       at the foot of this page, once, where somebody who has
+                       read the roles arrives.
 
-                <?php if ($status !== ''): ?>
-                  <span class="role__status"><?= e($status) ?></span>
-                <?php endif; ?>
-              </p>
+                       Names, not mailto links: the About roster is where
+                       somebody decides who to write to, and it shows the face
+                       and the job alongside the address.
+
+                       Both can be empty at once -- a job the club has asked to
+                       stop advertising, with nobody in it -- so the whole line
+                       is conditional. No empty paragraph, no placeholder: just
+                       the name and what the job involves. */ ?>
+              <?php if ($holderNames || $status !== ''): ?>
+                <p class="role__who">
+                  <?php if ($holderNames): ?>
+                    <span class="role__holders">
+                      Currently <?= alpine_list_phrase($holderNames) ?>.
+                    </span>
+                  <?php endif; ?>
+
+                  <?php if ($status !== ''): ?>
+                    <span class="role__status"><?= e($status) ?></span>
+                  <?php endif; ?>
+                </p>
+              <?php endif; ?>
 
             </article>
           <?php endforeach; ?>
@@ -213,14 +239,16 @@ alpine_page_hero(array(
                DO NOT fill this out with a nomination process, an eligibility
                rule, a term length or a date. If an officer confirms the real
                procedure, replace this with it and record here who said so. */ ?>
+      <?php /* "or the president directly if you know who that is" went on
+               2026-08-31: the roster is one link away and names them all, so
+               the clause described a reader the site does not have. */ ?>
       <p>
-        Tell an officer you're interested, or the president directly if you know who
-        that is. Some positions are filled at elections; open coordinator roles can
-        often be picked up during the year.
+        Talk to one of the current officers if you're interested. Some positions are
+        elected; open coordinator roles can also be filled during the year.
       </p>
       <p>
-        Most roles don't require previous club leadership or much outdoor experience.
-        Being reliable and answering email matters more.
+        Most roles don't require previous club leadership or extensive outdoor
+        experience. Being reliable and answering email matters more.
       </p>
     </div>
 
@@ -234,7 +262,7 @@ alpine_page_hero(array(
              start by opening a blank email to nobody in particular. */ ?>
     <p class="mt-lg">
       <a class="btn btn--primary" href="<?= e(url('about.php#officers')) ?>">
-        See the officers <?= icon('arrow-right', 'icon icon--xs') ?>
+        Meet the officers <?= icon('arrow-right', 'icon icon--xs') ?>
       </a>
     </p>
 

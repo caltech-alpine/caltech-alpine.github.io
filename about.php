@@ -46,11 +46,14 @@ require __DIR__ . '/includes/header.php';
 
 <?php alpine_page_hero(array(
     'title'  => 'About the Alpine Club',
-    /* Not "for the Caltech community": membership is open to anyone, which
-       this site says on four other pages. Gear and the film festivals are two
-       of the three things the club actually does, so both are named. */
-    'lede'   => 'The Caltech Alpine Club organizes outdoor trips, lends gear, and hosts '
-              . 'mountain film screenings.',
+    /* ONE FACT, because "What we do" is four inches below and describes the
+       club properly. The deck used to be "The Caltech Alpine Club organizes
+       outdoor trips, lends gear, and hosts mountain film screenings", and then
+       the next section said the same thing at greater length. Two descriptions
+       of one club, on one page, and the reader reads both before learning
+       anything. 1987 is in includes/config.php as facts.founded, so this line
+       and the paragraph below it cannot drift apart. */
+    'lede'   => 'Founded in ' . e(cfg('facts.founded')) . '.',
     /* The horizon in this frame sits about a fifth of the way down, not in the
        middle, so the default band (center 45%) lands entirely below it and the
        hero reads as a dark slope rather than a view. 28% brings the ridgeline
@@ -71,16 +74,15 @@ require __DIR__ . '/includes/header.php';
                  thing they clicked. */ ?>
         <h2 class="h2">What we do</h2>
         <div class="prose mt-lg">
+          <?php /* THE ONE SUBSTANTIVE DESCRIPTION ON THIS PAGE. It was two
+                   paragraphs, and the hero above it was a third version of the
+                   same list. One paragraph now carries trips, gear, talks and
+                   the screenings; the hero carries the founding year and
+                   nothing else. */ ?>
           <p>
-            The club organizes hiking, backpacking, trail running, climbing, and other
-            trips. Members can also borrow outdoor equipment. Activities vary from year
-            to year, so check the
-            <a href="<?= e(url('events.php')) ?>">calendar</a> for what is happening now.
-          </p>
-          <p>
-            The club hosts the Banff Mountain Film Festival on campus each year, along
-            with other mountain film screenings and talks by members and visiting
-            climbers.
+            The Alpine Club organizes hiking, backpacking, trail running, climbing, and
+            other trips. Members can also borrow outdoor equipment, attend talks, and
+            come to the club's mountain film screenings.
           </p>
           <p>
             Members include students, postdocs, faculty, staff, JPL employees, and
@@ -215,16 +217,12 @@ require __DIR__ . '/includes/header.php';
       <?php if ($asking): ?>
         <aside class="join-callout mt-lg">
           <div class="join-callout__text">
-            <h3 class="join-callout__title">Want to help run the Alpine Club?</h3>
-            <?php /* ONE SENTENCE, and no count. What the jobs need from a
-                     person, and what happens after you say you are interested,
-                     are both on Get Involved. The count was derived rather than
-                     typed, so it could not go stale, but it was still a number
-                     the reader has to hold on the way to a button that shows
-                     them the list. */ ?>
-            <p>
-              Some officer and coordinator roles are currently open.
-            </p>
+            <?php /* A QUESTION AND A BUTTON. The sentence under this heading
+                     said "Some officer and coordinator roles are currently
+                     open", which is what the button says it will show you, one
+                     line later and in full. The heading asks; the button
+                     answers; nothing in between needs saying. */ ?>
+            <h3 class="join-callout__title">Want to help run the club?</h3>
           </div>
           <a class="btn btn--ghost" href="<?= e(url('roles.php#open')) ?>">
             See open roles <?= icon('arrow-right', 'icon icon--xs') ?>
@@ -241,7 +239,11 @@ require __DIR__ . '/includes/header.php';
         <h3 class="officer-group__title">Past officers</h3>
         <?php foreach ($roster['past'] as $year => $people): ?>
           <div class="alumni__year">
-            <h4 class="alumni__heading">Through <?= e($year) ?></h4>
+            <?php /* Just the year. It read "Through 2026", which invited the
+                     reader to work out through-to-when and from-when, when the
+                     'until' column in data/assignments.csv is one number: the
+                     year they stopped. */ ?>
+            <h4 class="alumni__heading"><?= e($year) ?></h4>
             <ul class="alumni__list">
               <?php foreach ($people as $o): ?>
                 <li>
@@ -261,15 +263,25 @@ require __DIR__ . '/includes/header.php';
 <!-- ====================================================== contact ==== -->
 <section class="section" id="contact">
   <div class="wrap wrap--narrow">
-    <p class="eyebrow"><?= icon('mail', 'icon icon--xs') ?>Contact</p>
-    <h2 class="h2">Contact the club</h2>
+    <?php /* TWO LABELS AND TWO ADDRESSES. What went, 2026-08-31:
+
+             * the eyebrow "Contact" over the heading "Contact the club", which
+               is the same word in smaller type. The heading is now "Contact",
+               matching what the navigation calls this anchor.
+             * "Reaches the current officers" and "Including requests to join
+               from outside Caltech and JPL", which are what the labels above
+               them already say.
+             * a third row, "Activity questions -- find the officer who looks
+               after it", pointing back up this same page to the roster the
+               reader has just scrolled through, which also carries a catch-all
+               note of its own. */ ?>
+    <h2 class="h2">Contact</h2>
 
     <dl class="contact-list mt-lg">
       <div>
         <dt>General questions</dt>
         <dd>
           <a href="mailto:<?= e(cfg('links.officers')) ?>"><?= e(cfg('links.officers')) ?></a>
-          <span class="contact-list__note">Reaches the current officers.</span>
         </dd>
       </div>
 
@@ -278,20 +290,9 @@ require __DIR__ . '/includes/header.php';
           <dt>Membership</dt>
           <dd>
             <a href="mailto:<?= e(cfg('links.secretary')) ?>"><?= e(cfg('links.secretary')) ?></a>
-            <span class="contact-list__note">
-              Including requests to join from outside Caltech and JPL —
-              see <a href="<?= e(url('join.php#outside')) ?>">how to ask</a>.
-            </span>
           </dd>
         </div>
       <?php endif; ?>
-
-      <div>
-        <dt>Activity questions</dt>
-        <dd>
-          <a href="#officers">Find the officer who looks after it</a>
-        </dd>
-      </div>
 
     </dl>
   </div>

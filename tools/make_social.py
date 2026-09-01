@@ -129,7 +129,13 @@ def main():
 
     d.text((x, 236), "ALPINE CLUB", font=font(104, True), fill=(255, 255, 255))
 
-    d.text((x, 372), "Less lab. More mountains.", font=font(46), fill=ALPENGLOW)
+    # The site's identity line, the same sentence the homepage h1 and the
+    # footer carry. It was the slogan "Less lab. More mountains.", which came
+    # off the site on 2026-08-31 and was not replaced; leaving it here would
+    # have made the link preview promise a page that no longer says it.
+    # 38 rather than 46 because this sentence is 42 characters and has to clear
+    # the mark at x=830. Measured, not guessed.
+    d.text((x, 372), "Trips, shared gear, and people to go with.", font=font(38), fill=ALPENGLOW)
 
     # NOT "to get Caltech and JPL outdoors": membership is open to anyone, and
     # this image is the first thing somebody sees when a link is pasted.

@@ -194,6 +194,8 @@ h1, h2, h3, h4 {
   text-wrap: balance;
 }
 
+/* The biggest size on the site. One user: the homepage h1. Right for a two- or
+   three-word line, wrong for a sentence — see .hero__title in section 7. */
 .display {
   font-size: var(--step-5);
   font-weight: 800;
@@ -459,7 +461,14 @@ h1, h2, h3, h4 {
    gate is legible rather than a parenthesis nobody parses.
 
    No opacity on the gate line: white on the accent fill is 4.77:1, and fading
-   it would drop that under the AA floor at the exact size where it matters. */
+   it would drop that under the AA floor at the exact size where it matters.
+
+   These came off all three gear buttons on 2026-08-31 as a duplicate of the
+   callout above them, and went back the same day (Kyle). The redundancy
+   argument is real and it loses to the failure it prevents: somebody who
+   clicks straight through to the Caltech Y booking system, having read no
+   prose at all, and finds out at the counter. Removing the surrounding
+   repetition is the fix; removing it from the control is not. */
 .btn--gated { flex-direction: column; gap: .3em; padding-block: .72em; }
 .btn__label { display: inline-flex; align-items: center; gap: .55em; }
 .btn__gate {
@@ -745,22 +754,29 @@ body.nav-open { overflow: hidden; }
   background: var(--alpenglow);
 }
 
+/* The club's name, at .display. Three words, which is exactly what --step-5
+   and a line-height of .98 are for.
+
+   Briefly (2026-08-31) this was the identity SENTENCE instead, set a step down
+   because 42 characters at --step-5 filled the hero and left no room for the
+   buttons. That sentence is now .hero__text below and the name is back in the
+   h1, so the display setting is right again. If a future heading here is a
+   sentence rather than a name, drop it to --step-4 and give it a max-width;
+   do not leave a long line at this size. */
 .hero__title {
   color: var(--white);
   margin-bottom: 1.1rem;
 }
-.hero__title em {
-  display: block;
-  font-style: normal;
-  color: var(--alpenglow);
-}
 
+/* The line under the name: what the club is, in one sentence. It is the only
+   introductory sentence in the hero -- there is no second paragraph under the
+   buttons, and adding one is what this comment exists to prevent. */
 .hero__text {
   font-size: var(--step-1);
   line-height: 1.5;
   color: var(--on-dark);
   opacity: .92;
-  max-width: 44ch;
+  max-width: 46ch;
   margin-bottom: 2.2rem;
   text-wrap: pretty;
 }
@@ -1734,6 +1750,55 @@ main  { flex: 1 0 auto; }
   font-weight: 700;
   margin-bottom: .15rem !important;
 }
+/* Who the officer positions are for. One line, in the muted colour, so it
+   reads as a condition on the heading above rather than as a second heading or
+   as a claim about who may join the club. */
+.wanted-strip__who {
+  color: var(--text-mute);
+  margin-bottom: .55rem !important;
+}
+/* The openings: one per line, name then seat count.
+   ---------------------------------------------------------------------------
+   ONE PER LINE, not inline. They were laid out inline while they were bare
+   names, and that was right for names; each now carries a count, and two
+   name-plus-count pairs on one line make the reader work out which number
+   belongs to which title. Stacked, the titles form a column to scan and the
+   counts form a second one.
+
+   The count is NOT the call to action. It is set smaller, in the muted colour,
+   and it does not take the link -- the title is the only thing here worth
+   clicking, and "0/1 filled" as a link target would be a very strange thing to
+   click. list-style is off because a bullet adds a third mark to a line that
+   already has two things on it; the <ul> is there so a screen reader is told
+   how many there are. */
+.wanted-strip__roles {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  /* TWO COLUMNS, so the counts line up under each other. Laid out as a flex
+     row per item, "0/1 filled" starts wherever the title happens to end, and
+     with four openings of different name lengths the counts scatter across the
+     block -- which is the opposite of scannable. `display:contents` on the <li>
+     hands the title and the count straight to this grid while keeping the list
+     a real list for a screen reader. max-content twice, so the columns are as
+     wide as their longest title and no wider. */
+  display: grid;
+  grid-template-columns: max-content max-content;
+  gap: .3rem .9rem;
+  align-items: baseline;
+}
+.wanted-strip__role { display: contents; }
+.wanted-strip__count {
+  font-size: .84rem;
+  color: var(--text-mute);
+  white-space: nowrap;
+}
+/* On a narrow screen two columns of a long title plus a count do not fit, so
+   the count goes under its title and the grid becomes one column. */
+@media (max-width: 560px) {
+  .wanted-strip__roles { grid-template-columns: 1fr; gap: .1rem; }
+  .wanted-strip__count { margin-bottom: .35rem; }
+}
 .wanted-strip__text a {
   font-weight: 600;
   color: var(--accent-text);
@@ -1778,9 +1843,23 @@ main  { flex: 1 0 auto; }
 .join-callout .btn { flex: 0 0 auto; }
 
 
-/* --- what the club needs, on the Get Involved page --- */
+/* --- what the club needs, on the Get Involved page -----------------------
+   Two columns on one rule per row: who, and how it stands. The status used to
+   sit UNDER the role name as a sentence, which meant the reader had to read
+   each row to compare two of them. Putting it on the right, right-aligned,
+   makes the column of statuses readable straight down -- which is the whole
+   question somebody has when they arrive at this heading.
+
+   It is not a table. Three fields where one is optional and one is a link is a
+   list, and a real <table> would need a header row to be honest, which is a
+   row of furniture over three lines of content.                             */
 .wanted { list-style: none; margin: 0; padding: 0; }
 .wanted__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: .1rem 1.5rem;
   padding-block: .8rem;
   border-bottom: 1px solid var(--line);
 }
@@ -1792,11 +1871,25 @@ main  { flex: 1 0 auto; }
   color: var(--accent-text);
 }
 .wanted__role:hover { color: var(--alpenglow-hover); }
-.wanted__note {
+/* Who is in it, under the title. Present only when somebody is. */
+.wanted__holders {
   display: block;
-  margin-top: .15rem;
+  margin-top: .1rem;
   font-size: .88rem;
   color: var(--text-mute);
+}
+/* Quiet on purpose: no badge, no colour coding, no bar. It is two words of
+   fact beside a name, and the eye should reach the name first. */
+.wanted__note {
+  font-size: .88rem;
+  color: var(--text-mute);
+  white-space: nowrap;
+}
+/* On a narrow screen the two halves stack, and a right-aligned status would
+   hang off the wrong edge under the name it belongs to. */
+@media (max-width: 460px) {
+  .wanted__item { display: block; }
+  .wanted__note { display: block; margin-top: .25rem; }
 }
 
 
