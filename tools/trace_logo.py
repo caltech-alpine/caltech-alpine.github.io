@@ -183,10 +183,54 @@ def disagreement(mask, d, size):
     return float((got != mask).mean())
 
 
+# ------------------------------------------------------- isolate the disc --
+
+def crop_to_disc(im, sky_rgb):
+    """Cut a circular mark out of an opaque rectangular drawing.
+
+    WHY THIS IS NEEDED, and why it is geometry rather than colour. The favicon
+    drawing arrives as a disc on a black field, and the rock inside the disc is
+    the same black. Classifying by colour alone therefore cannot tell the
+    mountain from the background: it merges them, and the trace comes out as a
+    rectangle with a bite in it.
+
+    The circle is recoverable because the SKY colour appears nowhere else. Its
+    leftmost and rightmost pixels are the disc's horizontal extremes, and its
+    topmost pixel is the top of the disc, which is three points on a circle and
+    one of them is the apex -- so the centre and radius fall straight out with
+    no fitting. Verified against this drawing at twelve angles: 4% inside the
+    computed edge is sky or rock, 4% outside is the field.
+
+    That holds for any mark whose accent reaches the disc's widest point, and
+    fails loudly rather than quietly if it does not: the radius comes out too
+    small and the trace visibly clips.
+    """
+    a = np.asarray(im.convert("RGB")).astype(np.int32)
+    d = ((a - np.array(sky_rgb, dtype=np.int32)) ** 2).sum(axis=2)
+    sky = d < 60 ** 2
+    if not sky.any():
+        sys.exit("crop_to_disc: no pixel is near the sky colour %s" % (sky_rgb,))
+    ys, xs = np.nonzero(sky)
+    cx = (xs.min() + xs.max()) / 2.0
+    r = (xs.max() - xs.min()) / 2.0
+    cy = ys.min() + r
+
+    yy, xx = np.mgrid[0:a.shape[0], 0:a.shape[1]]
+    inside = (xx - cx) ** 2 + (yy - cy) ** 2 <= r ** 2
+
+    out = np.dstack([a, np.where(inside, 255, 0)]).astype(np.uint8)
+    im = Image.fromarray(out, "RGBA")
+    # Square, and tight to the disc, so the traced viewBox is the mark rather
+    # than the drawing's canvas.
+    box = (int(round(cx - r)), int(round(cy - r)),
+           int(round(cx + r)), int(round(cy + r)))
+    return im.crop(box)
+
+
 # ------------------------------------------------------------------- build --
 
 def build(src, layers, out_name, size, header, extra_head="", turdsize=8,
-          alphamax=1.0, opttolerance=0.6, check_only=False):
+          alphamax=1.0, opttolerance=0.6, check_only=False, disc_sky=None):
     path = os.path.join(ART, src)
     if not os.path.exists(path):
         sys.exit("missing source artwork: %s\n"
@@ -194,6 +238,8 @@ def build(src, layers, out_name, size, header, extra_head="", turdsize=8,
                  "  because a traced SVG cannot be re-traced from itself." % path)
 
     im = Image.open(path).convert("RGBA")
+    if disc_sky is not None:
+        im = crop_to_disc(im, disc_sky)
     if im.width != im.height:
         sys.exit("%s is %dx%d; the marks are square" % (src, im.width, im.height))
     if im.width != size:
@@ -246,7 +292,7 @@ def build(src, layers, out_name, size, header, extra_head="", turdsize=8,
     return worst
 
 
-# The two drawings, and what each layer becomes.
+# The drawings, and what each layer becomes.
 #
 # BADGE -- an orange sky, a dark mountain mass, a light torch, inside a circle.
 # The disc is traced as its own layer from every non-transparent pixel, so the
@@ -256,6 +302,21 @@ BADGE_LAYERS = [
     ("sky",  (253, 105,   1), "accent"),
     ("rock", ( 12,  11,  11), "ink"),
     ("snow", (253, 253, 253), "paper"),
+]
+
+# FAVICON -- the same idea reduced to one peak and a snowcap, for the sizes
+# where the torch is four grey pixels. Its own drawing rather than a simplified
+# render of the badge, and its own file for the same reason a favicon has ever
+# been separate: 16px is a different design problem, not a smaller one.
+#
+# The drawing is a disc on a BLACK FIELD, and the rock inside the disc is the
+# same black, so crop_to_disc() has to find the circle geometrically before
+# anything is classified. See its docstring.
+FAVICON_SKY = (242, 92, 1)
+FAVICON_LAYERS = [
+    ("sky",  FAVICON_SKY,       "accent"),
+    ("rock", (  9,   9,   9),   "ink"),
+    ("snow", (255, 255, 255),   "paper"),
 ]
 
 # LOCKUP -- the mark and "CALTECH" in black, "ALPINE CLUB" in orange, on a
@@ -281,8 +342,8 @@ def main():
         header=HEADER_LOGO, check_only=a.check))
 
     worst = max(worst, build(
-        "badge.png", BADGE_LAYERS, "favicon.svg", 512,
-        header=HEADER_FAVICON, check_only=a.check))
+        "favicon.png", FAVICON_LAYERS, "favicon.svg", 512,
+        header=HEADER_FAVICON, check_only=a.check, disc_sky=FAVICON_SKY))
 
     worst = max(worst, build(
         "lockup.png", LOCKUP_LAYERS, "logo-full.svg", 1254,
@@ -332,16 +393,22 @@ HEADER_LOGO = """<!--
 """
 
 HEADER_FAVICON = """<!--
-  Favicon: the same mark as logo.svg, and deliberately the same file rather
-  than a variant of it.
+  Favicon: one peak and a snowcap in a disc. A SIMPLER MARK THAN logo.svg, on
+  purpose.
 
-  The previous favicon inset the mark inside a rounded ink tile, because the
-  mark was line art with no background and lost its shape against whatever
-  colour a browser paints its tab strip. This mark is a filled disc, so it is
-  already a tile and already has an edge. Insetting it inside a second tile
-  would put a square behind a circle for no reason.
+  The masthead mark is a torch in front of three peaks. At 16 pixels the torch
+  is four grey dots and the three ridgelines are one, so the tab shows a
+  smudge. This is its own drawing, reduced to the two shapes that survive: the
+  disc, and a peak with a cap on it. A favicon has always been a separate file
+  for exactly this reason. 16px is a different design problem, not a smaller
+  one.
 
-  GENERATED from art/badge.png. See logo.svg's header.
+  The favicon before this inset the mark inside a rounded ink tile, because
+  that mark was line art with no background and lost its shape against
+  whatever colour a browser paints its tab strip. This one is a filled disc,
+  so it is already a tile and already has an edge.
+
+  GENERATED from art/favicon.png. See logo.svg's header.
   Regenerate the raster icons after any change: python tools/make_icons.py
 -->
 """

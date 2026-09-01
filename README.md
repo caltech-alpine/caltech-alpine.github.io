@@ -358,8 +358,14 @@ nothing can drift out of step.
 
 ```
 art/badge.png     the mark, as drawn. Orange sky, dark rock, light torch
-art/lockup.png    the same mark above CALTECH / ALPINE CLUB
+art/favicon.png   the same idea reduced to one peak, for small sizes
+art/lockup.png    the mark above CALTECH / ALPINE CLUB
 ```
+
+**The favicon is a different drawing, not a smaller render of the mark.** At 16
+pixels the torch is four grey dots and three ridgelines are one, so the tab
+shows a smudge; the favicon keeps only the disc and a capped peak. That is why
+a favicon has always been a separate file.
 
 `art/` sits outside `assets/`, and is excluded by both deploy routes, because
 `assets/` is the served tree and these are 1.4 MB of source nobody requests
@@ -368,7 +374,7 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 | File | Built from | What it is |
 |---|---|---|
 | `logo.svg` | `art/badge.png` | the mark. Masthead and footer |
-| `favicon.svg` | `art/badge.png` | the same mark, for the browser tab |
+| `favicon.svg` | `art/favicon.png` | the simplified mark, for the browser tab |
 | `logo-full.svg` | `art/lockup.png` | mark plus wordmark, for anything that needs the name in the artwork |
 | `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | the SVGs | rasters, written by `tools/make_icons.py` |
 | `social-default.png` | `logo.svg` | the link preview, written by `tools/make_social.py` |
