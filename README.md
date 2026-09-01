@@ -183,6 +183,11 @@ tools/
   make_icons.py      Regenerates the favicons and app icons from the SVGs.
   make_social.py     Regenerates the link-preview image.
   import_guides.py   One-off import of the old site's outdoor guides.
+  archive_old_site.py  Takes a copy of the OLD alpine.caltech.edu -- every
+                     page as HTML, as plain text and as prose-only, plus every
+                     photograph and PDF -- before that hostname is repointed
+                     here and the Wagtail site stops existing. Writes to
+                     ../old-site-archive, outside this repository.
   import_photos.py   One-off import of the old site's photographs into
                      assets/images/photos/ (deduped, capped at 1600px,
                      festival posters excluded). See its MANIFEST.json.
