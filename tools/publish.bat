@@ -50,7 +50,10 @@ REM ---- the website folder ----
 set "REPO=%~dp0.."
 if not exist "%REPO%\index.php" set "REPO=C:\Users\kyleh\Documents\2Projects\alpine-club\website"
 if not exist "%REPO%\index.php" set "REPO="
-REM  %~fi collapses the "\tools\.." so the window prints a path you can paste.
+REM  The for-loop below collapses the trailing "\tools\.." so the window
+REM  prints a path you can paste. Do NOT write the tilde-f operator into a
+REM  REM line to explain it -- cmd expands path operators inside comments
+REM  too, and the script dies before it does anything. Found 2026-09-02.
 if defined REPO for %%i in ("%REPO%") do set "REPO=%%~fi"
 
 REM ---- the key ----
