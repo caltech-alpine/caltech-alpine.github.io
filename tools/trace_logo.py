@@ -251,6 +251,61 @@ def disagreement(mask, d, w, h):
     return float((got != mask).mean())
 
 
+def enclosing_circle(ds, w, h, oversample=2):
+    """The smallest circle holding every traced path. Returns (cx, cy, r).
+
+    MEASURED FROM THE TRACE, NEVER TYPED. The disc variant below has to scale
+    the mark down to leave a ring of white around it, and how far down depends
+    on how big the mark actually is -- which is a property of the trace and
+    changes the next time art/favicon.png does. A number copied into the spec
+    would be right today and silently wrong after the next retrace, with the
+    only symptom a mark whose corner has grown past the edge of its disc.
+
+    A BOUNDING BOX WOULD BE THE WRONG MEASURE. This mark is itself a disc: a C
+    closed by a mountain. Its box corners are empty, so fitting the box's
+    circumcircle would shrink the artwork by a fifth to make room for white
+    space that has nothing in it. What has to fit inside the white circle is
+    the mark's own circumscribed circle, so that is what this returns.
+
+    Coordinate descent on the centre rather than Welzl's algorithm: the input
+    is a raster of a quarter-million pixels, the objective is convex, and the
+    answer is wanted to a tenth of a pixel on a 512 grid. Halving the step
+    until it is under a twentieth of a pixel gets there in well under a second
+    and needs no geometry library.
+    """
+    import io
+
+    import cairosvg
+
+    n_px = w * oversample
+    svg = ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d">'
+           '%s</svg>'
+           % (w, h, "".join('<path d="%s" fill="#000"/>' % d for d in ds)))
+    png = cairosvg.svg2png(bytestring=svg.encode(), output_width=n_px,
+                           output_height=int(round(n_px * h / float(w))))
+    alpha = np.asarray(Image.open(io.BytesIO(png)).convert("RGBA"))[:, :, 3]
+    ys, xs = np.nonzero(alpha > 8)
+    if not len(xs):
+        raise ValueError("the trace rendered to nothing")
+    xs = xs.astype(float)
+    ys = ys.astype(float)
+
+    cx = (xs.min() + xs.max()) / 2.0
+    cy = (ys.min() + ys.max()) / 2.0
+    r = np.sqrt((xs - cx) ** 2 + (ys - cy) ** 2).max()
+    step = float(n_px) / 64.0
+    while step > 0.05 * oversample:
+        moved = True
+        while moved:
+            moved = False
+            for dx, dy in ((step, 0), (-step, 0), (0, step), (0, -step)):
+                rr = np.sqrt((xs - (cx + dx)) ** 2 + (ys - (cy + dy)) ** 2).max()
+                if rr < r - 1e-9:
+                    cx, cy, r, moved = cx + dx, cy + dy, rr, True
+        step /= 2.0
+    return cx / oversample, cy / oversample, r / oversample
+
+
 # ------------------------------------------------------------------- build --
 
 def load(spec):
@@ -338,17 +393,58 @@ def build(spec, check_only=False):
         # `class` with no fill attribute would give it.
         adaptive = overrides.get("adaptive", {})
         rules = []
+        art = []
         for name, token, d in traced:
             tok = overrides.get(name, token)
             if name in adaptive:
                 light, dark = adaptive[name]
                 rules.append(("  .%s{fill:%s}" % (name, palette.hexof(light)),
                               "    .%s{fill:%s}" % (name, palette.hexof(dark))))
-                body.append('  <path class="%s" fill="%s" d="%s"/>'
-                            % (name, palette.hexof(light), d))
+                art.append('<path class="%s" fill="%s" d="%s"/>'
+                           % (name, palette.hexof(light), d))
             else:
-                body.append('  <path fill="%s" d="%s"/>'
-                            % (palette.hexof(tok), d))
+                art.append('<path fill="%s" d="%s"/>'
+                           % (palette.hexof(tok), d))
+
+        # `in_disc: 0.84` PUTS THE WHOLE MARK INSIDE A FILLED CIRCLE, at that
+        # fraction of the circle's diameter, with the rest of the square
+        # transparent. The one variant that is a different COMPOSITION rather
+        # than a recolour, so it is the one that needs a transform.
+        #
+        # WHY A DISC AND NOT THE FLIPPED MOUNTAIN. Both answer "an ink mountain
+        # disappears on a dark tab strip". Flipping (favicon-on-dark.svg) keeps
+        # the mark transparent and repaints the rock, which is the lighter
+        # touch and stays the default. A disc instead keeps the artwork in its
+        # real colours and gives it its own ground -- correct where the mark
+        # must read as the club's mark rather than adapt, and the shape Kyle
+        # asked for on 2026-09-02. A `rect` would be wrong here for the reason
+        # the flipped file exists at all: a square in a tab strip is a box, and
+        # a circle in a tab strip is an icon.
+        #
+        # THE SCALE IS DERIVED FROM THE TRACE, not written down. See
+        # enclosing_circle(): the mark's own circumscribed circle is measured
+        # and mapped onto `in_disc` of the frame's, so the ring of white is
+        # even the whole way round without anybody nudging a number, and a
+        # retrace that changes the artwork's size moves the scale with it.
+        in_disc = overrides.get("in_disc")
+        if in_disc:
+            mcx, mcy, mr = enclosing_circle([d for _, _, d in traced], w, h)
+            radius = min(w, h) / 2.0
+            s = (radius * in_disc) / mr
+            body.append('  <circle cx="%s" cy="%s" r="%s" fill="%s"/>'
+                        % (n(w / 2.0), n(h / 2.0), n(radius),
+                           palette.hexof(overrides.get("disc_fill", "white"))))
+            body.append('  <g transform="matrix(%s,0,0,%s,%s,%s)">'
+                        % (n(s), n(s), n(w / 2.0 - s * mcx), n(h / 2.0 - s * mcy)))
+            body.extend("    " + a for a in art)
+            body.append("  </g>")
+            print("      in_disc %.2f: mark r=%.1f at (%.1f,%.1f) -> r=%.1f, "
+                  "white ring %.1f px of %d" % (in_disc, mr, mcx, mcy,
+                                                radius * in_disc,
+                                                radius * (1 - in_disc), w))
+        else:
+            body.extend("  " + a for a in art)
+
         style = ""
         if rules:
             style = ('  <style>\n%s\n    @media (prefers-color-scheme: dark){\n'
@@ -466,6 +562,39 @@ HEADER_FAVICON_DARK = """<!--
 -->
 """
 
+HEADER_FAVICON_DISC = """<!--
+  THE MARK IN A WHITE DISC, for dark browser UI. Kyle, 2026-09-02.
+
+  The artwork is untouched: the same trace, the same alpenglow C, the same ink
+  mountain, placed inside a filled white circle with an even ring of white
+  around it. Outside that circle the square is transparent, so nothing here
+  ever renders as a box.
+
+  THE THIRD ANSWER TO ONE PROBLEM, and worth being clear about which is which,
+  because all three sit in this directory. An ink mountain vanishes on a dark
+  tab strip. favicon.svg flips the mountain to paper through a media query;
+  favicon-on-dark.svg is the same flip baked into an attribute, for a browser
+  that reads the &lt;link&gt; media attribute but not a query inside an SVG icon.
+  Both keep the mark transparent and CHANGE THE ARTWORK. This one changes no
+  artwork and gives the mark its own ground instead. Reach for it where the
+  mark has to look like the club's mark rather than adapt to whatever is behind
+  it: an avatar on a dark service, a dark mode app tile.
+
+  A CIRCLE AND NOT A SQUARE. A pale rectangle behind an icon reads as a box
+  somebody forgot to remove, which is exactly the complaint that took the
+  ground out of favicon.svg on 2026-09-02. A disc reads as the icon.
+
+  HOW BIG THE MARK IS INSIDE IT IS MEASURED, NOT CHOSEN BY EYE. See
+  enclosing_circle() and the in_disc note in build(). The fraction was picked
+  by rendering the candidates at 16, 32 and 48 px on a dark strip, which are
+  the sizes and the background it actually has to survive; a 512px view flatters
+  every one of them equally and decides nothing.
+
+  GENERATED from art/favicon.png, from the SAME trace as favicon.svg.
+  Raster master: assets/images/favicon-disc-512.png, tools/make_icons.py.
+-->
+"""
+
 HEADER_MARK = """<!--
   THE BARE MARK, ON TRANSPARENCY. For slides, print, a Slack workspace icon,
   an org avatar: places where whoever places it knows what is behind it.
@@ -577,6 +706,10 @@ FAVICON = dict(
         # this covers a browser that honours the media attribute on <link> but
         # not a media query inside an SVG it is using as an icon.
         ("favicon-on-dark.svg", {"rock": "paper"},   HEADER_FAVICON_DARK),
+        # The mark unaltered, inside a white disc, for dark UI that should see
+        # the club's real colours rather than a flipped mountain. 0.84 of the
+        # disc's diameter: see HEADER_FAVICON_DISC for how that was measured.
+        ("favicon-disc.svg", {"in_disc": 0.84},     HEADER_FAVICON_DISC),
         ("mark.svg",            {},                 HEADER_MARK),
         ("mark-on-dark.svg",    {"rock": "paper"},  HEADER_MARK_DARK),
     ],

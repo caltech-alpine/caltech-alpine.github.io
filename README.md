@@ -394,10 +394,12 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 | `logo-on-dark.svg` | `art/logo.png` | the same, light type. Masthead and footer, which are ink |
 | `favicon.svg` | `art/favicon.png` | the wordless mark, **transparent, mountain flips on `prefers-color-scheme`** |
 | `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in |
+| `favicon-disc.svg` | `art/favicon.png` | the mark **unaltered, inside a white disc**; transparent outside it. For dark UI that should see the real colours rather than a flipped mountain |
 | `mark.svg`, `mark-on-dark.svg` | `art/favicon.png` | the mark **on transparency**, for slides and print |
 | `favicon.ico` **(site root)** | `favicon.svg` | 16+32+48 in one file, each rendered at its own size |
 | `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` | `favicon.svg` | home-screen rasters, `tools/make_icons.py` |
 | `mark-512.png`, `mark-on-dark-512.png` | `mark*.svg` | transparent rasters — what to hand somebody who asks for "the logo as a PNG" |
+| `favicon-disc-512.png` | `favicon-disc.svg` | the 512 master of the disc variant — what to upload where a service wants a PNG and will put it on dark chrome |
 | `social-default.png` | `favicon.svg` | the link preview, written by `tools/make_social.py` |
 
 **The light and dark logos are one trace, not two drawings.** `trace_logo.py`
@@ -428,6 +430,26 @@ dark, and corner alpha `0` in both. `favicon-on-dark.svg` is linked with
 `media="(prefers-color-scheme: dark)"` as belt and braces, for a browser that
 honours the attribute on `<link>` but not a query inside an SVG it is using as
 an icon.
+
+**A third answer exists and is not wired into the site: `favicon-disc.svg`.**
+It gives the mark its own ground instead of altering it — the same trace, the
+real alpenglow C, the real ink mountain, inside a filled white **circle**, with
+the square outside the circle transparent. The distinction from the first
+answer is the shape: a pale *rectangle* behind an icon reads as a box somebody
+forgot to remove, and that is the complaint the ground was removed over; a disc
+reads as the icon. Reach for it where the mark has to look like the club's mark
+rather than adapt to whatever is behind it — an avatar on a dark service, a
+dark-mode app tile. **The site's `<link>` tags still point at the flip**, which
+is the lighter touch and stays the default; switching them is a separate
+decision, not something regenerating the icons will do for you.
+
+How much white surrounds the mark is derived, not eyeballed. `enclosing_circle()`
+measures the mark's own circumscribed circle off a render of the trace and maps
+it onto `in_disc` (0.84) of the disc's diameter, so the ring is even the whole
+way round and a retrace that resizes the artwork moves the scale with it. The
+fraction was chosen from renders at 16, 32 and 48 px on a dark strip; at 16 px
+the white ring is one device pixel and the C and the peak are both still
+resolvable, which is the only test that matters for a favicon.
 
 **Three files are opaque, each for a reason that is not aesthetic.**
 `apple-touch-icon.png` and the two `icon-*.png` because iOS masks a home-screen

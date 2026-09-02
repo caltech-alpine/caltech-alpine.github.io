@@ -6,7 +6,7 @@
 
      python tools/make_icons.py
 
- Writes, from assets/images/favicon.svg and its three siblings:
+ Writes, from assets/images/favicon.svg and its four siblings:
 
      favicon.ico                  16+32+48 in one file, AT THE SITE ROOT
      assets/images/apple-touch-icon.png  180x180, iOS home screen
@@ -15,6 +15,8 @@
      assets/images/icon-maskable-512.png  512x512, inset for Android masking
      assets/images/mark-512.png    512x512, TRANSPARENT, ink mountain
      assets/images/mark-on-dark-512.png   512x512, TRANSPARENT, paper mountain
+     assets/images/favicon-disc-512.png   512x512, TRANSPARENT, the mark in a
+                                          white disc, for dark UI
 
  The SVGs are the source of record. Edit art/favicon.png, run
  tools/trace_logo.py, then run this; do not edit a PNG by hand, because the
@@ -111,6 +113,13 @@ JOBS = [
     ("favicon.svg",      "icon-512.png",          512, PAPER),
     ("mark.svg",         "mark-512.png",          512, None),
     ("mark-on-dark.svg", "mark-on-dark-512.png",  512, None),
+    # THE 512 MASTER OF THE WHITE-DISC VARIANT (Kyle, 2026-09-02). The one
+    # raster here that is a deliverable rather than something a browser asked
+    # for: it is what to upload where a service wants "a PNG" and will put it
+    # on dark chrome of its own choosing. `background=None` because the disc
+    # is IN the SVG, and imposing paper behind it would fill the transparent
+    # corners and turn the circle back into the square it exists to avoid.
+    ("favicon-disc.svg", "favicon-disc-512.png",  512, None),
 ]
 
 # Which of the above must have a transparent corner, and which must not. Both
@@ -120,7 +129,8 @@ JOBS = [
 # this file documented and did not catch for two days.
 MUST_BE_OPAQUE = ("apple-touch-icon.png", "icon-192.png", "icon-512.png",
                   "icon-maskable-512.png")
-MUST_BE_TRANSPARENT = ("mark-512.png", "mark-on-dark-512.png")
+MUST_BE_TRANSPARENT = ("mark-512.png", "mark-on-dark-512.png",
+                       "favicon-disc-512.png")
 
 # The sizes inside favicon.ico. 48 is included for Windows taskbar pinning,
 # which upscales anything smaller.
