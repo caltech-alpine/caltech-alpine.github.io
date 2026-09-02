@@ -60,7 +60,7 @@
 # called into their title_held cell in data/assignments.csv. The row you are about to
 # delete is the last record of it. `php tools/check.php --data` will stop you.
 role_id,title,title_shared,group,min_people,max_people,description,contact_for,recruiting
-president,President,Co-President,"Steering Committee",1,2,"Runs the club, calls meetings, plans the year, and represents the club to Caltech.","Anything about the club in general",
+president,President,Co-President,"Steering Committee",2,2,"Runs the club, calls meetings, plans the year, and represents the club to Caltech.","Anything about the club in general",
 treasurer,Treasurer,,"Steering Committee",1,1,"Handles reimbursements, trip and event expenses, and the club's accounts with Caltech.","Reimbursements and club funds",
 secretary,Secretary,,"Steering Committee",1,1,"Runs the mailing list, handles membership requests, and sends club announcements.","Mailing list and membership",
 film_festival,"Film Festival Coordinator",,"Steering Committee",1,2,"Organizes the club's film festivals: venue, screening license, tickets through the Caltech Ticket Office, and raffle donations.","The film festivals",
