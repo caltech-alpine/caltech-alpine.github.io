@@ -53,6 +53,11 @@ try:
 except ImportError:
     sys.exit("needs potracer (pure-python potrace): python -m pip install potracer")
 
+try:
+    from scipy import ndimage
+except ImportError:                                     # only widen_gap needs it
+    ndimage = None
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import palette                                          # noqa: E402
 
@@ -82,6 +87,57 @@ def classify(rgba, layers):
     nearest = d.argmin(axis=2)
     return {name: (nearest == i) & (alpha > 128)
             for i, (name, _, _) in enumerate(layers)}
+
+
+def widen_gap(masks, shrink, against, k, despeckle=500):
+    """Cut `shrink` back by k px wherever it comes near `against`.
+
+    WHY THE MARK NEEDS THIS AT ALL. In art/favicon.png the mountain and the C
+    are two pixels apart at their closest and touch outright over 248 pixels,
+    measured 2026-09-02. In colour that reads fine, because orange beside black
+    is two shapes whatever the gap is. In ONE ink it is a single blob, and that
+    is the case this exists for: a monochrome mark, a fax-grade print, an
+    engraving, a service that flattens an avatar. Kyle asked for the channel to
+    be wider so the two halves stay two halves.
+
+    IT IS NOT A UNIFORM EROSION, and that distinction is the whole function.
+    Shrinking the mountain everywhere would pull its base off the outer circle
+    and the mark would stop being a disc. Only rock within k of the orange goes,
+    so the peaks, the ridges and the base arc are bit-for-bit what they were and
+    the silhouette is unchanged. At k=20 that costs 1.8% of the mountain, all of
+    it along the one edge nobody could see anyway.
+
+    IT DESPECKLES `against` FIRST, and skipping that is a real bug rather than
+    tidiness. classify() assigns each pixel to the nearest source colour, and a
+    mid-grey anti-aliased pixel on the BLACK/WHITE edge is nearer to the orange
+    (190,81,45) than to white or ink -- so the raw sun mask carries 63 stray
+    specks strewn along the mountain's own ridge. Measure distance to those and
+    the erosion nibbles the ridge everywhere, which is exactly what the first
+    attempt produced. potrace hides the same specks after the fact with
+    turdsize; this runs before it, so it has to clear them itself.
+    """
+    if not k:
+        return masks
+    if ndimage is None:
+        sys.exit("widening the gap needs scipy: python -m pip install scipy")
+
+    lab, n = ndimage.label(masks[against])
+    if n:
+        keep = [i for i in range(1, n + 1) if (lab == i).sum() >= despeckle]
+        solid = np.isin(lab, keep)
+    else:
+        solid = masks[against]
+
+    before = masks[shrink].sum()
+    d = ndimage.distance_transform_edt(~solid)
+    out = dict(masks)
+    out[shrink] = masks[shrink] & (d >= k)
+    print("    gap     %s pulled %d px clear of %s: %d px removed (%.1f%%), "
+          "%d of %d %s specks dropped first"
+          % (shrink, k, against, before - out[shrink].sum(),
+             100.0 * (before - out[shrink].sum()) / max(1, before),
+             n - len(keep) if n else 0, n, against))
+    return out
 
 
 # --------------------------------------------------------------- preparing --
@@ -333,10 +389,19 @@ def load(spec):
     return np.asarray(im), w, h
 
 
-def build(spec, check_only=False):
+def build(spec, check_only=False, gap=None):
     rgba, w, h = load(spec)
     masks = classify(rgba, spec["layers"])
     print("  %-13s %dx%d" % (spec["src"], w, h))
+
+    # `gap: (shrink, against, k)` -- see widen_gap(). k is in the pixels of THIS
+    # spec's own frame, which `width` states, so it does not silently mean
+    # something different in a drawing of another size. --gap on the command
+    # line overrides it, which is how a different value gets tried without
+    # editing anything.
+    if spec.get("gap"):
+        shrink, against, k = spec["gap"]
+        masks = widen_gap(masks, shrink, against, k if gap is None else gap)
 
     # Trace ONCE per layer. The variants differ only in which token a layer is
     # painted with, and tracing the same mask twice would be the same work for
@@ -691,6 +756,18 @@ FAVICON = dict(
         ("sun",   FAVICON_SUN,      "alpenglow"),
         ("rock",  ( 21,  21,  21),  "ink"),
     ],
+    # A REAL WHITE CHANNEL BETWEEN THE TWO HALVES (Kyle, 2026-09-02). In the
+    # drawing they touch: 248 pixels of the mountain are adjacent to the C and
+    # the narrowest separation is 2 px in this 512 frame, which is 0.06 of a
+    # device pixel at 16 px. Colour carried it; one ink does not, and a
+    # monochrome mark is the case this was raised for.
+    #
+    # 20 px here, chosen from renders in ONE INK at 16, 24, 32 and 48 px: it is
+    # the smallest value whose seam is unambiguous by 24 px. Nothing separates
+    # at 16 px in one colour, at any k, so there was no point paying more
+    # mountain for it. It costs 1.8% of the rock, entirely along the edge that
+    # was touching. See widen_gap() for why this is not a uniform erosion.
+    gap=("rock", "sun", 20),
     # FOUR FILES, ONE TRACE. Two axes, and they are independent: whether the
     # mark carries its own ground (a tab strip: yes; a slide: no), and which
     # way round the mountain is (on paper: ink; on ink: paper). Every one of
@@ -722,12 +799,20 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--check", action="store_true",
                     help="report the fit and write nothing")
+    # VARY THE CHANNEL BY FLAG, NOT BY EDITING THE SPEC. Trying a value should
+    # not mean a diff, and comparing two should not mean remembering to put the
+    # first one back. Pair it with --check to look without writing.
+    ap.add_argument("--gap", type=int, default=None, metavar="PX",
+                    help="override the white channel between the mark's two "
+                         "halves, in source pixels (spec default: %d). 0 to "
+                         "restore the drawing as it was traced."
+                         % FAVICON["gap"][2])
     a = ap.parse_args()
 
     print("trace_logo.py  (palette from assets/css/style.css: %s)"
           % ", ".join("%s %s" % (t, palette.hexof(t))
                       for t in ("alpenglow", "ink", "paper")))
-    worst = max(build(s, check_only=a.check) for s in SOURCES)
+    worst = max(build(s, check_only=a.check, gap=a.gap) for s in SOURCES)
 
     print()
     print("worst layer disagrees with its source on %.2f%% of pixels "

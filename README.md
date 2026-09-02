@@ -402,6 +402,26 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 | `favicon-disc-512.png` | `favicon-disc.svg` | the 512 master of the disc variant — what to upload where a service wants a PNG and will put it on dark chrome |
 | `social-default.png` | `favicon.svg` | the link preview, written by `tools/make_social.py` |
 
+**The mark's two halves are pulled apart at trace time, not in the drawing.**
+In `art/favicon.png` the mountain and the C touch: 248 adjacent pixels, and a
+narrowest separation of 2 px in a 512 frame, which is 0.06 of a device pixel at
+16 px. Colour hides that — orange beside black is two shapes whatever the gap
+is — but **one ink makes it a single blob**, and a monochrome mark is a case the
+club will hit (an engraving, a stamp, a service that flattens an avatar). So the
+`gap` key on the FAVICON spec erodes the mountain 20 px clear of the C before
+potrace runs, and `widen_gap()` does it *only near the orange*: a uniform
+erosion would pull the base off the outer circle and the mark would stop being a
+disc, whereas this leaves the peaks, the ridges and the base arc bit-for-bit
+what they were, at a cost of **1.8 % of the mountain**. Measured on the shipped
+SVG, the two halves are now **17 px apart at their closest**. 20 was chosen from
+renders in one ink at 16, 24, 32 and 48 px: it is the smallest value whose seam
+is unambiguous by 24 px, and nothing separates at 16 px in one colour at any
+value, so there was no point paying more mountain for it. Vary it with
+`python tools/trace_logo.py --gap N --check`; `--gap 0` restores the drawing as
+drawn. **The lockup is untouched** — `art/logo.png` is a different composition
+that already has the separation, and its `figure` layer is the wordmark, so the
+same erosion there would eat letterform spacing.
+
 **The light and dark logos are one trace, not two drawings.** `trace_logo.py`
 traces the artwork once and writes it twice, swapping a single token, so the
 pair cannot disagree with each other. `currentColor` would be the obvious
