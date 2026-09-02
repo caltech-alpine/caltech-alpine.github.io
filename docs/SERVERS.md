@@ -10,23 +10,53 @@ Last measured **2026-08-18**, except the editor survey, which is 2026-08-31.
 
 ---
 
+## The cutover happened — 2026-09-02
+
+**`alpine.caltech.edu` now serves this repository.** Measured that day, from off
+campus, before anything in this repository was changed to say so:
+
+```
+https://alpine.caltech.edu/version.txt          commit 9f7207f
+https://staging.alpine.caltech.edu/version.txt  commit 9f7207f   (the same)
+both hosts:  /  200      /roles.php  200
+alpine.      no x-robots-tag
+staging.     x-robots-tag: noindex, nofollow
+```
+
+Both hostnames reach the **same document root**, so staging is now an alias
+rather than a second copy, and the old failure mode — staging silently weeks
+behind production — cannot happen between them. The Wagtail page that used to
+answer at `alpine.caltech.edu` no longer does.
+
+**Exactly one line of code changed for this**: `URL=` in
+[`../tools/server-deploy.sh`](../tools/server-deploy.sh), which that script
+calls "the one place the published address is written". It was right about
+itself. It was **wrong about the documents** — nine files named the staging
+address, including `SECRETARY.md`, which the same comment claimed deliberately
+did not. Those were corrected the same day. The lesson worth keeping: *a
+single-source-of-truth claim is only true if something checks it*, and nothing
+here does yet.
+
 ## The three copies of the site
 
 | | Production | Staging | Pages pilot |
 |---|---|---|---|
 | Address | https://alpine.caltech.edu | https://staging.alpine.caltech.edu | https://caltech-alpine.github.io |
-| What runs there | Caltech Sites (Wagtail CMS) | Apache + PHP, our files | Static HTML built by GitHub Actions |
-| Who controls the content | Caltech Sites editors | this repository, published by `bin/deploy` | this repository, `main` branch |
-| Indexed by search engines | yes | no, and it must stay that way - `.htaccess` sends `X-Robots-Tag` when the Host starts `staging.` | no (`noindex`) |
-| Status | live, untouched by any of this | **live, serving the PHP site** (re-verified 2026-08-30) | live |
-| How current | n/a | whatever `bin/deploy` last published. Read `/version.txt` | `main`, within 30 min |
+| What runs there | **Apache + PHP, our files** | the same document root, same files | Static HTML built by GitHub Actions |
+| Who controls the content | this repository, published by `bin/deploy` | ditto — it is the same folder | this repository, `main` branch |
+| Indexed by search engines | **yes, and that is now the point** | no, and it must stay that way - `.htaccess` sends `X-Robots-Tag` when the Host starts `staging.` | no (`noindex`) |
+| Status | **live, serving the PHP site** (2026-09-02) | live, an alias of production | live |
+| How current | whatever `bin/deploy` last published. Read `/version.txt` | identical to production, always | `main`, within 30 min |
 
-Only production is the club's real site. Nothing done on staging changes it.
+**Production is the club's real site and it is now ours, so a bad publish is
+publicly visible.** `bin/deploy` backs up the document root before it writes and
+`--rollback` restores it; that safety net stopped being theoretical on
+2026-09-02.
 
-> ⚠ **As of 2026-08-30 staging is behind `main`.** `roles.php` — a page added in
-> August — returns 404 there, so the last deploy predates it. The 2026-08-28
-> entry in [DEPLOY-LOG.md](DEPLOY-LOG.md) says the same thing and it is still
-> owed. This is exactly the failure `version.txt` was added to make visible.
+Still unanswered: whether IMSS intends `staging.` to keep pointing here, or
+whether it will eventually be repointed at a genuinely separate root. Until
+somebody asks, do not build a procedure that assumes staging is independent —
+today it is not.
 
 ---
 

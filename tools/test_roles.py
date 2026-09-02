@@ -359,8 +359,17 @@ def scenario_3_rename_the_title(base):
     # THE POINT OF THE WHOLE REFACTOR. Under the old title-matching join, a
     # renamed role lost its holder and the site advertised a job somebody was
     # doing as vacant.
+    #
+    # Asked as a FRACTION rather than as the absence of the name (2026-09-02).
+    # This used to check that the renamed title was nowhere in the homepage
+    # strip, which only worked while President had min_people 1 and so never
+    # reached the strip at all. The club now wants two, so the job is
+    # legitimately on the homepage with one of its two seats taken -- and "the
+    # name is absent" stopped being a way to ask whether the holder was lost.
+    # The fraction is the actual question: 1/2 means Alice is still counted,
+    # 0/2 would mean the rename dropped her.
     check("the site does NOT now think the job is empty",
-          "Co-President" not in strip(p), strip(p))
+          "1/2 filled" in strip(p) and "0/2" not in strip(p), strip(p))
 
 
 def scenario_4_rename_it_back(base):
@@ -573,11 +582,14 @@ def scenario_11_stop_recruiting(base):
     check("'recruiting = no' takes it off the homepage",
           "Film Festival" not in strip(p), strip(p))
 
-    # Talks is also below its minimum, so the strip is still up for that. Quiet
-    # it too and the whole block must disappear rather than render empty. Worth
-    # saying explicitly: "not in ''" would pass without looking at anything, so
-    # this asks about the element and not about the text inside it.
+    # Talks and President are also below their minimum, so the strip is still up
+    # for those. Quiet them too and the whole block must disappear rather than
+    # render empty. Worth saying explicitly: "not in ''" would pass without
+    # looking at anything, so this asks about the element and not about the text
+    # inside it. (President joined this list on 2026-09-02, when its min_people
+    # went to 2 and the second seat became something the club is short of.)
     edit_cell("roles.csv", "talks,", "recruiting", "no")
+    edit_cell("roles.csv", "president,", "recruiting", "no")
     p = render(base)
     check("and with nothing left short, the homepage notice vanishes entirely",
           'class="wanted-strip"' not in p["index.php"])
@@ -623,6 +635,7 @@ def scenario_11_stop_recruiting(base):
 
     edit_cell("roles.csv", "talks,", "recruiting", "")
     edit_cell("roles.csv", "film_festival,", "recruiting", "")
+    edit_cell("roles.csv", "president,", "recruiting", "")
     p = render(base)
     check("clearing the cell starts advertising it again",
           "Film Festival Coordinator" in strip(p), strip(p))

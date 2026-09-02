@@ -25,7 +25,7 @@ set -euo pipefail
 HOST="portal.caltech.edu"
 DOCROOT_STAGING="/srv/www.alpine.caltech.edu/www/docroot"        # verified on the server 2026-08-18
 DOCROOT_PROD=""          # not set until the cutover; see docs/DEPLOY.md
-URL_STAGING="https://staging.alpine.caltech.edu"
+URL_STAGING="https://staging.alpine.caltech.edu"   # an ALIAS of production since 2026-09-02
 URL_PROD="https://alpine.caltech.edu"
 STAGE_DIR="_deploy"
 

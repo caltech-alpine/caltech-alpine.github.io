@@ -24,8 +24,8 @@ Slack. This repository holds the things that stay true for years.
 
 | | Address | What it is |
 |---|---|---|
-| **Production** | <https://alpine.caltech.edu> | The club's live site. **Still the Caltech Sites (Wagtail) page** as of 2026-08-30; nothing here reaches it yet. Moving it is a decision plus an IMSS request - [docs/DEPLOY.md](docs/DEPLOY.md), *The production cutover*. |
-| **The Caltech copy of this repo** | <https://staging.alpine.caltech.edu> | This repository, running as real PHP on Caltech hosting. What `bin/deploy` publishes to. |
+| **Production** | <https://alpine.caltech.edu> | **The club's live site, and since 2026-09-02 it is this repository.** What `bin/deploy` publishes to, and what search engines index. The Wagtail page that used to answer here is gone. |
+| **The same files, unindexed** | <https://staging.alpine.caltech.edu> | The same document root at a second hostname, held out of search by `.htaccess`. An alias, not a second copy - it cannot be behind production. |
 | **The preview** | <https://caltech-alpine.github.io> | A static render of `main`, rebuilt by [`.github/workflows/pages.yml`](.github/workflows/pages.yml) on every push and every 30 minutes. `noindex`, so it cannot compete with the real site in search. **This is the normal preview for content changes.** |
 
 Use the preview for anything that is data or wording. Use the Caltech copy for

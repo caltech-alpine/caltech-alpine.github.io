@@ -2,8 +2,8 @@
 """
  verify_deploy.py - check a deployed copy of the site from outside.
 
-     python tools/verify_deploy.py https://staging.alpine.caltech.edu
-     python tools/verify_deploy.py https://staging.alpine.caltech.edu --expect HEAD
+     python tools/verify_deploy.py https://alpine.caltech.edu
+     python tools/verify_deploy.py https://alpine.caltech.edu --expect HEAD
 
  tools/check.php answers "is the data right" and has to run on the server.
  tools/audit.py answers "is the markup right" and needs PHP locally.

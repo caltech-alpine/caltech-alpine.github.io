@@ -114,7 +114,7 @@ fetched and how many events it found, which config links are blank. Add
 the Caltech server** — see [SERVERS.md](SERVERS.md).
 
 ```bash
-python tools/verify_deploy.py https://staging.alpine.caltech.edu
+python tools/verify_deploy.py https://alpine.caltech.edu
 ```
 
 Checks a deployed copy from outside, over the public internet: every page

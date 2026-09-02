@@ -41,7 +41,19 @@ KEEP=5                      # how many old copies of the docroot to keep
 # checks it at the end, and SECRETARY.md deliberately does not repeat it -- so
 # the day IMSS repoints alpine.caltech.edu at this document root, exactly one
 # line changes and no document anywhere goes quietly stale.
-URL="https://staging.alpine.caltech.edu"
+#
+# THAT DAY CAME. Changed 2026-09-02, and measured before it was changed rather
+# than after: https://alpine.caltech.edu/version.txt served commit 9f7207f, the
+# same commit staging was serving, and both hostnames answered 200 on / and
+# /roles.php. Only staging still returns `x-robots-tag: noindex, nofollow` --
+# our own .htaccess sends that when the Host begins "staging.", so production is
+# indexable and staging is not, which is what we wanted and needed no edit.
+# The Wagtail site that used to answer here is gone from this address.
+#
+# staging.alpine.caltech.edu still exists and still serves the same docroot, so
+# it is now an alias rather than a separate copy of the site. This script checks
+# the address that matters.
+URL="https://alpine.caltech.edu"
 
 # Where the automatic checks live, for the gate below.
 GH_REPO="caltech-alpine/caltech-alpine.github.io"

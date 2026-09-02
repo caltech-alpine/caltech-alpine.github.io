@@ -33,15 +33,16 @@ That is the whole thing:
 
 | Address | What it is |
 |---|---|
-| <https://alpine.caltech.edu> | The club's live site. **Still the old Caltech Sites page** — this repository does not control it yet. |
-| <https://staging.alpine.caltech.edu> | This repository, running for real. This is what publishing updates. |
+| <https://alpine.caltech.edu> | **The club's live site, and it is now this repository.** This is what publishing updates, and what the public and Google see. |
+| <https://staging.alpine.caltech.edu> | The same files at a second address, kept out of search results. Handy for showing somebody a change. Not a separate copy, so it cannot be "behind". |
 | <https://caltech-alpine.github.io> | The preview. Rebuilt automatically from `main`. |
 
-*(Checked 2026-08-30. The move of `alpine.caltech.edu` onto this repository is a
-decision for the officers plus an IMSS request — see
-[docs/DEPLOY.md](docs/DEPLOY.md), "The production cutover". When it happens,
-nothing in your procedure changes: the publish command prints the address it
-just updated, and that is the one to check.)*
+*(Checked 2026-09-02 — the day the move happened. `alpine.caltech.edu` served
+the same commit as staging, and both answered every page. **Nothing in your
+procedure changed**, which was the design: the publish command prints the
+address it just updated, and that is the one to check. What did change is the
+stakes — this is now the public site, so publish something you have looked at
+on the preview first.)*
 
 ---
 
@@ -265,13 +266,13 @@ backed up the current site to /srv/.../backups/docroot-2027-06-04-1132
 
 publishing...
 
-checking https://staging.alpine.caltech.edu ...
-  ok   https://staging.alpine.caltech.edu is serving a1b2c3d - the commit just published.
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving a1b2c3d - the commit just published.
   ok   the home page loads and is ours.
 
 done.
 
-  live at:   https://staging.alpine.caltech.edu
+  live at:   https://alpine.caltech.edu
 ```
 
 The command takes the copy of the site from GitHub, backs up what was there,
