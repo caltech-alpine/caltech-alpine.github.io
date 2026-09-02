@@ -390,8 +390,8 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 
 | File | Built from | What it is |
 |---|---|---|
-| `logo.svg` | `art/logo.png` | the logo, dark type. **For light backgrounds** |
-| `logo-on-dark.svg` | `art/logo.png` | the same, light type. Masthead and footer, which are ink |
+| `logo.svg` | `art/logo.png` **+ `art/favicon.png`** | the lockup, dark type. **For light backgrounds.** Type and rule from the first, mark from the second — see below |
+| `logo-on-dark.svg` | the same two | the same, light type. Masthead and footer, which are ink |
 | `favicon-disc.svg` | `art/favicon.png` | **the tab icon.** The mark unaltered, inside a white disc; transparent outside it. Works on a light and a dark tab strip with no media query |
 | `favicon.svg` | `art/favicon.png` | the wordless mark, transparent, mountain flips on `prefers-color-scheme`. **No longer the tab icon**; still the source of every home-screen raster and the social card |
 | `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in. **Unreferenced** since the disc landed |
@@ -402,25 +402,48 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 | `favicon-disc-512.png` | `favicon-disc.svg` | the 512 master of the disc variant — what to upload where a service wants a PNG and will put it on dark chrome |
 | `social-default.png` | `favicon.svg` | the link preview, written by `tools/make_social.py` |
 
-**The mark's two halves are pulled apart at trace time, not in the drawing.**
-In `art/favicon.png` the mountain and the C touch: 248 adjacent pixels, and a
-narrowest separation of 2 px in a 512 frame, which is 0.06 of a device pixel at
-16 px. Colour hides that — orange beside black is two shapes whatever the gap
-is — but **one ink makes it a single blob**, and a monochrome mark is a case the
-club will hit (an engraving, a stamp, a service that flattens an avatar). So the
-`gap` key on the FAVICON spec erodes the mountain 20 px clear of the C before
-potrace runs, and `widen_gap()` does it *only near the orange*: a uniform
-erosion would pull the base off the outer circle and the mark would stop being a
-disc, whereas this leaves the peaks, the ridges and the base arc bit-for-bit
-what they were, at a cost of **1.8 % of the mountain**. Measured on the shipped
-SVG, the two halves are now **17 px apart at their closest**. 20 was chosen from
-renders in one ink at 16, 24, 32 and 48 px: it is the smallest value whose seam
-is unambiguous by 24 px, and nothing separates at 16 px in one colour at any
-value, so there was no point paying more mountain for it. Vary it with
-`python tools/trace_logo.py --gap N --check`; `--gap 0` restores the drawing as
-drawn. **The lockup is untouched** — `art/logo.png` is a different composition
-that already has the separation, and its `figure` layer is the wordmark, so the
-same erosion there would eat letterform spacing.
+**The C and the mountain need a white channel between them, and it is DRAWN.**
+In one ink — an engraving, a stamp, a service that flattens an avatar — the gap
+is the only thing telling the two halves apart, so it has to survive at small
+size. The drawing of 2026-09-02 separates them by **25.2 px in a 512 frame**
+(21.9 px measured back off the shipped SVG), which is enough.
+
+`widen_gap()` and the `gap` key exist to do that mechanically, and are **held at
+0**, deliberately rather than deleted. They ran at 20 for one commit and it was
+wrong twice: wrong in effect, because eroding the mountain takes the gap out of
+its flank and the flank is part of the drawing; and wrong in its premise, because
+the measurement that called for it reported the two halves touching over 248
+pixels, and those 248 were adjacent to the **anti-aliasing specks** in the raw
+sun mask rather than to the C. Against a despeckled mask the previous drawing
+already had 8.5 px. *The artifact that broke the fix had already broken the
+measurement that asked for it* — worth remembering the next time a mask is
+measured before it is traced. `--gap N` still works if a future drawing needs it.
+
+**The lockup is COMPOSED, so a new mark does not mean redrawing the wordmark.**
+`art/logo.png` used to be traced whole, which meant every change to the mark
+required a fresh render of the entire lockup with the type re-set by whatever
+tool made it — and Kyle redrew the mark twice on 2026-09-02 alone. So
+`build_lockup()` now keeps only the **type and its rule** from `art/logo.png`,
+throws away everything left of `cut` (x = 309, the left edge of the leftmost
+letter of either colour — the orange C of CALTECH at 309, the black A of ALPINE
+at 312), and drops in the mark traced from `art/favicon.png`. One mark, one
+place it is drawn, and the lockup follows it. **The mark half of `art/logo.png`
+is now dead pixels**; redraw that file only when the *type* changes.
+
+The split has to be geometric, because colour will not do it: the orange C
+shares a layer with "CALTECH" and the black mountain shares one with "ALPINE
+CLUB". What makes it work is the rule — the black bar is the only thing inked
+across most of the width, so it is found by row coverage (rows 275–292), lifted
+out, and the black layer then falls apart into the mountain and the individual
+letters. The mark is placed by its circumscribed circle, not its bounding box,
+at the full frame height so it sits on the rule exactly as the drawn mountain
+did.
+
+One trap that mapping closed: the two drawings name the same role differently —
+the lockup's dark layer is `figure` because it is mostly letterforms, the mark's
+is `rock` because it is a mountain. So `{"figure": "paper"}` reached the type and
+the rule and **sailed straight past the mountain**, and the dark lockup shipped
+an ink mountain on an ink ground. The `roles` key maps one onto the other.
 
 **The light and dark logos are one trace, not two drawings.** `trace_logo.py`
 traces the artwork once and writes it twice, swapping a single token, so the

@@ -547,6 +547,148 @@ def build(spec, check_only=False, gap=None):
     return worst
 
 
+def build_lockup(spec, check_only=False, gap=None):
+    """The wordmark lockup, with the CURRENT mark dropped into it.
+
+    WHY THIS IS NOT JUST ANOTHER build(). art/logo.png is a single raster of the
+    whole lockup, so a new mark used to mean a new drawing of the whole lockup,
+    with the wordmark re-rendered by whatever tool made it and the kerning at
+    that tool's mercy. Kyle redrew the MARK twice on 2026-09-02. Redrawing the
+    type each time to keep up is how a wordmark drifts.
+
+    So the lockup is composed instead: the TYPE and its rule are traced from
+    art/logo.png, everything left of the type is thrown away, and the mark comes
+    from art/favicon.png -- the same trace the favicon and the disc use. One
+    mark, one place it is drawn, and the lockup follows it automatically.
+
+    THE SPLIT IS GEOMETRIC, NOT BY COLOUR, because it has to be: the orange C
+    shares a layer with "CALTECH" and the black mountain shares one with "ALPINE
+    CLUB". What makes it tractable is the rule -- the black bar under the whole
+    lockup. It is the only thing inked across most of the width, so it is found
+    by row coverage, lifted out, and the black layer then falls apart into the
+    mountain and the individual letters. `cut` is the left edge of the leftmost
+    letter of either colour, so nothing left of it is type.
+    """
+    rgba, w, h = load(spec)
+    masks = classify(rgba, spec["layers"])
+    cut = spec["cut"]
+    print("  %-13s %dx%d  (lockup: type from x>=%d, mark from %s)"
+          % (spec["src"], w, h, cut, spec["mark"]["src"]))
+
+    # The rule: rows inked right across the lockup. Found rather than written
+    # down, so a redrawn wordmark with a thicker or higher bar still works.
+    fig = masks[spec["rule_layer"]]
+    wide = np.nonzero(fig.sum(axis=1) > spec.get("rule_span", 0.80) * w)[0]
+    if not len(wide):
+        sys.exit("%s: no rule found -- no row is inked across %.0f%% of the "
+                 "width. If the lockup lost its underline, set rule_span."
+                 % (spec["src"], 100 * spec.get("rule_span", 0.80)))
+    ry0, ry1 = int(wide.min()), int(wide.max())
+    rule = np.zeros_like(fig)
+    rule[ry0:ry1 + 1, :] = fig[ry0:ry1 + 1, :]
+    print("    rule    rows %d..%d (%d px), kept whole; the mark sits on it"
+          % (ry0, ry1, ry1 - ry0 + 1))
+
+    # Type only: drop everything left of the first letter, put the rule back.
+    right = np.arange(w)[None, :] >= cut
+    keep = {}
+    for name, _, token in spec["layers"]:
+        if token is None:
+            continue
+        m = masks[name] & right
+        if name == spec["rule_layer"]:
+            m = m | rule
+        keep[name] = m
+
+    # The mark, traced from its own artwork by the same code as everything else.
+    mspec = spec["mark"]
+    mrgba, mw, mh = load(mspec)
+    mmasks = classify(mrgba, mspec["layers"])
+    if mspec.get("gap"):
+        shrink, against, k = mspec["gap"]
+        mmasks = widen_gap(mmasks, shrink, against, k if gap is None else gap)
+
+    traced_type, traced_mark = [], []
+    worst = 0.0
+    for name, _, token in spec["layers"]:
+        if token is None:
+            continue
+        d = trace(keep[name], spec.get("turdsize", 8), spec.get("alphamax", 1.0),
+                  spec.get("opttolerance", 0.6))
+        bad = disagreement(keep[name], d, w, h)
+        worst = max(worst, bad or 0.0)
+        print("    %-7s %8d px  %6d bytes  %s   (type)"
+              % (name, keep[name].sum(), len(d),
+                 ("%.2f%% off" % (100 * bad)) if bad is not None else "unmeasured"))
+        traced_type.append((name, token, d))
+    for name, _, token in mspec["layers"]:
+        if token is None:
+            continue
+        d = trace(mmasks[name], mspec.get("turdsize", 8),
+                  mspec.get("alphamax", 1.0), mspec.get("opttolerance", 0.6))
+        print("    %-7s %8d px  %6d bytes                (mark)"
+              % (name, mmasks[name].sum(), len(d)))
+        traced_mark.append((name, token, d))
+
+    # PLACEMENT. The mark is a disc, so it is placed by its circumscribed circle
+    # rather than its bounding box -- same reasoning as the favicon disc, and the
+    # same function. Diameter is the height above the rule, so the mark sits ON
+    # the rule exactly as the drawn mountain did, and its left edge is the frame's
+    # left edge, so the lockup still begins where the mark begins.
+    mcx, mcy, mr = enclosing_circle([d for _, _, d in traced_mark], mw, mh)
+    diameter = float(h)
+    s = (diameter / 2.0) / mr
+    tx = diameter / 2.0 - s * mcx
+    ty = diameter / 2.0 - s * mcy
+    print("    mark    disc %.0f px tall, x 0..%.0f, sitting on the rule at y=%d; "
+          "type starts at x=%d, so the gap is %.0f px"
+          % (diameter, diameter, ry0, cut, cut - diameter))
+
+    for out_name, overrides, header in spec["outputs"]:
+        body = []
+        for name, token, d in traced_type:
+            body.append('  <path fill="%s" d="%s"/>'
+                        % (palette.hexof(overrides.get(name, token)), d))
+        body.append('  <g transform="matrix(%s,0,0,%s,%s,%s)">'
+                    % (n(s), n(s), n(tx), n(ty)))
+        # THE MARK'S LAYERS ANSWER TO THE LOCKUP'S OVERRIDE KEYS. The two
+        # drawings name the same roles differently -- the lockup calls its dark
+        # layer `figure` because it is mostly letterforms, the mark calls its
+        # `rock` because it is a mountain -- so `{"figure": "paper"}` reached the
+        # type and the rule and sailed straight past the mountain. The dark
+        # lockup came out with an ink mountain on an ink background: invisible,
+        # and invisible in a way that looks like a rendering glitch rather than a
+        # missing mapping. `roles` is what makes one override key hit both.
+        roles = spec.get("roles", {})
+        for name, token, d in traced_mark:
+            key = roles.get(name, name)
+            body.append('    <path fill="%s" d="%s"/>'
+                        % (palette.hexof(overrides.get(key, token)), d))
+        body.append("  </g>")
+
+        svg = ('%s<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d"\n'
+               '     role="img" aria-label="Caltech Alpine Club">\n%s\n</svg>\n'
+               % (header, w, h, "\n".join(body)))
+        try:
+            import xml.etree.ElementTree as ET
+            ET.fromstring(svg)
+        except Exception as err:
+            sys.exit("%s is not well-formed XML: %s\n"
+                     "  If the message points at a comment, look for '--' in "
+                     "it: XML does not allow it there." % (out_name, err))
+
+        if check_only:
+            print("      --check: would write %s (%d bytes)" % (out_name, len(svg)))
+        else:
+            with open(os.path.join(IMAGES, out_name), "w",
+                      encoding="utf-8", newline="\n") as f:
+                f.write(svg)
+            print("      wrote assets/images/%-18s %6d bytes  %s"
+                  % (out_name, len(svg),
+                     ", ".join("%s=%s" % kv for kv in overrides.items()) or "as drawn"))
+    return worst
+
+
 # =========================================================== the drawings ==
 
 HEADER_LOGO = """<!--
@@ -701,6 +843,21 @@ LOGO = dict(
         ("logo.svg",         {},                   HEADER_LOGO),
         ("logo-on-dark.svg", {"figure": "paper"},  HEADER_LOGO_DARK),
     ],
+    # COMPOSED, NOT TRACED WHOLE (2026-09-02). Everything left of x=309 in
+    # art/logo.png is the OLD mark and is thrown away; the type and its rule are
+    # kept, and the mark is taken from art/favicon.png instead. 309 is the left
+    # edge of the leftmost letter of either colour -- the orange C of "CALTECH"
+    # at 309, the black A of "ALPINE" at 312 -- measured, not eyeballed.
+    #
+    # The consequence worth knowing: art/logo.png's own mark is now dead pixels.
+    # Redrawing the lockup only matters if the TYPE changes. A new mark goes in
+    # art/favicon.png and this follows it, which is the point.
+    cut=309,
+    rule_layer="figure",
+    # Which of THIS spec's override keys each of the mark's layers listens to.
+    # Without it the dark lockup ships an ink mountain on an ink ground.
+    roles={"sun": "sun", "rock": "figure"},
+    mark=None,          # set to FAVICON below; it is defined after this one
 )
 
 # FAVICON -- an open orange C-ring with a mountain breaking out of it, on a
@@ -738,7 +895,18 @@ LOGO = dict(
 # about 2.5 and holds. The arc's endpoints barely moved (the gap edge went from
 # -34.5 to -32.0 degrees, the lower-left from 150.0 to 142.5), so this is the
 # same mark at a different weight and not a new one.
-FAVICON_SUN = (252, 69, 4)
+#
+# THE MOUNTAIN GOT ROOM (2026-09-02, second drawing that day). Kyle redrew it
+# with the two halves further apart and the mountain larger. That REPLACES the
+# `gap` erosion below rather than adding to it: the drawing now separates the
+# C from the mountain by 25.2 px in this 512 frame, against 8.5 px before, so
+# there is nothing left for an erosion to do and doing it anyway just eats the
+# mountain's flank. The drawing is drawn in #fe5d01 and pure #000000, where the
+# previous one used #fc4504 and #151515; both key fine either way, since
+# classify() takes the nearest of three colours that are nowhere near each
+# other, but the keys track the artwork so a future third drawing is compared
+# against what is actually on the canvas.
+FAVICON_SUN = (254, 93, 1)
 FAVICON = dict(
     src="favicon.png",
     trim=(254, 254, 254),
@@ -754,20 +922,21 @@ FAVICON = dict(
     layers=[
         ("field", (254, 254, 254),  None),      # keyed out, never drawn
         ("sun",   FAVICON_SUN,      "alpenglow"),
-        ("rock",  ( 21,  21,  21),  "ink"),
+        ("rock",  (  0,   0,   0),  "ink"),
     ],
-    # A REAL WHITE CHANNEL BETWEEN THE TWO HALVES (Kyle, 2026-09-02). In the
-    # drawing they touch: 248 pixels of the mountain are adjacent to the C and
-    # the narrowest separation is 2 px in this 512 frame, which is 0.06 of a
-    # device pixel at 16 px. Colour carried it; one ink does not, and a
-    # monochrome mark is the case this was raised for.
+    # THE CHANNEL IS DRAWN NOW, SO NOTHING IS ERODED. Held at 0 rather than
+    # deleted, because the machinery and the reason are both worth keeping.
     #
-    # 20 px here, chosen from renders in ONE INK at 16, 24, 32 and 48 px: it is
-    # the smallest value whose seam is unambiguous by 24 px. Nothing separates
-    # at 16 px in one colour, at any k, so there was no point paying more
-    # mountain for it. It costs 1.8% of the rock, entirely along the edge that
-    # was touching. See widen_gap() for why this is not a uniform erosion.
-    gap=("rock", "sun", 20),
+    # It ran at 20 for one commit and it was wrong twice over. Wrong in effect,
+    # because it takes the gap out of the mountain's flank and the flank is
+    # part of the drawing. Wrong in its premise: the measurement that justified
+    # it said the two halves touched over 248 pixels, and those 248 were
+    # adjacent to the anti-aliasing SPECKS in the raw sun mask, not to the C
+    # (see widen_gap() on why the mask is speckled). Measured against the
+    # despeckled mask the old drawing already had 8.5 px, and the drawing
+    # standing here now has 25.2. The lesson is the cheap one: the artifact
+    # that broke the fix had already broken the measurement that called for it.
+    gap=("rock", "sun", 0),
     # FOUR FILES, ONE TRACE. Two axes, and they are independent: whether the
     # mark carries its own ground (a tab strip: yes; a slide: no), and which
     # way round the mountain is (on paper: ink; on ink: paper). Every one of
@@ -792,6 +961,14 @@ FAVICON = dict(
     ],
 )
 
+# The lockup borrows the favicon's drawing, and Python needs FAVICON to exist
+# before it can be pointed at. Tying the knot here rather than reordering the
+# two specs keeps each one's comment block next to the drawing it describes.
+LOGO["mark"] = FAVICON
+
+# A spec with a `mark` is composed by build_lockup(); everything else is traced
+# whole by build(). One dispatch, so adding a second composed lockup later needs
+# no new branch here.
 SOURCES = [LOGO, FAVICON]
 
 
@@ -812,7 +989,8 @@ def main():
     print("trace_logo.py  (palette from assets/css/style.css: %s)"
           % ", ".join("%s %s" % (t, palette.hexof(t))
                       for t in ("alpenglow", "ink", "paper")))
-    worst = max(build(s, check_only=a.check, gap=a.gap) for s in SOURCES)
+    worst = max((build_lockup if s.get("mark") else build)(
+                    s, check_only=a.check, gap=a.gap) for s in SOURCES)
 
     print()
     print("worst layer disagrees with its source on %.2f%% of pixels "
