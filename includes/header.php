@@ -83,10 +83,24 @@ $navItems = require __DIR__ . '/nav.php';
          readers, link unfurlers and Windows pin-to-taskbar request that bare
          path and read no HTML first. It was a 404 until 2026-09-02.
 
-         THE DARK VARIANT is honoured by Firefox and Safari and ignored by
-         Chrome. Nothing depends on it: favicon.svg carries its own opaque
-         ground and is legible on a dark tab strip either way, so the dark
-         twin is an improvement and not a fix. */ ?>
+         THE TAB ICON IS TRANSPARENT, and stays legible by flipping rather
+         than by hiding behind a ground. favicon.svg has no <rect>: a tab
+         should show the mark, not a pale square. The mountain is a near-black,
+         so on a dark tab strip a fixed one would merge and leave a bare orange
+         ring -- which is why a ground existed here for three days. Instead the
+         file carries its own @media (prefers-color-scheme: dark) rule and
+         repaints the mountain paper. Verified in a real browser by drawing the
+         SVG to a canvas and reading the pixel back: ink 20,24,26 in light,
+         paper 249,246,240 in dark, corner alpha 0 in both.
+
+         THE DARK TWIN IS BELT AND BRACES, not the mechanism. It covers a
+         browser that honours media= on this <link> but does not evaluate a
+         media query inside an SVG used as an icon. Both paths land on a paper
+         mountain; a browser that does neither still gets a transparent icon.
+
+         /favicon.ico IS THE ONE OPAQUE FILE, deliberately. Its real consumer
+         is Windows pin-to-taskbar, the taskbar is dark by default, and an
+         .ico cannot express a media query. */ ?>
 <link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="32x32">
 <link rel="icon" href="<?= e(asset('images/favicon.svg')) ?>" type="image/svg+xml">
 <link rel="icon" href="<?= e(asset('images/favicon-on-dark.svg')) ?>" type="image/svg+xml" media="(prefers-color-scheme: dark)">

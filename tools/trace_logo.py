@@ -319,12 +319,46 @@ def build(spec, check_only=False):
         if bg:
             body.append('  <rect width="%d" height="%d" fill="%s"/>'
                         % (w, h, palette.hexof(bg)))
+
+        # AN `adaptive` LAYER CARRIES ITS COLOUR IN CSS, NOT IN AN ATTRIBUTE, so
+        # one transparent file can read on a light AND a dark tab strip without
+        # a ground behind it. `{"rock": ("ink", "paper")}` means: ink normally,
+        # paper under prefers-color-scheme: dark.
+        #
+        # WHY THIS EXISTS AT ALL. A ground was the earlier answer to "an ink
+        # mountain vanishes on a dark tab strip", and it works, but it puts a
+        # visible pale square in the tab -- which is the thing an icon is not
+        # supposed to have. Flipping the artwork instead solves the legibility
+        # problem without introducing a box.
+        #
+        # THE ATTRIBUTE IS STILL WRITTEN, as `fill` on the same element, and the
+        # stylesheet overrides it. That is the fallback: a consumer that applies
+        # no CSS at all -- an old rasteriser, a crawler thumbnailer -- gets the
+        # light colour rather than black-by-default, which is what a bare
+        # `class` with no fill attribute would give it.
+        adaptive = overrides.get("adaptive", {})
+        rules = []
         for name, token, d in traced:
             tok = overrides.get(name, token)
-            body.append('  <path fill="%s" d="%s"/>' % (palette.hexof(tok), d))
+            if name in adaptive:
+                light, dark = adaptive[name]
+                rules.append(("  .%s{fill:%s}" % (name, palette.hexof(light)),
+                              "    .%s{fill:%s}" % (name, palette.hexof(dark))))
+                body.append('  <path class="%s" fill="%s" d="%s"/>'
+                            % (name, palette.hexof(light), d))
+            else:
+                body.append('  <path fill="%s" d="%s"/>'
+                            % (palette.hexof(tok), d))
+        style = ""
+        if rules:
+            style = ('  <style>\n%s\n    @media (prefers-color-scheme: dark){\n'
+                     '%s\n    }\n  </style>\n'
+                     % ("\n".join(r[0] for r in rules),
+                        "\n".join(r[1] for r in rules)))
+
         svg = ('%s<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d"\n'
-               '     role="img" aria-label="Caltech Alpine Club">\n%s\n</svg>\n'
-               % (header, w, h, "\n".join(body)))
+               '     role="img" aria-label="Caltech Alpine Club">\n%s%s\n</svg>\n'
+               % (header, w, h, style, "\n".join(body)))
 
         # IT HAS TO PARSE. These files are fetched by every visitor on every
         # page, and a malformed one fails where nothing here would notice: the
@@ -399,9 +433,17 @@ HEADER_FAVICON = """<!--
   capped peak. A favicon has always been a separate file for exactly this
   reason. 16px is a different design problem, not a smaller one.
 
-  IT CARRIES ITS OWN BACKGROUND. The disc is opaque, so one file reads on the
-  ink masthead, on a paper page and on whatever colour a browser paints its tab
-  strip, and there is no light/dark pair to keep in step.
+  THE BACKGROUND IS TRANSPARENT, AND THE MOUNTAIN ADAPTS. There is no ground
+  rect: a browser tab should show the mark, not a pale square sitting in the
+  tab strip. Legibility is handled instead by the &lt;style&gt; block, which paints
+  the mountain ink normally and paper under prefers-color-scheme: dark.
+
+  THAT REPLACES THE GROUND THIS FILE USED TO CARRY, and the problem the ground
+  solved is real: the mountain is a near-black, so a transparent icon with a
+  fixed ink mountain merges into a dark tab strip and reads as a bare orange
+  ring. Flipping the artwork fixes that without the square. The fill attribute
+  is still written alongside the class, so a consumer that applies no CSS gets
+  the light colour rather than a default black.
 
   GENERATED from art/favicon.png. See logo.svg's header.
   Regenerate the raster icons after any change: python tools/make_icons.py
@@ -409,13 +451,16 @@ HEADER_FAVICON = """<!--
 """
 
 HEADER_FAVICON_DARK = """<!--
-  THE FAVICON FOR DARK BROWSER UI. Identical to favicon.svg except that the
-  ground is ink and the mountain is paper, so the silhouette survives instead
-  of merging with a dark tab strip.
+  THE FAVICON FOR DARK BROWSER UI. Also transparent; the mountain is paper
+  rather than ink, baked into the fill attribute instead of a media query.
 
-  Linked with media="(prefers-color-scheme: dark)". Firefox and Safari honour
-  that on a favicon; Chrome ignores it and keeps favicon.svg, which is opaque
-  and legible either way, so nothing depends on the query being respected.
+  BELT AND BRACES, NOT A SECOND MECHANISM THAT MATTERS ON ITS OWN. favicon.svg
+  already adapts by itself through a media query inside the file, which is the
+  technique with the widest support. This file exists for the reverse case: a
+  browser that honours media="(prefers-color-scheme: dark)" on the &lt;link&gt; but
+  does not evaluate a media query inside an SVG being used as an icon. Either
+  path lands on a paper mountain, and a browser that does neither still gets a
+  transparent icon whose only weak case is a dark tab strip.
 
   GENERATED from art/favicon.png, from the SAME trace as favicon.svg.
 -->
@@ -504,7 +549,13 @@ FAVICON = dict(
     src="favicon.png",
     trim=(254, 254, 254),
     square=True,        # see pad_to_square(); make_icons.py forces a square
-    background="paper", # see the note above; without it the mountain vanishes
+    # NO `background` HERE ANY MORE. Every output below is transparent; the two
+    # that a browser puts on an unknown colour handle it by flipping the
+    # mountain instead (see `adaptive`), and the home-screen rasters -- which
+    # genuinely cannot be transparent, because iOS composites alpha to black --
+    # get their ground imposed by tools/make_icons.py at render time. Keeping a
+    # ground here would have put it back in the browser tab, which is the one
+    # place Kyle does not want it.
     width=512,
     layers=[
         ("field", (254, 254, 254),  None),      # keyed out, never drawn
@@ -516,10 +567,18 @@ FAVICON = dict(
     # way round the mountain is (on paper: ink; on ink: paper). Every one of
     # them used to be either missing or a hand-recoloured copy.
     outputs=[
-        ("favicon.svg",         {},                                    HEADER_FAVICON),
-        ("favicon-on-dark.svg", {"background": "ink", "rock": "paper"}, HEADER_FAVICON_DARK),
-        ("mark.svg",            {"background": None},                  HEADER_MARK),
-        ("mark-on-dark.svg",    {"background": None, "rock": "paper"}, HEADER_MARK_DARK),
+        # THE BROWSER TAB ICON IS TRANSPARENT AND ADAPTS (2026-09-02, Kyle).
+        # No ground, so there is no pale square in the tab; the mountain flips
+        # to paper under prefers-color-scheme: dark, so nothing disappears.
+        ("favicon.svg", {"adaptive": {"rock": ("ink", "paper")}},
+                        HEADER_FAVICON),
+        # The same thing again with the dark colour baked in as an attribute,
+        # linked with media="(prefers-color-scheme: dark)". Belt and braces:
+        # this covers a browser that honours the media attribute on <link> but
+        # not a media query inside an SVG it is using as an icon.
+        ("favicon-on-dark.svg", {"rock": "paper"},   HEADER_FAVICON_DARK),
+        ("mark.svg",            {},                 HEADER_MARK),
+        ("mark-on-dark.svg",    {"rock": "paper"},  HEADER_MARK_DARK),
     ],
 )
 

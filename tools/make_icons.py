@@ -90,15 +90,25 @@ MASK_SAFE = 0.72
 
 # (source svg, output png, pixels, background or None)
 #
-# `background=None` means "whatever the SVG itself carries". Every browser icon
-# below comes from favicon.svg, which carries an opaque paper ground, so none
-# of them needs one imposed. The two mark-*.png files come from the mark SVGs,
-# which carry no ground, so they come out genuinely transparent -- and that is
-# checked at the end of this run rather than trusted.
+# THE GROUND IS IMPOSED HERE, NOT CARRIED BY THE SVG (changed 2026-09-02).
+# favicon.svg is transparent so that a browser tab shows the mark and not a
+# pale square. But a HOME-SCREEN icon cannot be transparent: iOS masks it to a
+# rounded square and composites alpha to BLACK, so a transparent icon arrives
+# as a mark floating in a black tile nobody chose, and the near-black mountain
+# inside it disappears. Android is the same story with a different mask.
+#
+# So the three home-screen rasters get PAPER imposed at render time, and only
+# there. `background=None` on the two mark-*.png files means "whatever the SVG
+# carries", which for those is nothing -- they come out genuinely transparent,
+# and that is asserted at the end of this run rather than trusted.
+#
+# The media query inside favicon.svg does not fire under cairosvg, so these
+# render with the light (ink) mountain, which is correct on paper.
+PAPER = palette.hexof("paper")
 JOBS = [
-    ("favicon.svg",      "apple-touch-icon.png",  180, None),
-    ("favicon.svg",      "icon-192.png",          192, None),
-    ("favicon.svg",      "icon-512.png",          512, None),
+    ("favicon.svg",      "apple-touch-icon.png",  180, PAPER),
+    ("favicon.svg",      "icon-192.png",          192, PAPER),
+    ("favicon.svg",      "icon-512.png",          512, PAPER),
     ("mark.svg",         "mark-512.png",          512, None),
     ("mark-on-dark.svg", "mark-on-dark-512.png",  512, None),
 ]
@@ -175,7 +185,14 @@ def main():
     # 512 is measurably softer than a 16px render, and 16px is the size that
     # matters most here, so each entry is rendered at its own size and the ICO
     # is assembled from the largest with the others appended.
-    frames = [render("favicon.svg", s) for s in ICO_SIZES]
+    #
+    # THE .ICO IS OPAQUE even though favicon.svg is transparent, and this is
+    # the one place that asymmetry is deliberate rather than sloppy. The .ico's
+    # real consumer is Windows pin-to-taskbar, and the Windows taskbar is dark
+    # by default -- a transparent icon there loses its near-black mountain and
+    # leaves a bare orange ring, the exact failure the SVG avoids with a media
+    # query that an .ico has no way to express.
+    frames = [render("favicon.svg", s, PAPER) for s in ICO_SIZES]
     ico_path = os.path.join(ROOT, "favicon.ico")
     frames[-1].save(ico_path, format="ICO",
                     sizes=[(s, s) for s in ICO_SIZES],
@@ -185,8 +202,27 @@ def main():
              "+".join(str(s) for s in ICO_SIZES),
              os.path.getsize(ico_path) / 1024.0))
 
-    # -- prove the alpha, do not assume it ----------------------------------
+    # -- the tab icon must have NO GROUND -----------------------------------
+    # Kyle's call, 2026-09-02: a pale square in the tab strip is the one thing
+    # this mark must not have. It is asserted rather than trusted because the
+    # ground came and went twice in three days, and a <rect> reappearing in
+    # favicon.svg is invisible in a file listing and obvious in a browser tab.
     bad = []
+    for name in ("favicon.svg", "favicon-on-dark.svg",
+                 "mark.svg", "mark-on-dark.svg"):
+        svg = open(os.path.join(IMAGES, name), encoding="utf-8").read()
+        if "<rect" in svg:
+            bad.append("  %s contains a <rect>: the tab icon must be "
+                       "transparent. See the FAVICON spec in "
+                       "tools/trace_logo.py." % name)
+    if "prefers-color-scheme" not in open(
+            os.path.join(IMAGES, "favicon.svg"), encoding="utf-8").read():
+        bad.append("  favicon.svg has no prefers-color-scheme rule. Without a "
+                   "ground AND without the flip, the ink mountain vanishes on "
+                   "a dark tab strip -- see the `adaptive` key in "
+                   "tools/trace_logo.py.")
+
+    # -- prove the alpha, do not assume it ----------------------------------
     for name in MUST_BE_OPAQUE + MUST_BE_TRANSPARENT:
         im = written.get(name)
         if im is None:

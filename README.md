@@ -392,8 +392,8 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 |---|---|---|
 | `logo.svg` | `art/logo.png` | the logo, dark type. **For light backgrounds** |
 | `logo-on-dark.svg` | `art/logo.png` | the same, light type. Masthead and footer, which are ink |
-| `favicon.svg` | `art/favicon.png` | the wordless mark **with its own paper ground**, for the browser tab |
-| `favicon-on-dark.svg` | `art/favicon.png` | the same on an ink ground, for dark browser UI |
+| `favicon.svg` | `art/favicon.png` | the wordless mark, **transparent, mountain flips on `prefers-color-scheme`** |
+| `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in |
 | `mark.svg`, `mark-on-dark.svg` | `art/favicon.png` | the mark **on transparency**, for slides and print |
 | `favicon.ico` **(site root)** | `favicon.svg` | 16+32+48 in one file, each rendered at its own size |
 | `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` | `favicon.svg` | home-screen rasters, `tools/make_icons.py` |
@@ -412,16 +412,42 @@ thin strip in a lot of nothing. Somebody asking for "the logo as a PNG" for an
 avatar wants `mark-512.png`; somebody who wants the lockup wants `logo.svg`, at
 its own shape.
 
-**Four favicon files, one trace.** Two independent axes: whether the mark
-carries its own ground (a browser tab: **yes**, because a transparent ink
-mountain merges with a dark tab strip and leaves a bare orange ring; a slide:
-no), and whether the mountain is ink or paper. `tools/make_icons.py` **asserts**
-the alpha on every output, because both directions of that mistake look fine in
-a file listing — and one of them shipped for two days. `logo-512.png` was
-documented here and in `make_icons.py` as transparent, and had not been since
-`favicon.svg` gained its ground on 2026-08-31: it was a warm off-white square,
-which reads as a dirty box on any dark background. It is now `mark-512.png`,
-and the assertion is why the next such change fails loudly.
+**Nothing the browser shows has a ground, and that took two tries.** A tab
+should show the mark, not a pale square sitting in the tab strip — Kyle's call,
+2026-09-02. The difficulty is that the mountain is `--ink`, a near-black, so a
+*fixed* transparent icon merges into a dark tab strip and reads as a bare orange
+ring. A full-bleed `--paper` rect was the first answer, and it worked at the
+cost of the square.
+
+**The second answer flips the artwork instead of hiding it.** `favicon.svg`
+carries its own `@media (prefers-color-scheme: dark)` block and repaints the
+mountain `--paper`. No ground, nothing to disappear. Verified in a real browser
+rather than by reading the CSS — drawing the SVG to a canvas and sampling the
+pixel back gives ink `20,24,26` under a light scheme, paper `249,246,240` under
+dark, and corner alpha `0` in both. `favicon-on-dark.svg` is linked with
+`media="(prefers-color-scheme: dark)"` as belt and braces, for a browser that
+honours the attribute on `<link>` but not a query inside an SVG it is using as
+an icon.
+
+**Three files are opaque, each for a reason that is not aesthetic.**
+`apple-touch-icon.png` and the two `icon-*.png` because iOS masks a home-screen
+icon to a rounded square and composites alpha to **black**, so a transparent
+icon arrives as a mark in a black tile nobody chose with a near-black mountain
+invisible inside it. `favicon.ico` because its real consumer is Windows
+pin-to-taskbar, the taskbar is dark by default, and an `.ico` has no way to
+express a media query. Those three get `--paper` imposed by `make_icons.py` at
+render time, never by the SVG.
+
+**All of it is asserted, not trusted.** `make_icons.py` fails if `favicon.svg`
+contains a `<rect>`, if it lacks a `prefers-color-scheme` rule, or if any
+output's corner alpha disagrees with what it is supposed to be — in both
+directions, because both mistakes look fine in a file listing. One of them
+shipped for two days: `logo-512.png` was documented here and in `make_icons.py`
+as transparent and had not been since `favicon.svg` first gained a ground on
+2026-08-31. It was a warm off-white square, a dirty box on any dark background.
+It is now `mark-512.png`. `tools/audit.py` reads **both** `fill="#hex"` and
+`fill:#hex`, so the dark-mode colour — which lives only in the style block, and
+which nobody would catch by eye — is checked like every other.
 
 **`favicon.ico` and `site.webmanifest` live at the site root**, not in
 `assets/`. The `.ico` is the only path crawlers, feed readers, link unfurlers

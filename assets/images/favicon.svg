@@ -7,16 +7,29 @@
   capped peak. A favicon has always been a separate file for exactly this
   reason. 16px is a different design problem, not a smaller one.
 
-  IT CARRIES ITS OWN BACKGROUND. The disc is opaque, so one file reads on the
-  ink masthead, on a paper page and on whatever colour a browser paints its tab
-  strip, and there is no light/dark pair to keep in step.
+  THE BACKGROUND IS TRANSPARENT, AND THE MOUNTAIN ADAPTS. There is no ground
+  rect: a browser tab should show the mark, not a pale square sitting in the
+  tab strip. Legibility is handled instead by the &lt;style&gt; block, which paints
+  the mountain ink normally and paper under prefers-color-scheme: dark.
+
+  THAT REPLACES THE GROUND THIS FILE USED TO CARRY, and the problem the ground
+  solved is real: the mountain is a near-black, so a transparent icon with a
+  fixed ink mountain merges into a dark tab strip and reads as a bare orange
+  ring. Flipping the artwork fixes that without the square. The fill attribute
+  is still written alongside the class, so a consumer that applies no CSS gets
+  the light colour rather than a default black.
 
   GENERATED from art/favicon.png. See logo.svg's header.
   Regenerate the raster icons after any change: python tools/make_icons.py
 -->
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
      role="img" aria-label="Caltech Alpine Club">
-  <rect width="512" height="512" fill="#f9f6f0"/>
+  <style>
+  .rock{fill:#14181a}
+    @media (prefers-color-scheme: dark){
+    .rock{fill:#f9f6f0}
+    }
+  </style>
   <path fill="#be512d" d="M271.75 511.28C273.54 511.05 276.46 511.05 278.25 511.28C280.04 511.5 278.57 511.68 275 511.68C271.43 511.68 269.96 511.5 271.75 511.28ZM65.24 392.12C-16.91 268.95 30.49 91.75 163.1 26.24C276.99 -30.03 418.73 9.07 483.7 114.66L486.88 119.83L474.19 127.09C467.21 131.09 448.3 141.96 432.17 151.26C416.03 160.56 402.74 168.01 402.63 167.83C381.78 134.19 342.45 108.84 296.5 99.43C282.62 96.59 252.38 98.17 235.81 102.6C142.18 127.66 91.36 231.44 129.5 319.67C132.08 325.63 134.68 331.7 135.28 333.16C136.44 335.98 135.76 336.83 110.53 364C101.03 374.22 85.86 390.91 79.92 397.66C76.94 401.05 74.2 403.86 73.83 403.91C73.47 403.96 69.6 398.65 65.24 392.12Z"/>
-  <path fill="#14181a" d="M263.73 511.44C263.6 511.34 259.45 510.95 254.5 510.59C204.83 506.93 154.76 484.76 113.2 448.02C104.53 440.35 83.56 418.23 80.3 413.32C78.92 411.23 80.18 409.69 110.18 376.79C138.12 346.15 236.18 238.26 240 233.96C248.86 223.98 260.45 211.99 261.02 212.22C261.41 212.37 264.8 215.88 268.55 220C272.29 224.12 279.44 231.99 284.43 237.49C289.42 242.98 296.23 250.41 299.56 253.99C302.89 257.57 307.84 262.96 310.56 265.97C313.28 268.98 318.22 274.38 321.55 277.97C327.42 284.3 330.04 287.16 344.51 303C348.27 307.12 354.07 313.37 357.39 316.88L363.42 323.26L366.22 319.88C376.05 308.02 393.64 288.14 394.35 288.08C394.82 288.03 396.62 289.47 398.35 291.26C400.08 293.06 420.62 314.03 444 337.86C467.38 361.7 486.65 381.61 486.84 382.11C487.58 384.12 473.43 405.83 462.14 420C424.6 467.12 361.99 503.09 306.5 509.42C304.3 509.68 300.02 510.16 297 510.49C291.85 511.06 264.24 511.85 263.73 511.44Z"/>
+  <path class="rock" fill="#14181a" d="M263.73 511.44C263.6 511.34 259.45 510.95 254.5 510.59C204.83 506.93 154.76 484.76 113.2 448.02C104.53 440.35 83.56 418.23 80.3 413.32C78.92 411.23 80.18 409.69 110.18 376.79C138.12 346.15 236.18 238.26 240 233.96C248.86 223.98 260.45 211.99 261.02 212.22C261.41 212.37 264.8 215.88 268.55 220C272.29 224.12 279.44 231.99 284.43 237.49C289.42 242.98 296.23 250.41 299.56 253.99C302.89 257.57 307.84 262.96 310.56 265.97C313.28 268.98 318.22 274.38 321.55 277.97C327.42 284.3 330.04 287.16 344.51 303C348.27 307.12 354.07 313.37 357.39 316.88L363.42 323.26L366.22 319.88C376.05 308.02 393.64 288.14 394.35 288.08C394.82 288.03 396.62 289.47 398.35 291.26C400.08 293.06 420.62 314.03 444 337.86C467.38 361.7 486.65 381.61 486.84 382.11C487.58 384.12 473.43 405.83 462.14 420C424.6 467.12 361.99 503.09 306.5 509.42C304.3 509.68 300.02 510.16 297 510.49C291.85 511.06 264.24 511.85 263.73 511.44Z"/>
 </svg>

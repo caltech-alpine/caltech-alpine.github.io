@@ -236,7 +236,15 @@ def logo_palette_check():
             warns.append("logo: %s is missing" % name)
             continue
         svg = open(path, encoding="utf-8").read()
-        for fill in sorted(set(re.findall(r'fill="(#[0-9a-fA-F]{6})"', svg))):
+        # BOTH NOTATIONS. favicon.svg carries a <style> block so the mountain
+        # can flip on prefers-color-scheme, which means its dark colour lives
+        # in `fill:#hex` and NOT in a `fill="#hex"` attribute. Checking only
+        # the attribute form would leave exactly one colour unchecked — the one
+        # that only ever appears on a dark tab strip, where nobody would catch
+        # it by eye.
+        found = set(re.findall(r'fill="(#[0-9a-fA-F]{6})"', svg))
+        found |= set(re.findall(r'fill:\s*(#[0-9a-fA-F]{6})', svg))
+        for fill in sorted(found):
             if fill.lower() not in declared:
                 fails.append(
                     "logo: %s fills with %s, which no token in style.css "
