@@ -344,7 +344,24 @@ except Exception: pass' "$1" 2>/dev/null || true
 }
 
 live_version="$(fetch "$URL/version.txt")"
-home="$(fetch "$URL/")"
+
+# The home page gets THREE tries, five seconds apart; version.txt gets one. The
+# first request after a publish is the expensive one -- the rsync leaves an empty
+# calendar cache, so PHP calls Google before it can render anything, and PHP-FPM
+# has no opcache for the new files either. version.txt is a static file and pays
+# none of that, which is why it can answer while the home page has not yet.
+#
+# Measured 2026-09-02: this check printed "the home page did not come back as
+# expected" on a deploy that was entirely healthy -- version.txt already agreed
+# -- and the identical fetch from the identical server two minutes later returned
+# 28657 bytes in 0.15 s. A single-shot check immediately after a publish measures
+# the warm-up, not the deploy, and a gate that cries wolf is a gate nobody reads.
+home=""
+for attempt in 1 2 3; do
+  home="$(fetch "$URL/")"
+  printf '%s' "$home" | grep -q "Alpine Club" && break
+  [ "$attempt" = 3 ] || sleep 5
+done
 
 if [ -z "$home" ] && [ -z "$live_version" ]; then
   echo "  --   could not reach $URL from this server."

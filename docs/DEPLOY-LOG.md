@@ -9,6 +9,76 @@ rather than describing it.
 
 ---
 
+## 2026-09-02 - deployed, at last, and the key was already installed
+
+**Who:** Claude, at Kyle's instruction (*"you can deploy alpine website yourself.
+or create a .bat that connects to ssh with a key that might already exist"*).
+**Deployed:** `51da787`, *No square in the tab: the favicon goes transparent and
+the mountain flips*. This clears the debt the two entries below kept recording.
+
+**The two-week-old backlog is gone.** `roles.php` returns **HTTP 200** now, and
+`https://staging.alpine.caltech.edu/version.txt` reports `51da787`, deployed
+`2026-09-02T18:27:52Z`. The August work is live.
+
+```
+deploying 51da787  No square in the tab: the favicon goes transparent and the mountain flips
+GitHub's checks on 51da787 passed.
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-09-02-1127
+removed old backup docroot-2026-08-19-1051
+publishing...
+checking https://staging.alpine.caltech.edu ...
+  ok   https://staging.alpine.caltech.edu is serving 51da787 - the commit just published.
+  !!   the home page did not come back as expected. Open https://staging.alpine.caltech.edu.
+done.
+```
+
+**`ACCESS.md` §5 turned out to be already done, in a way nothing recorded.**
+`~/.ssh/caltech-website-portal.ppk` exists, unencrypted, comment
+`eddsa-key-20260818`, and its public half is line 1 of `authorized_keys` on the
+server. So publishing needed **no password and no Duo push** — Duo gates password
+authentication, not public keys — and the whole daemon in §A0 was never needed
+for a one-command job. `id` on the server: `groups=104(input),20403(alpinewww)`.
+
+**PuTTY's `plink` is the route, not OpenSSH.** `puttygen caltech-website-portal.ppk
+-O private-openssh -o caltech-portal` — the conversion §5 of ACCESS.md tells you
+to do in the PuTTYgen GUI — **exits 1 and writes nothing** when run from Git Bash,
+silently, because `puttygen.exe` is a GUI-subsystem binary with no console
+attached. There is nothing to fix: `plink -i <the .ppk>` speaks to the same
+server with the same key and needs no second copy of the private key on disk.
+
+```
+plink -batch -ssh -hostkey SHA256:0kAZ/... -i %USERPROFILE%\.ssh\caltech-website-portal.ppk khunady@portal.caltech.edu "/srv/www.alpine.caltech.edu/www/bin/deploy"
+```
+
+That is now **`tools/publish.bat`** ([DEPLOY.md](DEPLOY.md) §A2b): double-click,
+it refuses to run with uncommitted or unpushed work, names the VPN when the
+connection fails, prints everything the server said, and saves it to
+`%TEMP%\alpine-publish.txt`.
+
+**The one `!!` was the check's own bug, and it is fixed.** `version.txt` agreed,
+`roles.php` was 200, and the page was correct — but the verifier greps the home
+page for `Alpine Club` in a single 25-second fetch taken immediately after the
+rsync, when the calendar cache is empty and PHP has to call Google before it can
+render. The identical fetch from the identical server two minutes later:
+
+```
+try1: 200 28657B 0.148767s
+try2: 200 28657B 0.100908s
+12          <- occurrences of "Alpine Club" in the body
+```
+
+A one-shot check there measures the warm-up, not the deploy. `server-deploy.sh`
+now retries the home page three times, five seconds apart. **This is the second
+time this verifier has cried wolf** — the 2026-08-19 entry below is the
+case-sensitive header lookup — and both times the site was fine and the report
+was not, which is the failure mode that gets a gate ignored.
+
+**Still owed:** re-deploy so the server picks up the retry (the check runs from
+`repo/`, which `bin/deploy` resets from GitHub, so the fix only takes effect on
+the *next* publish).
+
+---
+
 ## 2026-08-30 - the deploy command changed, and the rollback never worked
 
 **Who:** Claude, reworking the repository for handover to a future secretary.

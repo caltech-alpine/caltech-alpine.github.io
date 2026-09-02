@@ -165,6 +165,52 @@ copy that was weeks out of date.
 Everything it publishes comes from GitHub. Anything edited by hand inside
 `repo/`, or inside `docroot/`, is discarded without a prompt.
 
+The home page check gets **three tries, five seconds apart**. Added 2026-09-02,
+after it reported "the home page did not come back as expected" on a deploy that
+was entirely healthy: the rsync leaves an empty calendar cache, so the very first
+request has to call Google before it can render, while `version.txt` is a static
+file and answers instantly. One shot right after a publish measures the warm-up
+rather than the deploy.
+
+## A2b. `tools\publish.bat` — the same command, without PuTTY
+
+**A shortcut for somebody who already has an SSH key, not a second procedure.**
+§A2 above is what the club depends on, because it needs nothing but PuTTY and
+survives the secretary's laptop being reinstalled. Read A2 first; this is A2 with
+the typing removed.
+
+Double-click **`tools\publish.bat`** (or run it from a terminal, which is the
+only way to pass it an argument). It logs into `portal` with the `.ppk` already
+in `%USERPROFILE%\.ssh`, runs `bin/deploy`, and prints back everything the server
+said. **No password and no Duo push — Duo gates password authentication, not
+public keys.** Arguments pass straight through, so `publish.bat --rollback` and
+`publish.bat --force` do what §A3 and §A2 describe.
+
+What it checks before it connects, because each one has cost somebody an
+afternoon:
+
+| It stops when | Because |
+|---|---|
+| the working tree has uncommitted changes | the server publishes GitHub, so publishing now would put the **old** code back. It prints `git status --short` and the commit-and-push line |
+| the working tree is ahead of `origin/main` | same trap, one step later. It lists the unpushed commits and asks before continuing |
+| `portal` will not accept the key | it prints what the connection actually said, then names the VPN — off campus *and* the default split-tunnel profile both fail, and both look like the server being down |
+| `plink.exe` or the key is missing | it says which file it looked for, and points at §A2 and [ACCESS.md](ACCESS.md) instead of failing obscurely |
+
+Two details worth not undoing. **The host key is pinned in the file** (`-hostkey
+SHA256:0kAZ/…`, read off the server with `plink -v` on 2026-09-02) so a first run
+is never asked to trust an unknown key and a *changed* key stops the publish
+rather than being waved through — if it ever complains, find out why before
+editing the pin. **The username comes from `.deploy-user`**, the same gitignored
+file `tools/deploy.sh` and `tools/portal_daemon.py` already read, so the next
+person's is theirs and no name is hard-coded in a tracked file.
+
+It writes the whole transcript to `%TEMP%\alpine-publish.txt`, which is what you
+paste into [DEPLOY-LOG.md](DEPLOY-LOG.md).
+
+This does not replace `tools/portal_daemon.py` (§A0). The daemon exists for a
+*run* of server commands on one authentication — setting the site up, poking at
+permissions. Publishing is one command, so a key is simpler than a session.
+
 ## A3. Rolling back
 
 ```bash
