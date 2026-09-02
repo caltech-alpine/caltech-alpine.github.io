@@ -73,9 +73,24 @@ time this verifier has cried wolf** — the 2026-08-19 entry below is the
 case-sensitive header lookup — and both times the site was fine and the report
 was not, which is the failure mode that gets a gate ignored.
 
-**Still owed:** re-deploy so the server picks up the retry (the check runs from
-`repo/`, which `bin/deploy` resets from GitHub, so the fix only takes effect on
-the *next* publish).
+**Deployed again half an hour later, `e4cc081`, this time by double-clicking
+`tools/publish.bat`** — which is how the retry fix reached the server, since
+`bin/deploy` resets `repo/` from GitHub before running the script out of it. Both
+lines green on the first real run:
+
+```
+  ok   https://staging.alpine.caltech.edu is serving e4cc081 - the commit just published.
+  ok   the home page loads and is ours.
+```
+
+All seven pages answer 200 from outside — `/`, `roles.php`, `about.php`,
+`events.php`, `join.php`, `gear.php`, `support.php`.
+
+**A stub, not a copy, on the Desktop.** `Publish Alpine Site.bat` there holds no
+logic and `call`s `tools/publish.bat`. `tools/alpine-daemon.bat` says a Desktop
+copy of *it* exists and must be re-copied after every edit; that is one file two
+places and no way to tell which one somebody ran. A stub cannot drift, and it
+prints where it looked if the repository ever moves.
 
 ---
 

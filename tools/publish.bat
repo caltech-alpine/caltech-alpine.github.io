@@ -19,8 +19,10 @@ REM  Arguments pass straight through to the server:
 REM      publish.bat --rollback    put the previous copy of the site back
 REM      publish.bat --force       publish past a red or unfinished check
 REM
-REM  Canonical copy: <repo>\tools\publish.bat.  A copy on the Desktop is
-REM  a copy - edit this one and copy it out again.
+REM  This file is the only copy.  "Publish Alpine Site.bat" on the
+REM  Desktop is a two-line stub that calls this one, deliberately: a
+REM  real copy out there would drift from this one and nobody would
+REM  know which had been run.
 REM
 REM  NO SSH KEY?  You do not need this file at all.  The same publish
 REM  command typed into PuTTY is SECRETARY.md step 3, and that route is
