@@ -59,7 +59,15 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # v5, not v4. GitHub deprecated the Node 20 runtime on 2025-09-19 and now
+      # forces v4 onto Node 24 while printing a warning on every run. It still
+      # works today -- this was never a failure -- but a warning on every run is
+      # one nobody reads, and the day it becomes a hard error is a day the club
+      # cannot publish, because bin/deploy refuses a commit whose checks have
+      # not passed. Bumped 2026-09-02. The other three actions here
+      # (configure-pages@v5, upload-pages-artifact@v3, deploy-pages@v4) are
+      # already on Node 24 runtimes and were not warned about.
+      - uses: actions/checkout@v5
 
       - name: Show the PHP we are building with
         run: php -v
