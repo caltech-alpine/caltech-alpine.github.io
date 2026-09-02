@@ -1,0 +1,30 @@
+<!--
+  THE LOCKUP'S MOUNTAIN, DRAWN BY HAND. Kyle, 2026-09-02, in Inkscape.
+
+  THE ONE PIECE OF THE MARK THAT IS NOT TRACED. Everything else in
+  assets/images/logo.svg comes off a drawing: the type and its rule from
+  art/logo.png, the orange C from art/favicon.png. This mountain does not,
+  because the lockup asks the mark for something the favicon must not have.
+  In the favicon the mountain closes the disc, and its base is the circle. In
+  the lockup it runs out to the right and down into the baseline rule, so the
+  mark and the wordmark share a ground line. A disc dropped into a horizontal
+  lockup sits in it; this sits ON it.
+
+  IT IS IN THE FAVICON'S COORDINATE SYSTEM, 0 0 512 512, because that is what
+  the group in the lockup is scaled from. Draw inside that box and the placement
+  looks after itself.
+
+  HOW TO CHANGE IT: open this file in Inkscape, edit, save, then run
+  `python tools/trace_logo.py`. Do NOT edit assets/images/logo.svg, which is
+  generated and will be overwritten. Delete this file and the lockup falls back
+  to the traced favicon mountain, which is a legitimate thing to want.
+
+  WHAT IT DOES NOT TRACK. Redraw art/favicon.png and the lockup picks up the new
+  C and the new placement automatically, but this mountain stays as it is, and
+  a C of a different radius may no longer meet it. trace_logo.py prints a line
+  every run so that is visible rather than discovered.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"
+     role="img" aria-label="Caltech Alpine Club mountain, lockup form">
+  <path fill="#14181a" d="M 255.5,510.82 C 196.64,505.7 131.86,471.24 91.82,423.75 l -4.01,-4.76 4.9,-5.74 c 15.78,-18.5 58.94,-68.92 59.78,-69.85 2.43,-2.65 41.63,-48.6 67.32,-78.9 10.25,-12.1 19.26,-22.63 20,-23.4 0.75,-0.78 6.82,-7.9 13.49,-15.84 l 12.14,-14.43 4.53,4.85 c 2.49,2.66 8.35,9.1 13.03,14.3 4.68,5.21 11.2,12.41 14.5,16.02 3.3,3.61 9.38,10.33 13.5,14.94 4.12,4.6 7.95,8.87 8.5,9.47 0.55,0.6 7.06,7.84 14.46,16.09 12.62,14.07 17.53,19.47 29.36,32.28 2.65,2.87 5.16,5.22 5.59,5.22 0.65,0 4.26,-4.12 16.22,-18.5 9.78,-11.76 13.12,-15.5 13.83,-15.5 1.25,0 169.80297,200.23452 169.80297,200.23452 z"/>
+</svg>

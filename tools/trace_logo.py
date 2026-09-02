@@ -39,7 +39,9 @@
 """
 
 import argparse
+import io
 import os
+import re
 import sys
 
 try:
@@ -586,8 +588,13 @@ def build_lockup(spec, check_only=False, gap=None):
     ry0, ry1 = int(wide.min()), int(wide.max())
     rule = np.zeros_like(fig)
     rule[ry0:ry1 + 1, :] = fig[ry0:ry1 + 1, :]
-    print("    rule    rows %d..%d (%d px), kept whole; the mark sits on it"
-          % (ry0, ry1, ry1 - ry0 + 1))
+    # The rule is found either way, because ry0 is also where the mark's bottom
+    # goes -- it is the lockup's ground line whether or not it is drawn.
+    keep_rule = spec.get("keep_rule", True)
+    print("    rule    rows %d..%d (%d px), %s"
+          % (ry0, ry1, ry1 - ry0 + 1,
+             "kept whole; the mark sits on it" if keep_rule
+             else "DROPPED; this lockup has no baseline"))
 
     # Type only: drop everything left of the first letter, put the rule back.
     right = np.arange(w)[None, :] >= cut
@@ -597,7 +604,14 @@ def build_lockup(spec, check_only=False, gap=None):
             continue
         m = masks[name] & right
         if name == spec["rule_layer"]:
-            m = m | rule
+            # The rule runs the WHOLE width, so most of it is already inside the
+            # x >= cut region and comes along with the letters. Keeping it is a
+            # union with the part left of the cut; dropping it is a subtraction,
+            # not simply declining to add. Getting that wrong leaves the rule
+            # under the wordmark and removes only the stub under the mark, which
+            # renders as a shorter underline rather than as no underline, and
+            # looks deliberate.
+            m = (m | rule) if keep_rule else (m & ~rule)
         keep[name] = m
 
     # The mark, traced from its own artwork by the same code as everything else.
@@ -635,6 +649,12 @@ def build_lockup(spec, check_only=False, gap=None):
     # same function. Diameter is the height above the rule, so the mark sits ON
     # the rule exactly as the drawn mountain did, and its left edge is the frame's
     # left edge, so the lockup still begins where the mark begins.
+    #
+    # COMPUTED FROM THE TRACE, BEFORE ANY HAND-DRAWN OVERRIDE IS SWAPPED IN.
+    # That ordering is deliberate: the circle the mark is placed by is the one
+    # the C describes, and the lockup's mountain deliberately runs outside it,
+    # down to the rule. Measure the override and the mark shrinks to fit its own
+    # overhang, moving the whole lockup every time somebody nudges a slope.
     mcx, mcy, mr = enclosing_circle([d for _, _, d in traced_mark], mw, mh)
     diameter = float(h)
     s = (diameter / 2.0) / mr
@@ -644,11 +664,53 @@ def build_lockup(spec, check_only=False, gap=None):
           "type starts at x=%d, so the gap is %.0f px"
           % (diameter, diameter, ry0, cut, cut - diameter))
 
+    # HAND-DRAWN LAYERS REPLACE TRACED ONES, AFTER PLACEMENT. The lockup wants
+    # something from the mark the favicon must not have: a mountain that runs
+    # out to the right and down into the baseline rule, so the mark and the
+    # wordmark share a ground line. There is no drawing to trace that from and
+    # no rule to derive it by -- Kyle drew it -- so it lives in its own file and
+    # is swapped in here. See art/logo-mark-rock.svg's own header.
+    #
+    # ANNOUNCED ON EVERY RUN, not silently applied. The whole point of composing
+    # the lockup is that a new art/favicon.png updates it; a hand-drawn layer is
+    # the one part that does NOT track, so the run has to say which piece is
+    # pinned. Delete the file and the traced mountain comes back.
+    for name, src in (spec.get("hand") or {}).items():
+        path = os.path.join(ART, src)
+        if not os.path.exists(path):
+            print("    hand    %s: %s is missing, using the traced %s"
+                  % (name, src, name))
+            continue
+        held = io.open(path, encoding="utf-8").read()
+        m = re.search(r'<path\b[^>]*?\sd="([^"]*)"', held, re.S)
+        if not m:
+            sys.exit("art/%s has no <path d=...>: it is the hand-drawn %s layer "
+                     "for the lockup and cannot be empty. Delete it to fall "
+                     "back to the trace." % (src, name))
+        d = " ".join(m.group(1).split())
+        traced_mark = [(nm, tk, d if nm == name else dd)
+                       for nm, tk, dd in traced_mark]
+        print("    hand    %s comes from art/%s (%d bytes), NOT from the trace; "
+              "redrawing %s will not change it"
+              % (name, src, len(d), mspec["src"]))
+
+    # `type_shift` nudges the WORDMARK only, never the mark. Taking the rule away
+    # takes away the thing the type was sitting on, and the two lines then read
+    # low against a mark that still runs the full height of the frame. It is a
+    # typographic adjustment to a typographic change, so it moves the type and
+    # leaves the mark's placement -- which is derived -- alone.
+    sx, sy = spec.get("type_shift") or (0, 0)
+
     for out_name, overrides, header in spec["outputs"]:
         body = []
+        if (sx, sy) != (0, 0):
+            body.append('  <g transform="translate(%s,%s)">' % (n(sx), n(sy)))
+        pad = "    " if (sx, sy) != (0, 0) else "  "
         for name, token, d in traced_type:
-            body.append('  <path fill="%s" d="%s"/>'
-                        % (palette.hexof(overrides.get(name, token)), d))
+            body.append('%s<path fill="%s" d="%s"/>'
+                        % (pad, palette.hexof(overrides.get(name, token)), d))
+        if (sx, sy) != (0, 0):
+            body.append("  </g>")
         body.append('  <g transform="matrix(%s,0,0,%s,%s,%s)">'
                     % (n(s), n(s), n(tx), n(ty)))
         # THE MARK'S LAYERS ANSWER TO THE LOCKUP'S OVERRIDE KEYS. The two
@@ -692,12 +754,23 @@ def build_lockup(spec, check_only=False, gap=None):
 # =========================================================== the drawings ==
 
 HEADER_LOGO = """<!--
-  THE CALTECH ALPINE CLUB LOGO: a sun behind a mountain range, then the club's
-  name. FOR LIGHT BACKGROUNDS. The dark-background twin is logo-on-dark.svg,
-  which is the same trace with one token swapped.
+  THE CALTECH ALPINE CLUB LOGO: the mark, then the club's name. FOR LIGHT
+  BACKGROUNDS. The dark-background twin is logo-on-dark.svg, which is the same
+  trace with one token swapped.
 
-  GENERATED. Do not edit this file. Edit the drawing at art/logo.png and run
-  `python tools/trace_logo.py`.
+  COMPOSED, NOT TRACED WHOLE. The type comes from art/logo.png and the mark from
+  art/favicon.png, so a redrawn mark updates this file by itself. See
+  build_lockup() in tools/trace_logo.py.
+
+  NO BASELINE RULE, chosen over the version that has one on 2026-09-02. The
+  alternative is still generated, as logo-with-rule.svg, and the reasons are
+  written up beside it. The short form: this one's mark is the FAVICON's mark,
+  the same shape to within a rounding error, so the club has one mark instead of
+  two silhouettes. Nothing in this file is drawn by hand, so all of it follows
+  the next redraw.
+
+  GENERATED. Do not edit this file. Edit art/logo.png (type) or art/favicon.png
+  (mark) and run `python tools/trace_logo.py`.
 
   THE NAME IS IN THE ARTWORK. Anywhere this is placed must not also print
   "Caltech Alpine Club" as text beside it, which is what the masthead used to
@@ -719,11 +792,42 @@ HEADER_LOGO = """<!--
 
 HEADER_LOGO_DARK = """<!--
   THE LOGO, FOR DARK BACKGROUNDS: the masthead and the footer. Identical to
-  logo.svg except that the mountain, the rule and "ALPINE CLUB" are paper
-  instead of ink. The sun keeps the accent, which is legible on both.
+  logo.svg except that the mountain and "ALPINE CLUB" are paper instead of ink.
+  The sun keeps the accent, which is legible on both.
 
-  GENERATED from art/logo.png alongside logo.svg, from the SAME trace, so the
-  two cannot drift apart. See logo.svg's header.
+  GENERATED alongside logo.svg, from the SAME trace, so the two cannot drift
+  apart. See logo.svg's header.
+-->
+"""
+
+HEADER_LOGO_RULE = """<!--
+  THE LOCKUP WITH A BASELINE RULE. THE ALTERNATE, NOT THE LOGO. The one to use
+  is logo.svg; this is kept because it is a real design and throwing it away
+  would mean redrawing it to get it back.
+
+  WHAT IT IS. The wordmark sits on a rule that runs the width of the lockup, and
+  the mark's mountain runs out to the right and down into that rule, so the two
+  share a ground line. A disc dropped into a horizontal lockup sits IN it; this
+  one sits ON it, which is the older brand form and has more movement in it.
+
+  WHY IT IS NOT THE LOGO (2026-09-02). Three reasons, in the order that decided
+  it. Its mountain is drawn by hand and is NOT the favicon's mountain: roughly
+  88% overlap, so the club would carry two silhouettes of one mark, and a
+  redrawn favicon would update one of them and not the other. The rule is a
+  hairline: clear on a poster, most of a pixel in a masthead, gone in print at
+  business-card size, so it is a detail that only exists at one scale. And it
+  puts a third horizontal under two lines of type that are already horizontal.
+
+  Its mountain comes from art/logo-mark-rock.svg and nothing else uses that
+  file. GENERATED; see logo.svg's header.
+-->
+"""
+
+HEADER_LOGO_RULE_DARK = """<!--
+  THE RULED LOCKUP, FOR DARK BACKGROUNDS. The alternate's dark twin, and not the
+  masthead logo; that is logo-on-dark.svg. Same trace, with the mountain, the
+  rule and "ALPINE CLUB" in paper. See logo-with-rule.svg's header for why this
+  family is the alternate.
 -->
 """
 
@@ -854,10 +958,40 @@ LOGO = dict(
     # art/favicon.png and this follows it, which is the point.
     cut=309,
     rule_layer="figure",
+    # NO BASELINE (Kyle, 2026-09-02). See HEADER_LOGO_RULE for the comparison
+    # that settled it. Dropping the rule takes away what the wordmark was
+    # sitting on, so the type is nudged up to sit level against a mark that
+    # still runs the full height of the frame; the number is Kyle's, off the
+    # variant he drew.
+    keep_rule=False,
+    type_shift=(0, -10.608173),
     # Which of THIS spec's override keys each of the mark's layers listens to.
     # Without it the dark lockup ships an ink mountain on an ink ground.
     roles={"sun": "sun", "rock": "figure"},
+    # The one layer of the mark the lockup does not take from the trace. The
+    # favicon's mountain closes the disc; the lockup's runs out to the right and
+    # down into the baseline rule so the mark and the wordmark share a ground
+    # line. Kyle drew it, there is nothing to trace it from, and deleting the
+    # file falls back to the traced mountain. art/logo-mark-rock.svg says the
+    # rest, including how to reopen it in Inkscape.
+    #
+    # ONLY THE RULED ALTERNATE USES IT. The logo takes the mark as traced, which
+    # is most of why it is the logo: nothing in it is pinned by hand.
     mark=None,          # set to FAVICON below; it is defined after this one
+)
+
+# The alternate: the same composition with the baseline kept and the hand-drawn
+# mountain that runs down into it. Everything else is LOGO's, by construction,
+# so the two cannot drift on anything except what is listed here.
+LOGO_RULE = dict(
+    LOGO,
+    keep_rule=True,
+    type_shift=None,
+    hand={"rock": "logo-mark-rock.svg"},
+    outputs=[
+        ("logo-with-rule.svg",         {},                  HEADER_LOGO_RULE),
+        ("logo-with-rule-on-dark.svg", {"figure": "paper"}, HEADER_LOGO_RULE_DARK),
+    ],
 )
 
 # FAVICON -- an open orange C-ring with a mountain breaking out of it, on a
@@ -965,11 +1099,12 @@ FAVICON = dict(
 # before it can be pointed at. Tying the knot here rather than reordering the
 # two specs keeps each one's comment block next to the drawing it describes.
 LOGO["mark"] = FAVICON
+LOGO_RULE["mark"] = FAVICON
 
 # A spec with a `mark` is composed by build_lockup(); everything else is traced
 # whole by build(). One dispatch, so adding a second composed lockup later needs
 # no new branch here.
-SOURCES = [LOGO, FAVICON]
+SOURCES = [LOGO, LOGO_RULE, FAVICON]
 
 
 def main():

@@ -214,6 +214,7 @@ def contrast_check():
 # would hand-nudge a colour. favicon-disc.svg joined on 2026-09-02 and is now
 # the one that matters most: it is what the browser tab actually shows.
 LOGO_SVGS = ("logo.svg", "logo-on-dark.svg",
+             "logo-with-rule.svg", "logo-with-rule-on-dark.svg",
              "favicon.svg", "favicon-on-dark.svg", "favicon-disc.svg",
              "mark.svg", "mark-on-dark.svg")
 

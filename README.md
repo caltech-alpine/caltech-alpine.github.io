@@ -390,8 +390,9 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 
 | File | Built from | What it is |
 |---|---|---|
-| `logo.svg` | `art/logo.png` **+ `art/favicon.png`** | the lockup, dark type. **For light backgrounds.** Type and rule from the first, mark from the second — see below |
+| `logo.svg` | `art/logo.png` + `art/favicon.png` | **the logo.** Type from the first, mark from the second, no baseline rule. **For light backgrounds** |
 | `logo-on-dark.svg` | the same two | the same, light type. Masthead and footer, which are ink |
+| `logo-with-rule.svg`, `logo-with-rule-on-dark.svg` | the same two **+ `art/logo-mark-rock.svg`** | **the alternate**, not the logo: wordmark on a baseline rule, with a hand-drawn mountain running down into it. Kept, not used — see below |
 | `favicon-disc.svg` | `art/favicon.png` | **the tab icon.** The mark unaltered, inside a white disc; transparent outside it. Works on a light and a dark tab strip with no media query |
 | `favicon.svg` | `art/favicon.png` | the wordless mark, transparent, mountain flips on `prefers-color-scheme`. **No longer the tab icon**; still the source of every home-screen raster and the social card |
 | `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in. **Unreferenced** since the disc landed |
@@ -438,6 +439,44 @@ out, and the black layer then falls apart into the mountain and the individual
 letters. The mark is placed by its circumscribed circle, not its bounding box,
 at the full frame height so it sits on the rule exactly as the drawn mountain
 did.
+
+**Two lockups are generated, and the one without a baseline rule is the logo.**
+Kyle drew both on 2026-09-02. `logo.svg` is the mark beside the wordmark;
+`logo-with-rule.svg` puts the wordmark on a rule that runs the width of the
+lockup, with the mountain running out to the right and down into it so the two
+share a ground line. Three things decided it, in the order they mattered:
+
+1. **The logo's mark IS the favicon's mark** — measured, not asserted: IoU
+   0.9997 on the mountain and 1.0000 on the C, the residue being curve-fitting
+   noise. The ruled version's mountain is hand-drawn and overlaps the favicon's
+   by about **88 %**, so the club would carry two silhouettes of one mark and a
+   redrawn favicon would update one of them.
+2. **Nothing in the logo is pinned by hand**, so all of it follows the next
+   redraw. The alternate depends on `art/logo-mark-rock.svg`, which tracks
+   nothing.
+3. The rule is a hairline — clear on a poster, most of a pixel in a masthead,
+   gone in print at card size — and it stacks a third horizontal under two lines
+   of type that are already horizontal.
+
+Dropping the rule is a **subtraction, not declining to add**: it spans the whole
+width, so most of it already sits inside the `x >= cut` region and arrives with
+the letters. Getting that backwards leaves the rule under the wordmark and
+removes only the stub under the mark, which renders as a *shorter* underline and
+looks deliberate. Removing it also takes away what the type was sitting on, so
+`type_shift` nudges the wordmark up to sit level against a mark that still runs
+the full frame height; it moves the type only, never the mark.
+
+**The alternate's mountain is the one hand-drawn thing here.** It lives in
+`art/logo-mark-rock.svg`, in the favicon's own `0 0 512 512` coordinate system —
+open it in Inkscape, edit, save, re-run `trace_logo.py`. **Delete it and the
+traced mountain comes back.** `trace_logo.py` prints on every run which layer is
+pinned and that redrawing `art/favicon.png` will not change it, because a
+hand-drawn piece inside a composed file is precisely the part that does not
+track. And the mark's **placement is computed from the trace, before the
+override is swapped in**: the circle the mark is placed by is the one the C
+describes, and that mountain deliberately runs outside it. Measure the override
+instead and the mark shrinks to fit its own overhang, moving the whole lockup
+every time somebody nudges a slope.
 
 One trap that mapping closed: the two drawings name the same role differently —
 the lockup's dark layer is `figure` because it is mostly letterforms, the mark's
