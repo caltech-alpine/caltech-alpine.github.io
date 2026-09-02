@@ -207,13 +207,14 @@ def contrast_check():
 # generator: pull every fill out of the SVGs and require it to be a colour that
 # some --token in style.css actually resolves to.
 #
-# ALL SIX, not just the three that existed on 2026-08-31. The four favicon
+# ALL SEVEN, not just the three that existed on 2026-08-31. The five favicon
 # outputs come off one trace, so in principle they cannot disagree -- but the
 # reason this check exists at all is that "in principle the generator is right"
 # was already wrong once, and the on-dark variants are exactly where somebody
-# would hand-nudge a colour.
+# would hand-nudge a colour. favicon-disc.svg joined on 2026-09-02 and is now
+# the one that matters most: it is what the browser tab actually shows.
 LOGO_SVGS = ("logo.svg", "logo-on-dark.svg",
-             "favicon.svg", "favicon-on-dark.svg",
+             "favicon.svg", "favicon-on-dark.svg", "favicon-disc.svg",
              "mark.svg", "mark-on-dark.svg")
 
 

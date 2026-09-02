@@ -136,6 +136,12 @@ MUST_BE_TRANSPARENT = ("mark-512.png", "mark-on-dark-512.png",
 # which upscales anything smaller.
 ICO_SIZES = (16, 32, 48)
 
+# WHICH SVG THE BROWSER ICONS COME FROM. One name, in one place, because the
+# .ico and the <link rel="icon"> in includes/header.php have to agree: a tab
+# showing a disc while the pinned shortcut shows a pale square is the kind of
+# mismatch nobody notices until it is on somebody's taskbar.
+ICO_SRC = "favicon-disc.svg"
+
 
 def render(src, size, background=None):
     """One SVG at one pixel size, as an RGBA Pillow image."""
@@ -196,40 +202,67 @@ def main():
     # matters most here, so each entry is rendered at its own size and the ICO
     # is assembled from the largest with the others appended.
     #
-    # THE .ICO IS OPAQUE even though favicon.svg is transparent, and this is
-    # the one place that asymmetry is deliberate rather than sloppy. The .ico's
-    # real consumer is Windows pin-to-taskbar, and the Windows taskbar is dark
-    # by default -- a transparent icon there loses its near-black mountain and
-    # leaves a bare orange ring, the exact failure the SVG avoids with a media
-    # query that an .ico has no way to express.
-    frames = [render("favicon.svg", s, PAPER) for s in ICO_SIZES]
+    # IT COMES OFF THE DISC, AND IT KEEPS ITS TRANSPARENCY (2026-09-02). This
+    # used to be the one deliberately opaque file: a paper ground was imposed
+    # here because the .ico's real consumer is Windows pin-to-taskbar, the
+    # taskbar is dark by default, and an .ico cannot express the media query
+    # favicon.svg uses to survive there. The disc answers that in the artwork
+    # instead, so the ground is redundant -- and dropping it means the tab, the
+    # taskbar and the pinned shortcut are finally the same picture rather than
+    # a disc in one place and a pale square in the other.
+    frames = [render(ICO_SRC, s) for s in ICO_SIZES]
     ico_path = os.path.join(ROOT, "favicon.ico")
     frames[-1].save(ico_path, format="ICO",
                     sizes=[(s, s) for s in ICO_SIZES],
                     append_images=frames[:-1])
-    print("  wrote %-24s %-11s %6.1f KB  from favicon.svg"
+    print("  wrote %-24s %-11s %6.1f KB  from %s"
           % ("favicon.ico  (site root)",
              "+".join(str(s) for s in ICO_SIZES),
-             os.path.getsize(ico_path) / 1024.0))
+             os.path.getsize(ico_path) / 1024.0, ICO_SRC))
 
-    # -- the tab icon must have NO GROUND -----------------------------------
+    # -- NO SQUARE GROUND, ANYWHERE THE BROWSER LOOKS ------------------------
     # Kyle's call, 2026-09-02: a pale square in the tab strip is the one thing
-    # this mark must not have. It is asserted rather than trusted because the
-    # ground came and went twice in three days, and a <rect> reappearing in
-    # favicon.svg is invisible in a file listing and obvious in a browser tab.
+    # this mark must not have. Asserted rather than trusted because the ground
+    # came and went twice in three days, and a <rect> reappearing in one of
+    # these files is invisible in a file listing and obvious in a browser tab.
+    # The disc is a <circle> and passes this by construction, which is the
+    # distinction the whole variant rests on.
     bad = []
-    for name in ("favicon.svg", "favicon-on-dark.svg",
+    for name in ("favicon.svg", "favicon-on-dark.svg", "favicon-disc.svg",
                  "mark.svg", "mark-on-dark.svg"):
         svg = open(os.path.join(IMAGES, name), encoding="utf-8").read()
         if "<rect" in svg:
-            bad.append("  %s contains a <rect>: the tab icon must be "
-                       "transparent. See the FAVICON spec in "
-                       "tools/trace_logo.py." % name)
+            bad.append("  %s contains a <rect>: these are the transparent "
+                       "outputs and none of them may carry a square ground. "
+                       "See the FAVICON spec in tools/trace_logo.py." % name)
+
+    # THE TAB ICON MUST STILL BE THE ONE header.php LINKS. ICO_SRC decides what
+    # /favicon.ico is rendered from; if the two drift, a browser that reads the
+    # .ico and a browser that reads the SVG show different marks, and neither
+    # is wrong enough for anybody to file it.
+    disc = open(os.path.join(IMAGES, ICO_SRC), encoding="utf-8").read()
+    if "<circle" not in disc:
+        bad.append("  %s has no <circle>: the disc IS the ground, and without "
+                   "it the ink mountain vanishes on a dark tab strip with "
+                   "nothing left to save it -- see in_disc in "
+                   "tools/trace_logo.py." % ICO_SRC)
+    header = open(os.path.join(ROOT, "includes", "header.php"),
+                  encoding="utf-8").read()
+    if "images/" + ICO_SRC not in header:
+        bad.append("  includes/header.php does not link %s, but favicon.ico is "
+                   "rendered from it. Point rel=\"icon\" at the same file or "
+                   "change ICO_SRC." % ICO_SRC)
+
+    # favicon.svg is no longer the tab icon, but it is still what every
+    # home-screen raster and the social card are rendered from, and it is the
+    # transparent adaptive mark anyone reaching for "the favicon as an SVG"
+    # will find. Its flip is the thing that makes it safe on an unknown
+    # background, so it stays checked.
     if "prefers-color-scheme" not in open(
             os.path.join(IMAGES, "favicon.svg"), encoding="utf-8").read():
-        bad.append("  favicon.svg has no prefers-color-scheme rule. Without a "
-                   "ground AND without the flip, the ink mountain vanishes on "
-                   "a dark tab strip -- see the `adaptive` key in "
+        bad.append("  favicon.svg has no prefers-color-scheme rule. It carries "
+                   "no ground, so without the flip its ink mountain vanishes "
+                   "on anything dark -- see the `adaptive` key in "
                    "tools/trace_logo.py.")
 
     # -- prove the alpha, do not assume it ----------------------------------

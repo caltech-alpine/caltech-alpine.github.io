@@ -66,13 +66,12 @@ $navItems = require __DIR__ . '/nav.php';
 <?php /* THE ICON SET. Every file here is generated: art/favicon.png ->
          tools/trace_logo.py -> tools/make_icons.py. Do not hand-edit one.
 
-         FIVE LINES, AND THE ORDER IS THE POINT. A browser that cannot pick
-         by `sizes` takes the LAST rel=icon it understands, so the legacy
-         .ico goes FIRST and the SVG last. Written the other way round -- SVG
-         first, bitmaps after, which is the intuitive reading order -- a
-         modern browser ends up on a 48px bitmap in a tab that would have
-         taken vector. That is the whole reason this block is not sorted the
-         way it reads.
+         THE ORDER IS THE POINT. A browser that cannot pick by `sizes` takes
+         the LAST rel=icon it understands, so the legacy .ico goes FIRST and
+         the SVG last. Written the other way round -- SVG first, bitmaps
+         after, which is the intuitive reading order -- a modern browser ends
+         up on a 48px bitmap in a tab that would have taken vector. That is
+         the whole reason this block is not sorted the way it reads.
 
          WHY NO 16/32/48 PNG LINES. They would be redundant: favicon.ico
          already CONTAINS 16, 32 and 48, each rendered at its own size rather
@@ -83,29 +82,41 @@ $navItems = require __DIR__ . '/nav.php';
          readers, link unfurlers and Windows pin-to-taskbar request that bare
          path and read no HTML first. It was a 404 until 2026-09-02.
 
-         THE TAB ICON IS TRANSPARENT, and stays legible by flipping rather
-         than by hiding behind a ground. favicon.svg has no <rect>: a tab
-         should show the mark, not a pale square. The mountain is a near-black,
-         so on a dark tab strip a fixed one would merge and leave a bare orange
-         ring -- which is why a ground existed here for three days. Instead the
-         file carries its own @media (prefers-color-scheme: dark) rule and
-         repaints the mountain paper. Verified in a real browser by drawing the
-         SVG to a canvas and reading the pixel back: ink 20,24,26 in light,
-         paper 249,246,240 in dark, corner alpha 0 in both.
+         THE TAB ICON IS THE MARK IN A WHITE DISC (Kyle, 2026-09-02):
+         favicon-disc.svg, and the .ico rendered from the same file. The
+         artwork is never altered -- real alpenglow C, real ink mountain -- and
+         it sits inside a filled white circle with the square outside that
+         circle transparent.
 
-         THE DARK TWIN IS BELT AND BRACES, not the mechanism. It covers a
-         browser that honours media= on this <link> but does not evaluate a
-         media query inside an SVG used as an icon. Both paths land on a paper
-         mountain; a browser that does neither still gets a transparent icon.
+         WHAT PROBLEM THE DISC SOLVES, AND WHY THE THIRD ATTEMPT. The mountain
+         is a near-black, so a transparent icon with a fixed mountain merges
+         into a dark tab strip and reads as a bare orange ring. A full-bleed
+         paper <rect> was the first answer and put a pale SQUARE in the tab.
+         Flipping the mountain to paper under @media (prefers-color-scheme:
+         dark) was the second, and it works, at the cost of showing a mark that
+         is not the club's colours. The disc keeps both: a ground, so nothing
+         merges, in a shape that reads as an icon rather than as a box somebody
+         forgot to remove.
 
-         /favicon.ico IS THE ONE OPAQUE FILE, deliberately. Its real consumer
-         is Windows pin-to-taskbar, the taskbar is dark by default, and an
-         .ico cannot express a media query. */ ?>
+         IT NEEDS NO MEDIA QUERY, which is why there are now four lines here
+         and not five. On a dark strip the white disc is the contrast; on a
+         light strip it disappears into the background and the mark reads
+         exactly as it always did. One file, both schemes, nothing to evaluate
+         -- so favicon-on-dark.svg is no longer linked. It is still generated,
+         and it is now unreferenced by the site.
+
+         /favicon.ico IS NO LONGER THE OPAQUE ODD ONE OUT. It used to carry an
+         imposed paper ground for precisely the dark-taskbar problem the disc
+         solves, and an .ico cannot express a media query -- so it now comes
+         off favicon-disc.svg with its transparency intact, and the tab, the
+         taskbar and the pinned shortcut finally show the same thing. */ ?>
 <link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="32x32">
-<link rel="icon" href="<?= e(asset('images/favicon.svg')) ?>" type="image/svg+xml">
-<link rel="icon" href="<?= e(asset('images/favicon-on-dark.svg')) ?>" type="image/svg+xml" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="<?= e(asset('images/favicon-disc.svg')) ?>" type="image/svg+xml">
 <?php /* iOS ignores an SVG icon and will not use one for a home-screen
-         bookmark, so the touch icon has to be a raster. */ ?>
+         bookmark, so the touch icon has to be a raster. It stays on
+         favicon.svg over a full-bleed paper ground rather than moving to the
+         disc: iOS masks a home-screen icon to a rounded square and composites
+         alpha to BLACK, so a disc would arrive with four black corners. */ ?>
 <link rel="apple-touch-icon" href="<?= e(asset('images/apple-touch-icon.png')) ?>">
 <?php /* The manifest is what makes Android Chrome use the club's icon for a
          home-screen bookmark instead of falling back to the Apple one. It

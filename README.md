@@ -392,11 +392,11 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 |---|---|---|
 | `logo.svg` | `art/logo.png` | the logo, dark type. **For light backgrounds** |
 | `logo-on-dark.svg` | `art/logo.png` | the same, light type. Masthead and footer, which are ink |
-| `favicon.svg` | `art/favicon.png` | the wordless mark, **transparent, mountain flips on `prefers-color-scheme`** |
-| `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in |
-| `favicon-disc.svg` | `art/favicon.png` | the mark **unaltered, inside a white disc**; transparent outside it. For dark UI that should see the real colours rather than a flipped mountain |
+| `favicon-disc.svg` | `art/favicon.png` | **the tab icon.** The mark unaltered, inside a white disc; transparent outside it. Works on a light and a dark tab strip with no media query |
+| `favicon.svg` | `art/favicon.png` | the wordless mark, transparent, mountain flips on `prefers-color-scheme`. **No longer the tab icon**; still the source of every home-screen raster and the social card |
+| `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in. **Unreferenced** since the disc landed |
 | `mark.svg`, `mark-on-dark.svg` | `art/favicon.png` | the mark **on transparency**, for slides and print |
-| `favicon.ico` **(site root)** | `favicon.svg` | 16+32+48 in one file, each rendered at its own size |
+| `favicon.ico` **(site root)** | `favicon-disc.svg` | 16+32+48 in one file, each rendered at its own size, transparent outside the disc |
 | `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` | `favicon.svg` | home-screen rasters, `tools/make_icons.py` |
 | `mark-512.png`, `mark-on-dark-512.png` | `mark*.svg` | transparent rasters — what to hand somebody who asks for "the logo as a PNG" |
 | `favicon-disc-512.png` | `favicon-disc.svg` | the 512 master of the disc variant — what to upload where a service wants a PNG and will put it on dark chrome |
@@ -431,17 +431,27 @@ dark, and corner alpha `0` in both. `favicon-on-dark.svg` is linked with
 honours the attribute on `<link>` but not a query inside an SVG it is using as
 an icon.
 
-**A third answer exists and is not wired into the site: `favicon-disc.svg`.**
-It gives the mark its own ground instead of altering it — the same trace, the
-real alpenglow C, the real ink mountain, inside a filled white **circle**, with
-the square outside the circle transparent. The distinction from the first
-answer is the shape: a pale *rectangle* behind an icon reads as a box somebody
-forgot to remove, and that is the complaint the ground was removed over; a disc
-reads as the icon. Reach for it where the mark has to look like the club's mark
-rather than adapt to whatever is behind it — an avatar on a dark service, a
-dark-mode app tile. **The site's `<link>` tags still point at the flip**, which
-is the lighter touch and stays the default; switching them is a separate
-decision, not something regenerating the icons will do for you.
+**The third answer is what the site actually ships: `favicon-disc.svg`.** It
+gives the mark its own ground instead of altering it — the same trace, the real
+alpenglow C, the real ink mountain, inside a filled white **circle**, with the
+square outside the circle transparent. The distinction from the first answer is
+the shape: a pale *rectangle* behind an icon reads as a box somebody forgot to
+remove, and that is the complaint the ground was taken out over; a disc reads as
+the icon.
+
+**And it needs no media query at all**, which is why the icon block in
+`includes/header.php` is now four lines rather than five. On a dark strip the
+white disc *is* the contrast; on a light strip it disappears into the background
+and the mark reads as it always did. One file covers both schemes, so
+`favicon-on-dark.svg` is **no longer linked** — it is still generated and still
+palette-checked, and nothing on the site references it.
+
+`favicon.ico` comes off the disc too, and **keeps its transparency**. It used to
+be the one deliberately opaque file, carrying an imposed paper ground for exactly
+the dark-taskbar problem the disc solves; now the tab, the Windows taskbar and a
+pinned shortcut all show the same picture. The home-screen rasters stay on
+`favicon.svg` over full-bleed paper, because iOS composites alpha to **black** and
+a disc would arrive with four black corners.
 
 How much white surrounds the mark is derived, not eyeballed. `enclosing_circle()`
 measures the mark's own circumscribed circle off a render of the trace and maps
@@ -451,19 +461,21 @@ fraction was chosen from renders at 16, 32 and 48 px on a dark strip; at 16 px
 the white ring is one device pixel and the C and the peak are both still
 resolvable, which is the only test that matters for a favicon.
 
-**Three files are opaque, each for a reason that is not aesthetic.**
-`apple-touch-icon.png` and the two `icon-*.png` because iOS masks a home-screen
-icon to a rounded square and composites alpha to **black**, so a transparent
-icon arrives as a mark in a black tile nobody chose with a near-black mountain
-invisible inside it. `favicon.ico` because its real consumer is Windows
-pin-to-taskbar, the taskbar is dark by default, and an `.ico` has no way to
-express a media query. Those three get `--paper` imposed by `make_icons.py` at
-render time, never by the SVG.
+**The home-screen rasters are opaque, for a reason that is not aesthetic.**
+`apple-touch-icon.png` and the two `icon-*.png` are opaque because iOS masks a
+home-screen icon to a rounded square and composites alpha to **black**, so a
+transparent icon arrives as a mark in a black tile nobody chose with a
+near-black mountain invisible inside it. They get `--paper` imposed by
+`make_icons.py` at render time, never by the SVG. `favicon.ico` used to be on
+that list for the equivalent Windows-taskbar reason and came off it on
+2026-09-02: the disc carries its own ground, so the imposed one was redundant.
 
-**All of it is asserted, not trusted.** `make_icons.py` fails if `favicon.svg`
-contains a `<rect>`, if it lacks a `prefers-color-scheme` rule, or if any
-output's corner alpha disagrees with what it is supposed to be — in both
-directions, because both mistakes look fine in a file listing. One of them
+**All of it is asserted, not trusted.** `make_icons.py` fails if any of the
+transparent SVGs grows a `<rect>`, if `favicon-disc.svg` loses its `<circle>`,
+if `includes/header.php` stops linking the same file the `.ico` is rendered
+from, if `favicon.svg` lacks a `prefers-color-scheme` rule, or if any output's
+corner alpha disagrees with what it is supposed to be — in both directions,
+because both mistakes look fine in a file listing. One of them
 shipped for two days: `logo-512.png` was documented here and in `make_icons.py`
 as transparent and had not been since `favicon.svg` first gained a ground on
 2026-08-31. It was a warm off-white square, a dirty box on any dark background.
