@@ -1,0 +1,30 @@
+{
+  "name": "Caltech Alpine Club",
+  "short_name": "Alpine Club",
+  "description": "Outdoor adventures for Caltech, JPL, and the extended Caltech community.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "browser",
+  "theme_color": "#14181a",
+  "background_color": "#f9f6f0",
+  "icons": [
+    {
+      "src": "assets/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/images/icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

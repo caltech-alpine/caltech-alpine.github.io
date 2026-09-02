@@ -15,6 +15,20 @@ ErrorDocument 404 /404.php
 # Never list the contents of a directory that has no index file.
 Options -Indexes
 
+# ------------------------------------------------------------- media types --
+# THIS IS NOT COSMETIC, because this file also sends X-Content-Type-Options:
+# nosniff further down. With nosniff set, a browser will not guess a type it
+# was given wrongly -- it REFUSES the resource. Apache's bundled mime.types
+# has carried .webmanifest only since relatively recently and Caltech hosting's
+# version is not something this repo controls, so a manifest served as
+# application/octet-stream is a live possibility, and the failure is Chrome
+# silently declining to use the club's home-screen icon. Declaring the type
+# costs nothing and removes the question.
+<IfModule mod_mime.c>
+  AddType application/manifest+json .webmanifest
+  AddType image/x-icon              .ico
+</IfModule>
+
 # ----------------------------------------------------------------- caching --
 # CSS and JS carry a ?v= stamp from the file's modification time (see the
 # asset() helper), so they can be cached hard without going stale.
@@ -26,6 +40,13 @@ Options -Indexes
   ExpiresByType image/jpeg          "access plus 1 month"
   ExpiresByType image/png           "access plus 1 month"
   ExpiresByType image/webp          "access plus 1 month"
+  # The root icon and the manifest carry NO ?v= stamp -- the clients that ask
+  # for them (crawlers, launchers, pin-to-taskbar) request a bare path and
+  # cannot be handed a query string. So they get a shorter life than the
+  # stamped assets above, long enough to matter and short enough that a
+  # redrawn mark reaches a pinned tab this year.
+  ExpiresByType image/x-icon        "access plus 1 week"
+  ExpiresByType application/manifest+json "access plus 1 week"
   # Pages themselves must not be cached: they carry live calendar data.
   ExpiresByType text/html           "access plus 0 seconds"
 </IfModule>

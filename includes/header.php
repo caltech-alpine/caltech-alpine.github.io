@@ -63,12 +63,42 @@ $navItems = require __DIR__ . '/nav.php';
   <link rel="canonical" href="<?= e($canonicalUrl) ?>">
 <?php endif; ?>
 
+<?php /* THE ICON SET. Every file here is generated: art/favicon.png ->
+         tools/trace_logo.py -> tools/make_icons.py. Do not hand-edit one.
+
+         FIVE LINES, AND THE ORDER IS THE POINT. A browser that cannot pick
+         by `sizes` takes the LAST rel=icon it understands, so the legacy
+         .ico goes FIRST and the SVG last. Written the other way round -- SVG
+         first, bitmaps after, which is the intuitive reading order -- a
+         modern browser ends up on a 48px bitmap in a tab that would have
+         taken vector. That is the whole reason this block is not sorted the
+         way it reads.
+
+         WHY NO 16/32/48 PNG LINES. They would be redundant: favicon.ico
+         already CONTAINS 16, 32 and 48, each rendered at its own size rather
+         than downscaled, and it has to exist anyway for the clients below.
+         Three extra files and three extra lines bought nothing.
+
+         /favicon.ico ALSO EARNS ITS PLACE WITHOUT THIS TAG. Crawlers, feed
+         readers, link unfurlers and Windows pin-to-taskbar request that bare
+         path and read no HTML first. It was a 404 until 2026-09-02.
+
+         THE DARK VARIANT is honoured by Firefox and Safari and ignored by
+         Chrome. Nothing depends on it: favicon.svg carries its own opaque
+         ground and is legible on a dark tab strip either way, so the dark
+         twin is an improvement and not a fix. */ ?>
+<link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="32x32">
 <link rel="icon" href="<?= e(asset('images/favicon.svg')) ?>" type="image/svg+xml">
+<link rel="icon" href="<?= e(asset('images/favicon-on-dark.svg')) ?>" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <?php /* iOS ignores an SVG icon and will not use one for a home-screen
-         bookmark, so the touch icon has to be a raster. Both are generated
-         from favicon.svg by tools/make_icons.py. */ ?>
+         bookmark, so the touch icon has to be a raster. */ ?>
 <link rel="apple-touch-icon" href="<?= e(asset('images/apple-touch-icon.png')) ?>">
-<link rel="icon" href="<?= e(asset('images/favicon-32.png')) ?>" sizes="32x32" type="image/png">
+<?php /* The manifest is what makes Android Chrome use the club's icon for a
+         home-screen bookmark instead of falling back to the Apple one. It
+         declares display:browser on purpose -- this is a website, not an
+         app, and half its useful links go to Google Calendar and Slack, so
+         stripping the browser chrome would trap somebody there. */ ?>
+<link rel="manifest" href="<?= e(url('site.webmanifest')) ?>">
 
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="<?= e(cfg('site.name')) ?>">

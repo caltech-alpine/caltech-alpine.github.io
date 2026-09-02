@@ -50,8 +50,17 @@ PAGES = ["index.php", "events.php", "join.php", "roles.php", "gear.php",
          "about.php", "support.php", "404.php"]
 
 # Copied verbatim. Everything the pages reference at runtime.
+#
+# favicon.ico and site.webmanifest LIVE AT THE ROOT and so have to be listed
+# here individually, because they are the two generated files deliberately not
+# under assets/. The .ico is at the root because crawlers, feed readers and
+# pin-to-taskbar request the bare /favicon.ico and read no HTML first; the
+# manifest is there so its relative icon paths resolve identically in the
+# static render and under PHP. Leave either out and the preview 404s a file the
+# live site serves, which is the one class of difference this build exists to
+# avoid. See tools/make_icons.py.
 ASSET_DIRS = ["assets"]
-ASSET_FILES = ["robots.txt"]
+ASSET_FILES = ["robots.txt", "favicon.ico", "site.webmanifest"]
 
 HOST, PORT = "127.0.0.1", 8899
 

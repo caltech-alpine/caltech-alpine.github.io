@@ -309,10 +309,16 @@ def build(spec, check_only=False):
         # onto something it did not choose. Only the favicon asks for this --
         # see the note on its spec -- and it is the drawing's own white field
         # kept rather than an invention.
-        if spec.get("background"):
+        #
+        # `background: None` in an output's overrides DROPS the rect instead of
+        # inheriting the spec's. That is how the transparent mark files come off
+        # the SAME trace as the opaque favicon: one knob, and no second drawing
+        # to keep in step. `overrides.get(k, default)` returns None for an
+        # explicit None, which is exactly the behaviour wanted here.
+        bg = overrides.get("background", spec.get("background"))
+        if bg:
             body.append('  <rect width="%d" height="%d" fill="%s"/>'
-                        % (w, h, palette.hexof(
-                            overrides.get("background", spec["background"]))))
+                        % (w, h, palette.hexof(bg)))
         for name, token, d in traced:
             tok = overrides.get(name, token)
             body.append('  <path fill="%s" d="%s"/>' % (palette.hexof(tok), d))
@@ -402,6 +408,43 @@ HEADER_FAVICON = """<!--
 -->
 """
 
+HEADER_FAVICON_DARK = """<!--
+  THE FAVICON FOR DARK BROWSER UI. Identical to favicon.svg except that the
+  ground is ink and the mountain is paper, so the silhouette survives instead
+  of merging with a dark tab strip.
+
+  Linked with media="(prefers-color-scheme: dark)". Firefox and Safari honour
+  that on a favicon; Chrome ignores it and keeps favicon.svg, which is opaque
+  and legible either way, so nothing depends on the query being respected.
+
+  GENERATED from art/favicon.png, from the SAME trace as favicon.svg.
+-->
+"""
+
+HEADER_MARK = """<!--
+  THE BARE MARK, ON TRANSPARENCY. For slides, print, a Slack workspace icon,
+  an org avatar: places where whoever places it knows what is behind it.
+
+  NOT FOR A BROWSER TAB. The mountain is ink, so on a dark tab strip it
+  disappears and leaves a bare orange ring. That is measured, not feared: it
+  is what shipped on 2026-08-31 before favicon.svg gained its ground. Use
+  favicon.svg there, which carries its own paper.
+
+  THE DARK-BACKGROUND TWIN IS mark-on-dark.svg. Same trace, mountain in paper.
+
+  GENERATED from art/favicon.png. Raster copies at mark-512.png and
+  mark-on-dark-512.png, written by tools/make_icons.py.
+-->
+"""
+
+HEADER_MARK_DARK = """<!--
+  THE BARE MARK ON TRANSPARENCY, FOR DARK BACKGROUNDS: the mountain is paper
+  rather than ink. The C keeps the accent, which reads on both.
+
+  GENERATED from art/favicon.png, from the SAME trace as mark.svg.
+-->
+"""
+
 # LOGO -- a white field that is keyed out, an orange sun and "CALTECH", and
 # everything else in one dark colour: the mountain, the baseline rule, and
 # "ALPINE CLUB". That dark layer is called `figure` rather than `ink` because
@@ -444,19 +487,40 @@ LOGO = dict(
 # onto --ink: measured 2026-08-31, the iOS icon came out as a bare orange ring
 # with the mountain invisible inside it. A dark browser tab strip does the same
 # thing. The old mark was an opaque disc for exactly this reason.
-FAVICON_SUN = (253, 84, 10)
+# THE C GOT THICKER (2026-09-02). Same construction, redrawn heavier, because
+# the old one failed at the only size that matters. Measured off both drawings
+# by fitting the ring's circle (sub-pixel: outer radius p10/p90 453.5/454.5):
+#
+#     2026-08-31   R_out 454.0   ring width 119.3   = 0.263 * R
+#     2026-09-02   R_out 504.7   ring width 194.0   = 0.384 * R
+#
+# 46% heavier relative to the radius. At a 16px tab the old stroke landed on
+# about 1.5 device pixels and anti-aliased into a smear; this one lands on
+# about 2.5 and holds. The arc's endpoints barely moved (the gap edge went from
+# -34.5 to -32.0 degrees, the lower-left from 150.0 to 142.5), so this is the
+# same mark at a different weight and not a new one.
+FAVICON_SUN = (252, 69, 4)
 FAVICON = dict(
     src="favicon.png",
-    trim=(253, 253, 253),
+    trim=(254, 254, 254),
     square=True,        # see pad_to_square(); make_icons.py forces a square
     background="paper", # see the note above; without it the mountain vanishes
     width=512,
     layers=[
-        ("field", (253, 253, 253),  None),      # keyed out, never drawn
+        ("field", (254, 254, 254),  None),      # keyed out, never drawn
         ("sun",   FAVICON_SUN,      "alpenglow"),
-        ("rock",  ( 19,  19,  19),  "ink"),
+        ("rock",  ( 21,  21,  21),  "ink"),
     ],
-    outputs=[("favicon.svg", {}, HEADER_FAVICON)],
+    # FOUR FILES, ONE TRACE. Two axes, and they are independent: whether the
+    # mark carries its own ground (a tab strip: yes; a slide: no), and which
+    # way round the mountain is (on paper: ink; on ink: paper). Every one of
+    # them used to be either missing or a hand-recoloured copy.
+    outputs=[
+        ("favicon.svg",         {},                                    HEADER_FAVICON),
+        ("favicon-on-dark.svg", {"background": "ink", "rock": "paper"}, HEADER_FAVICON_DARK),
+        ("mark.svg",            {"background": None},                  HEADER_MARK),
+        ("mark-on-dark.svg",    {"background": None, "rock": "paper"}, HEADER_MARK_DARK),
+    ],
 )
 
 SOURCES = [LOGO, FAVICON]

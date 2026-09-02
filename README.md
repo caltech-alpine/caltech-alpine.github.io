@@ -363,7 +363,7 @@ drift out of step.
 
 ```
 art/logo.png      the logo, as drawn: sun, mountains, CALTECH / ALPINE CLUB
-art/favicon.png   a sun behind one peak, in a disc, with no words
+art/favicon.png   an open orange C with a mountain breaking out of it, no words
 ```
 
 **The name is inside the logo.** Anywhere `logo.svg` or `logo-on-dark.svg` is
@@ -373,9 +373,16 @@ masthead used to do exactly that, because the older mark had no words; the
 empty `site.logo_dark`.
 
 **The favicon is a different drawing, not a smaller render of the logo.** At 16
-pixels a wordmark is a smudge, so the favicon keeps only the disc, the sun and
-a capped peak. That is why a favicon has always been a separate file: 16px is a
-different design problem, not a smaller one.
+pixels a wordmark is a smudge, so the favicon keeps only the C and one peak.
+That is why a favicon has always been a separate file: 16px is a different
+design problem, not a smaller one.
+
+**And 16px is what decides the mark's weight.** The C was redrawn heavier on
+2026-09-02. Fitting the ring's circle on both drawings (sub-pixel: outer radius
+p10/p90 453.5/454.5) gives a stroke of 0.263 × radius before and 0.384 after —
+**46% heavier**. The old stroke landed on about 1.5 device pixels in a 16px tab
+and anti-aliased into a smear; this one lands on about 2.5 and holds. The arc's
+endpoints barely moved, so it is the same mark at a different weight.
 
 `art/` sits outside `assets/`, and is excluded by both deploy routes, because
 `assets/` is the served tree and these are megabytes of source nobody requests
@@ -385,8 +392,12 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 |---|---|---|
 | `logo.svg` | `art/logo.png` | the logo, dark type. **For light backgrounds** |
 | `logo-on-dark.svg` | `art/logo.png` | the same, light type. Masthead and footer, which are ink |
-| `favicon.svg` | `art/favicon.png` | the wordless disc, for the browser tab |
-| `apple-touch-icon.png`, `favicon-32.png`, `logo-512.png` | `favicon.svg` | square rasters, written by `tools/make_icons.py` |
+| `favicon.svg` | `art/favicon.png` | the wordless mark **with its own paper ground**, for the browser tab |
+| `favicon-on-dark.svg` | `art/favicon.png` | the same on an ink ground, for dark browser UI |
+| `mark.svg`, `mark-on-dark.svg` | `art/favicon.png` | the mark **on transparency**, for slides and print |
+| `favicon.ico` **(site root)** | `favicon.svg` | 16+32+48 in one file, each rendered at its own size |
+| `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` | `favicon.svg` | home-screen rasters, `tools/make_icons.py` |
+| `mark-512.png`, `mark-on-dark-512.png` | `mark*.svg` | transparent rasters — what to hand somebody who asks for "the logo as a PNG" |
 | `social-default.png` | `favicon.svg` | the link preview, written by `tools/make_social.py` |
 
 **The light and dark logos are one trace, not two drawings.** `trace_logo.py`
@@ -395,11 +406,52 @@ pair cannot disagree with each other. `currentColor` would be the obvious
 alternative and does not work: the logo is loaded with `<img>`, and an SVG used
 as an image has no parent to inherit from.
 
-**Every square icon comes from `favicon.svg`**, including `logo-512.png`. The
-logo is about 3.9:1, so rendering it into a 512 square either squashes it or
-leaves a thin strip in a lot of nothing. Somebody asking for "the logo as a
-PNG" for an avatar wants the mark; somebody who wants the lockup wants
-`logo.svg`, at its own shape.
+**Every square icon comes from `favicon.svg`**, never from the lockup. The logo
+is about 3.9:1, so rendering it into a 512 square either squashes it or leaves a
+thin strip in a lot of nothing. Somebody asking for "the logo as a PNG" for an
+avatar wants `mark-512.png`; somebody who wants the lockup wants `logo.svg`, at
+its own shape.
+
+**Four favicon files, one trace.** Two independent axes: whether the mark
+carries its own ground (a browser tab: **yes**, because a transparent ink
+mountain merges with a dark tab strip and leaves a bare orange ring; a slide:
+no), and whether the mountain is ink or paper. `tools/make_icons.py` **asserts**
+the alpha on every output, because both directions of that mistake look fine in
+a file listing — and one of them shipped for two days. `logo-512.png` was
+documented here and in `make_icons.py` as transparent, and had not been since
+`favicon.svg` gained its ground on 2026-08-31: it was a warm off-white square,
+which reads as a dirty box on any dark background. It is now `mark-512.png`,
+and the assertion is why the next such change fails loudly.
+
+**`favicon.ico` and `site.webmanifest` live at the site root**, not in
+`assets/`. The `.ico` is the only path crawlers, feed readers, link unfurlers
+and pin-to-taskbar try, and they read no HTML first — so it was a 404. The
+manifest is what makes Android Chrome use the club's icon for a home-screen
+bookmark instead of falling back to the Apple one; it declares
+`display: browser` deliberately, because this is a website whose useful links
+go to Google Calendar and Slack, and stripping the browser chrome would trap
+somebody there. Both files are in `ASSET_FILES` in `tools/build_static.py`, so
+the static preview serves them exactly as the PHP copy does, and `.htaccess`
+declares their media types — **not cosmetic**, because the site also sends
+`X-Content-Type-Options: nosniff`, and under `nosniff` a manifest served as
+`application/octet-stream` is refused rather than guessed.
+
+**The icon block in `includes/header.php` is five lines and is not sorted the
+way it reads.** A browser that cannot choose by `sizes` takes the *last*
+`rel=icon` it understands, so the legacy `.ico` is declared **first** and the
+SVG last. Written the intuitive way round — vector first, bitmaps after — a
+modern browser settles on a bitmap in a tab that would have taken vector.
+There are no standalone `favicon-16/32/48.png` files: the `.ico` already holds
+those three sizes and has to exist regardless.
+
+**The lockup still carries the OLD mark, and should not for long.** `art/logo.png`
+was drawn before the C was redrawn: its ring measures 0.284 × radius against the
+favicon's 0.384, and its mountain sits *inside* the ring with a baseline rule
+fused to it rather than breaking out of it. Those are two different marks on the
+same page — the lockup in the masthead, the favicon in the tab. Fixing it needs a
+new `art/logo.png`, not a code change: the rule and the mark share paths in the
+current raster, so there is no column of empty pixels to cut the old mark out at
+(measured — the widest internal gutter is zero).
 
 **To change the mark:** drop the new drawing into `art/` under the
 same filename, then run the three generators in this order:

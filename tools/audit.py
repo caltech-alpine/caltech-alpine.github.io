@@ -206,7 +206,15 @@ def contrast_check():
 # channels. So this checks the SHIPPED files rather than trusting the
 # generator: pull every fill out of the SVGs and require it to be a colour that
 # some --token in style.css actually resolves to.
-LOGO_SVGS = ("logo.svg", "logo-on-dark.svg", "favicon.svg")
+#
+# ALL SIX, not just the three that existed on 2026-08-31. The four favicon
+# outputs come off one trace, so in principle they cannot disagree -- but the
+# reason this check exists at all is that "in principle the generator is right"
+# was already wrong once, and the on-dark variants are exactly where somebody
+# would hand-nudge a colour.
+LOGO_SVGS = ("logo.svg", "logo-on-dark.svg",
+             "favicon.svg", "favicon-on-dark.svg",
+             "mark.svg", "mark-on-dark.svg")
 
 
 def logo_palette_check():
