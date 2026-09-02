@@ -147,8 +147,18 @@ require __DIR__ . '/includes/header.php';
       <ul class="wanted-strip__roles">
         <?php foreach ($short as $r): ?>
           <li class="wanted-strip__role">
+            <?php /* THE SAME TITLE GET INVOLVED AND ABOUT USE (Kyle, 2026-09-02),
+                     which means the holder count and not min_people. This passed
+                     min, so a President with one of two seats taken was
+                     "Co-President" here and "President" on the two pages a
+                     reader reaches by clicking it -- three pages, two names, one
+                     job. Defensible in isolation (the seat on offer IS a
+                     co-presidency) and wrong across the site, which is the only
+                     scale a name is read at. alpine_role_title()'s default
+                     already counts holders; the argument is gone rather than
+                     changed, so there is nothing here to keep in step. */ ?>
             <a href="<?= e(url('roles.php#' . $r['role_id'])) ?>"><?=
-              e(alpine_role_title($r, $r['min'])) ?></a>
+              e(alpine_role_title($r)) ?></a>
             <?php /* The seat count, from the same function Get Involved uses,
                      so the two pages cannot describe one role differently. */ ?>
             <span class="wanted-strip__count"><?= e(alpine_role_status_line($r)) ?></span>

@@ -9,6 +9,100 @@ rather than describing it.
 
 ---
 
+## 2026-09-02 (later) - the cutover, a red gate that was mine, and a comment that killed the script
+
+**Who:** Claude, at Kyle's instruction ("the domain is now alpine.caltech.edu" ·
+"the .bat should give a more verbose output. I want to see what it's doing").
+**Deployed:** `094eee7`, to **https://alpine.caltech.edu**.
+
+**The production cutover happened, and was measured before anything was written down.**
+
+```
+https://alpine.caltech.edu/version.txt          commit 9f7207f
+https://staging.alpine.caltech.edu/version.txt  commit 9f7207f   (identical)
+both:   /  200      /roles.php  200
+alpine.      no x-robots-tag
+staging.     x-robots-tag: noindex, nofollow
+```
+
+Same document root behind both hostnames. Production is indexable, staging is not, our
+`.htaccess` already handled that, and the Wagtail page is gone from this address.
+
+**`server-deploy.sh` was right about itself and wrong about the documents.** Its `URL=` comment
+promised that on cutover day "exactly one line changes and no document anywhere goes quietly
+stale". One line did change. **Nine files named the staging address**, including `SECRETARY.md`,
+which that same comment claimed deliberately did not repeat it. Corrected the same day; the
+general form is in [SERVERS.md](SERVERS.md) - *a single-source-of-truth claim is only true if
+something checks it*, and nothing here checks it yet.
+
+---
+
+**Two mistakes of mine, in order, both caught by machinery rather than by me.**
+
+**1. I split a two-file change and turned `main` red in twelve seconds.** Wanting to publish the
+domain work without committing a content decision that was Kyle's, I used
+
+```
+git add -A -- . ':!data/roles.csv'
+```
+
+`data/roles.csv` carried an uncommitted `president min_people 1 -> 2`. What I did not read is that
+**`tools/test_roles.py` was modified too, in the same working tree, as the other half of that same
+change** - assertions rewritten for two seats, dated 2026-09-02, with comments explaining why. The
+exclusion committed the assertions without the data:
+
+```
+1 of 104 checks FAILED:
+  * the site does NOT now think the job is empty  --  Join the officer team
+    We have 2 open officer positions ... Film Festival Coordinator 0/1 filled
+```
+
+Fixed by committing `roles.csv`, which is the only coherent state. **The lesson is about the
+exclusion, not the CSV: a pathspec exclusion assumes the excluded file is independent, and nothing
+checked that.** Read everything `git status` lists before excluding one line of it. Worth saying
+plainly that the gate did its job - CI went red before any deploy could carry it, which is exactly
+what the check gate on `bin/deploy` exists for.
+
+**2. A comment killed the script before its first line.** The publisher grew a line collapsing the
+trailing `\tools\..` in the displayed path, and a `REM` written to explain it contained the tilde-f
+path operator. **cmd.exe expands batch-parameter path operators inside `REM` lines too:**
+
+```
+The following usage of the path operator in batch-parameter substitution is invalid: ...
+```
+
+The whole script aborted during setup, ahead of every check and every server call, so nothing was
+published. Found by *running* the file. Reading it would not have found it, and neither would any
+test the repository currently has.
+
+---
+
+**Then it published, and the verbose output is the deliverable.** `094eee7` is live; both verifier
+lines green against the new address on their first run.
+
+```
+[1/3] ok - working tree is clean and matches GitHub's main.
+[2/3] logging in to portal.caltech.edu as khunady with the key ...
+      ok - authenticated, no password and no Duo push needed.
+[3/3] running /srv/www.alpine.caltech.edu/www/bin/deploy on the server. ...
+  ok   https://alpine.caltech.edu is serving 094eee7 - the commit just published.
+  ok   the home page loads and is ours.
+```
+
+Before it acts it now prints the repo path, branch, newest commit and subject, the GitHub remote,
+the key file, the login, every server path it will touch, where backups go, the live URL and its
+`version.txt`, and where the transcript is saved. **The live URL is read out of
+`tools/server-deploy.sh` at runtime** with `findstr` on the `URL=` line rather than written into the
+`.bat` - today proved the point, since one line moved and the window printed the new address
+without the publisher being touched.
+
+**Live and public, verified from outside:** `We have 3 open officer positions`, with
+`President 1/2 filled`. That is the visible consequence of the `min_people` change, on a site that
+search engines can now see. If the club does not want a second co-president, revert `1e81b43` and
+the test change with it; they only make sense together.
+
+---
+
 ## 2026-09-02 - deployed, at last, and the key was already installed
 
 **Who:** Claude, at Kyle's instruction (*"you can deploy alpine website yourself.
