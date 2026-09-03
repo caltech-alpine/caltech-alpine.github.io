@@ -9,6 +9,60 @@ rather than describing it.
 
 ---
 
+## 2026-09-02 (latest) - the favicon loses its disc, and a check that only worked by coincidence
+
+**Who:** Claude, at Kyle's instruction ("i prefer the favicon without the disc.
+give it another try. and deploy yourself").
+**Deployed:** `0b568d4`, to **https://alpine.caltech.edu**. No failures.
+
+```
+[1/3] ok - working tree is clean and matches GitHub's main.
+[2/3] logging in to portal.caltech.edu as khunady with the key ...
+      ok - authenticated, no password and no Duo push needed.
+[3/3] running /srv/www.alpine.caltech.edu/www/bin/deploy on the server.
+
+HEAD is now at 0b568d4 No disc in the tab: the favicon goes back to the bare mark that flips
+deploying 0b568d4  No disc in the tab: the favicon goes back to the bare mark that flips
+
+GitHub's checks on 0b568d4 passed.
+
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-09-02-1720
+removed old backup docroot-2026-09-02-1527
+
+publishing...
+
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving 0b568d4 - the commit just published.
+  ok   the home page loads and is ours.
+
+done.
+```
+
+**What went out.** Four commits' worth of logo and icon work, ending with the tab
+icon going back to the bare transparent mark that flips its mountain under
+`prefers-color-scheme: dark`. The white disc was tried and rejected: it solves
+the dark-tab-strip problem, but a circle is a shape the mark does not otherwise
+have, so in a tab it reads as a badge. It is still generated for anywhere an
+avatar lands on somebody else's dark chrome.
+
+**The one thing worth recording, because it is the shape of bug that survives a
+green gate.** `make_icons.py` asserts that the tab icon's SVG contains a
+`<circle>`, since the disc *is* its ground. That was written as
+`open(IMAGES/ICO_SRC)` while `ICO_SRC` and the disc happened to be the same
+file. The moment the tab icon moved off the disc, the check began asking
+`favicon.svg` for a circle it has never had - so a correct change would have
+been failed by a check that had quietly stopped guarding anything. **A check
+written against a variable that only coincidentally points at its subject fails
+on exactly the day the subject changes**, which is the day you need it. It now
+names `favicon-disc.svg`.
+
+**Nothing to roll back.** Verified before deploying rather than after: both tab
+strips at 16, 20, 24, 32 and 48 px, corner alpha `0` throughout, worst contrast
+of either ink against its own strip **3.4:1** (the orange C on dark, above the
+3:1 floor for a graphical object).
+
+---
+
 ## 2026-09-02 (later) - the cutover, a red gate that was mine, and a comment that killed the script
 
 **Who:** Claude, at Kyle's instruction ("the domain is now alpine.caltech.edu" ·
