@@ -82,36 +82,39 @@ $navItems = require __DIR__ . '/nav.php';
          readers, link unfurlers and Windows pin-to-taskbar request that bare
          path and read no HTML first. It was a 404 until 2026-09-02.
 
-         THE TAB ICON IS THE MARK IN A WHITE DISC (Kyle, 2026-09-02):
-         favicon-disc.svg, and the .ico rendered from the same file. The
-         artwork is never altered -- real alpenglow C, real ink mountain -- and
-         it sits inside a filled white circle with the square outside that
-         circle transparent.
+         THE TAB ICON IS THE BARE MARK, WITH NO GROUND OF ANY KIND (Kyle,
+         2026-09-02, after trying one): favicon.svg, transparent, nothing behind
+         the artwork. A tab should show the mark and not a shape the mark is
+         sitting on.
 
-         WHAT PROBLEM THE DISC SOLVES, AND WHY THE THIRD ATTEMPT. The mountain
-         is a near-black, so a transparent icon with a fixed mountain merges
-         into a dark tab strip and reads as a bare orange ring. A full-bleed
-         paper <rect> was the first answer and put a pale SQUARE in the tab.
-         Flipping the mountain to paper under @media (prefers-color-scheme:
-         dark) was the second, and it works, at the cost of showing a mark that
-         is not the club's colours. The disc keeps both: a ground, so nothing
-         merges, in a shape that reads as an icon rather than as a box somebody
-         forgot to remove.
+         THREE ANSWERS WERE TRIED TO ONE PROBLEM, and this is the third time
+         this comment has been rewritten, so the order is worth keeping. The
+         mountain is a near-black, so a fixed transparent icon merges into a
+         dark tab strip and reads as a bare orange ring. (1) A full-bleed paper
+         rect fixed it and put a pale SQUARE in the tab. (2) A white DISC fixed
+         it without the square and is still a good asset, but it is a shape the
+         mark does not otherwise have, and in a tab it reads as a badge rather
+         than as the mark. (3) Flipping the artwork: the file carries its own
+         @media (prefers-color-scheme: dark) rule and repaints the mountain
+         paper. Nothing is added, so there is nothing to look wrong.
 
-         IT NEEDS NO MEDIA QUERY, which is why there are now four lines here
-         and not five. On a dark strip the white disc is the contrast; on a
-         light strip it disappears into the background and the mark reads
-         exactly as it always did. One file, both schemes, nothing to evaluate
-         -- so favicon-on-dark.svg is no longer linked. It is still generated,
-         and it is now unreferenced by the site.
+         THE DISC IS STILL BUILT and is still the right thing to hand a service
+         that will put an avatar on dark chrome of its own choosing:
+         assets/images/favicon-disc-512.png. It is simply not what the tab gets.
 
-         /favicon.ico IS NO LONGER THE OPAQUE ODD ONE OUT. It used to carry an
-         imposed paper ground for precisely the dark-taskbar problem the disc
-         solves, and an .ico cannot express a media query -- so it now comes
-         off favicon-disc.svg with its transparency intact, and the tab, the
-         taskbar and the pinned shortcut finally show the same thing. */ ?>
+         THE DARK TWIN IS BELT AND BRACES, not the mechanism. It covers a
+         browser that honours media= on this <link> but does not evaluate a
+         media query inside an SVG used as an icon. Both paths land on a paper
+         mountain; a browser that does neither still gets a transparent icon.
+
+         /favicon.ico IS THE ONE OPAQUE FILE, and with no disc to supply a
+         ground it goes back to carrying paper. Its real consumer is Windows
+         pin-to-taskbar, the taskbar is dark by default, and an .ico has no way
+         to express either a media query or a `media` attribute -- so it is the
+         one place where the square is the least-bad answer. */ ?>
 <link rel="icon" href="<?= e(url('favicon.ico')) ?>" sizes="32x32">
-<link rel="icon" href="<?= e(asset('images/favicon-disc.svg')) ?>" type="image/svg+xml">
+<link rel="icon" href="<?= e(asset('images/favicon.svg')) ?>" type="image/svg+xml">
+<link rel="icon" href="<?= e(asset('images/favicon-on-dark.svg')) ?>" type="image/svg+xml" media="(prefers-color-scheme: dark)">
 <?php /* iOS ignores an SVG icon and will not use one for a home-screen
          bookmark, so the touch icon has to be a raster. It stays on
          favicon.svg over a full-bleed paper ground rather than moving to the

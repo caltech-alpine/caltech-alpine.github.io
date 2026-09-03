@@ -137,10 +137,22 @@ MUST_BE_TRANSPARENT = ("mark-512.png", "mark-on-dark-512.png",
 ICO_SIZES = (16, 32, 48)
 
 # WHICH SVG THE BROWSER ICONS COME FROM. One name, in one place, because the
-# .ico and the <link rel="icon"> in includes/header.php have to agree: a tab
-# showing a disc while the pinned shortcut shows a pale square is the kind of
-# mismatch nobody notices until it is on somebody's taskbar.
-ICO_SRC = "favicon-disc.svg"
+# .ico and the <link rel="icon"> in includes/header.php have to agree, and a
+# check below fails the build if they drift.
+#
+# BACK TO favicon.svg (2026-09-02): Kyle prefers the tab icon with no ground at
+# all, so the disc is no longer what the tab gets and the .ico must not be the
+# one thing still showing it.
+ICO_SRC = "favicon.svg"
+
+# ...AND THE .ICO IS OPAQUE AGAIN. With the disc out of the picture nothing
+# supplies a ground, and an .ico can express neither a media query nor the
+# `media` attribute on a <link>, so the flip that saves favicon.svg on a dark
+# tab strip is unavailable to it. Its real consumer is Windows pin-to-taskbar
+# and that taskbar is dark by default, where a transparent icon loses its
+# near-black mountain and leaves a bare orange ring. A pale square is the
+# least-bad answer in the one place with no better one.
+ICO_BACKGROUND = PAPER
 
 
 def render(src, size, background=None):
@@ -202,15 +214,8 @@ def main():
     # matters most here, so each entry is rendered at its own size and the ICO
     # is assembled from the largest with the others appended.
     #
-    # IT COMES OFF THE DISC, AND IT KEEPS ITS TRANSPARENCY (2026-09-02). This
-    # used to be the one deliberately opaque file: a paper ground was imposed
-    # here because the .ico's real consumer is Windows pin-to-taskbar, the
-    # taskbar is dark by default, and an .ico cannot express the media query
-    # favicon.svg uses to survive there. The disc answers that in the artwork
-    # instead, so the ground is redundant -- and dropping it means the tab, the
-    # taskbar and the pinned shortcut are finally the same picture rather than
-    # a disc in one place and a pale square in the other.
-    frames = [render(ICO_SRC, s) for s in ICO_SIZES]
+    # See ICO_SRC and ICO_BACKGROUND above for why this one file is opaque.
+    frames = [render(ICO_SRC, s, ICO_BACKGROUND) for s in ICO_SIZES]
     ico_path = os.path.join(ROOT, "favicon.ico")
     frames[-1].save(ico_path, format="ICO",
                     sizes=[(s, s) for s in ICO_SIZES],
@@ -240,12 +245,17 @@ def main():
     # /favicon.ico is rendered from; if the two drift, a browser that reads the
     # .ico and a browser that reads the SVG show different marks, and neither
     # is wrong enough for anybody to file it.
-    disc = open(os.path.join(IMAGES, ICO_SRC), encoding="utf-8").read()
+    # Named explicitly rather than via ICO_SRC. It was written as ICO_SRC while
+    # the two happened to be the same file, and the moment the tab icon moved
+    # off the disc this check started asking favicon.svg for a circle it has
+    # never had. A check that only works while two names coincide is a check
+    # that fails on the day the thing it guards changes.
+    disc = open(os.path.join(IMAGES, "favicon-disc.svg"), encoding="utf-8").read()
     if "<circle" not in disc:
-        bad.append("  %s has no <circle>: the disc IS the ground, and without "
-                   "it the ink mountain vanishes on a dark tab strip with "
-                   "nothing left to save it -- see in_disc in "
-                   "tools/trace_logo.py." % ICO_SRC)
+        bad.append("  favicon-disc.svg has no <circle>: the disc IS the ground, "
+                   "and without it the ink mountain vanishes on anything dark "
+                   "with nothing left to save it -- see in_disc in "
+                   "tools/trace_logo.py.")
     header = open(os.path.join(ROOT, "includes", "header.php"),
                   encoding="utf-8").read()
     if "images/" + ICO_SRC not in header:

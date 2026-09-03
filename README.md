@@ -393,11 +393,11 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 | `logo.svg` | `art/logo.png` + `art/favicon.png` | **the logo.** Type from the first, mark from the second, no baseline rule. **For light backgrounds** |
 | `logo-on-dark.svg` | the same two | the same, light type. Masthead and footer, which are ink |
 | `logo-with-rule.svg`, `logo-with-rule-on-dark.svg` | the same two **+ `art/logo-mark-rock.svg`** | **the alternate**, not the logo: wordmark on a baseline rule, with a hand-drawn mountain running down into it. Kept, not used — see below |
-| `favicon-disc.svg` | `art/favicon.png` | **the tab icon.** The mark unaltered, inside a white disc; transparent outside it. Works on a light and a dark tab strip with no media query |
-| `favicon.svg` | `art/favicon.png` | the wordless mark, transparent, mountain flips on `prefers-color-scheme`. **No longer the tab icon**; still the source of every home-screen raster and the social card |
-| `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in. **Unreferenced** since the disc landed |
+| `favicon-disc.svg` | `art/favicon.png` | the mark unaltered, inside a white disc; transparent outside it. **Not the tab icon** — a good asset for a service that puts an avatar on dark chrome |
+| `favicon.svg` | `art/favicon.png` | **the tab icon.** The wordless mark, transparent, mountain flips on `prefers-color-scheme`. Also the source of every home-screen raster and the social card |
+| `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in. Linked with `media="(prefers-color-scheme: dark)"` as belt and braces |
 | `mark.svg`, `mark-on-dark.svg` | `art/favicon.png` | the mark **on transparency**, for slides and print |
-| `favicon.ico` **(site root)** | `favicon-disc.svg` | 16+32+48 in one file, each rendered at its own size, transparent outside the disc |
+| `favicon.ico` **(site root)** | `favicon.svg` | 16+32+48 in one file, each rendered at its own size, over a paper ground |
 | `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` | `favicon.svg` | home-screen rasters, `tools/make_icons.py` |
 | `mark-512.png`, `mark-on-dark-512.png` | `mark*.svg` | transparent rasters — what to hand somebody who asks for "the logo as a PNG" |
 | `favicon-disc-512.png` | `favicon-disc.svg` | the 512 master of the disc variant — what to upload where a service wants a PNG and will put it on dark chrome |
@@ -513,27 +513,29 @@ dark, and corner alpha `0` in both. `favicon-on-dark.svg` is linked with
 honours the attribute on `<link>` but not a query inside an SVG it is using as
 an icon.
 
-**The third answer is what the site actually ships: `favicon-disc.svg`.** It
-gives the mark its own ground instead of altering it — the same trace, the real
-alpenglow C, the real ink mountain, inside a filled white **circle**, with the
-square outside the circle transparent. The distinction from the first answer is
-the shape: a pale *rectangle* behind an icon reads as a box somebody forgot to
-remove, and that is the complaint the ground was taken out over; a disc reads as
-the icon.
+**That second answer is what the tab ships, and it is the one Kyle picked**
+after a third was tried and rejected on 2026-09-02. The third gives the mark its
+own ground instead of altering it: the same trace inside a filled white
+**circle**, transparent outside it — `favicon-disc.svg`. It solves the problem
+without the square, and it is a genuinely good asset, but a circle is a shape the
+mark does not otherwise have, so in a tab it reads as a badge rather than as the
+mark. **The disc is still generated** and is the right thing to hand a service
+that will drop an avatar onto dark chrome of its own choosing
+(`assets/images/favicon-disc-512.png`); it is simply not what the tab gets.
 
-**And it needs no media query at all**, which is why the icon block in
-`includes/header.php` is now four lines rather than five. On a dark strip the
-white disc *is* the contrast; on a light strip it disappears into the background
-and the mark reads as it always did. One file covers both schemes, so
-`favicon-on-dark.svg` is **no longer linked** — it is still generated and still
-palette-checked, and nothing on the site references it.
+Measured rather than argued, on both strips at 16, 20, 24, 32 and 48 px: corner
+alpha `0` throughout, and the **worst contrast of either ink against its own
+strip is 3.4:1** — the orange C on dark, above the 3:1 WCAG floor for a graphical
+object. The ink mountain on light comes in at 16:1, the paper one on dark at 15:1.
 
-`favicon.ico` comes off the disc too, and **keeps its transparency**. It used to
-be the one deliberately opaque file, carrying an imposed paper ground for exactly
-the dark-taskbar problem the disc solves; now the tab, the Windows taskbar and a
-pinned shortcut all show the same picture. The home-screen rasters stay on
-`favicon.svg` over full-bleed paper, because iOS composites alpha to **black** and
-a disc would arrive with four black corners.
+`favicon.ico` is **the one opaque file** again. With no disc to supply a ground
+and no way for an `.ico` to express either a media query or a `<link media=…>`,
+the flip that saves `favicon.svg` on a dark tab strip is unavailable to it — and
+its real consumer is Windows pin-to-taskbar, which is dark by default, where a
+transparent icon loses the near-black mountain and leaves a bare orange ring. A
+pale square is the least-bad answer in the one place with no better one. The
+home-screen rasters are opaque for their own reason: iOS composites alpha to
+**black**, so a transparent icon arrives in a black tile nobody chose.
 
 How much white surrounds the mark is derived, not eyeballed. `enclosing_circle()`
 measures the mark's own circumscribed circle off a render of the trace and maps
