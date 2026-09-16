@@ -9,7 +9,66 @@ rather than describing it.
 
 ---
 
-## 2026-09-02 (latest) - the favicon loses its disc, and a check that only worked by coincidence
+## 2026-09-16 (latest) - the new calendar, and clear space round the logo
+
+**Who:** Claude, at Kyle's instruction (the new calendar's integrate-calendar
+panel pasted in, then "correct the logos to have a little image border buffer").
+**Deployed:** `f3b6818`, to **https://alpine.caltech.edu**. No failures.
+
+Two commits went out together: `271f100` moved the site onto
+`caltech.alpine@gmail.com` and deleted the leftover `[bracket]` title
+stripping, and `f3b6818` gave the mark and the lockups 6% clear space from
+inside `tools/trace_logo.py`.
+
+```
+[1/3] ok - working tree is clean and matches GitHub's main.
+[2/3] logging in to portal.caltech.edu as khunady with the key ...
+      ok - authenticated, no password and no Duo push needed.
+[3/3] running /srv/www.alpine.caltech.edu/www/bin/deploy on the server.
+
+HEAD is now at f3b6818 Clear space: the logo stops butting its own edge, from the generator out
+deploying f3b6818  Clear space: the logo stops butting its own edge, from the generator out
+
+GitHub's checks on f3b6818 passed.
+
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-09-16-1628
+removed old backup docroot-2026-09-02-1538
+
+publishing...
+
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving f3b6818 - the commit just published.
+  ok   the home page loads and is ours.
+
+done.
+```
+
+**Checked afterwards, because the deploy script only proves the commit landed
+and not that the calendar swap worked.** Fetched the public pages:
+
+| | |
+|---|---|
+| `events.php` carries the new calendar id | 3 occurrences |
+| ...and the old `e13b4ff6...` one | 0 |
+| Home page "Coming up" | *Sep 23 Weekly Trail Run - Weekly on Wednesdays*, off the new feed |
+| `logo-on-dark.svg` viewBox | `-12.52 -17.52 1053.04 327.04`, i.e. the padded box is the one being served |
+
+**One thing to know before trying this locally.** The page renders "Calendar
+unavailable" on a laptop PHP build with no curl and no openssl extension -
+there is no way for it to fetch an https feed at all, so the failure says
+nothing about the calendar. Test the parser against a downloaded `.ics`
+instead, or just read the deployed page.
+
+**A stale sentence in [DEPLOY.md](DEPLOY.md), not introduced here.** Its
+preamble still says "Nothing here touches `alpine.caltech.edu`" and describes
+staging as the target. Both this deploy and the 2026-09-02 one below published
+straight to production, so that paragraph has been wrong since the cutover.
+Left alone rather than patched in passing - whoever fixes it should check the
+whole production-cutover section against what the server actually does.
+
+---
+
+## 2026-09-02 - the favicon loses its disc, and a check that only worked by coincidence
 
 **Who:** Claude, at Kyle's instruction ("i prefer the favicon without the disc.
 give it another try. and deploy yourself").
