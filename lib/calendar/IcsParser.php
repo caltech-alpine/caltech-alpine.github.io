@@ -281,7 +281,7 @@ class IcsParser
         $e->cancelled  = isset($b['STATUS']) && strtoupper($b['STATUS']['value']) === 'CANCELLED';
         $e->location   = isset($b['LOCATION']) ? $this->unescapeText($b['LOCATION']['value']) : '';
 
-        $title      = $this->cleanTitle($summary);
+        $title      = trim($summary);
         $e->title   = ($title !== '') ? $title : 'Alpine Club event';
 
         $e->descriptionHtml = $this->safeHtml($rawDesc);
@@ -559,10 +559,10 @@ class IcsParser
     /* ===================================================================== */
 
     /*
-     * The three wrappers below exist so the Google API source can reuse this
-     * class's title and description handling. Without them the two sources
-     * would drift apart and the same event would render differently depending
-     * on which one was switched on.
+     * The wrappers below exist so the Google API source can reuse this class's
+     * description handling. Without them the two sources would drift apart and
+     * the same event would render differently depending on which one was
+     * switched on.
      */
 
     /** @see safeHtml */
@@ -571,31 +571,22 @@ class IcsParser
     /** @see htmlToText */
     public function publicHtmlToText($raw) { return $this->htmlToText($raw); }
 
-    /** @see cleanTitle */
-    public function publicCleanTitle($summary) { return $this->cleanTitle($summary); }
-
-    /**
-     * "[RUN] Weekly trail run" -> "Weekly trail run".
+    /*
+     * THERE IS NO TITLE CLEANING, AND THAT IS THE DESIGN (Kyle, 2026-09-16).
      *
-     * The site used to turn that prefix into an activity label on the card.
-     * That was removed in August 2026 - the labels were not worth the table of
-     * activities, aliases and keyword guesses behind them. All that survives is
-     * this: a leading [bracket] is dropped from the displayed title, so titles
-     * typed under the old convention still read cleanly. Nothing needs to be
-     * edited in the calendar, and a new event needs no prefix.
+     * Two earlier layers are gone. The first turned a "[RUN]" prefix into an
+     * activity label on the card, and went in August 2026 because the label
+     * was not worth the table of activities, aliases and keyword guesses
+     * behind it. The second was the remnant: a leading [bracket] was silently
+     * dropped from the displayed title so old tagged events still read
+     * cleanly. That went here, because a rule that edits a title invisibly is
+     * worse than the stray bracket it removes - an officer who types a title
+     * with brackets for their own reasons gets it quietly rewritten, and
+     * nothing on the page says why.
+     *
+     * The title is now printed exactly as typed in Google Calendar. If a
+     * bracket should not appear on the site, delete it in the calendar.
      */
-    private function cleanTitle($summary)
-    {
-        $summary = trim($summary);
-
-        if (preg_match('/^\[\s*([A-Za-z0-9 _\-\/&]{1,24})\s*\]\s*(.*)$/u', $summary, $m)) {
-            $rest = trim($m[2]);
-            // A bracket with nothing after it was the whole title; keep the words.
-            return ($rest !== '') ? $rest : trim($m[1]);
-        }
-
-        return $summary;
-    }
 
     /** Undo iCalendar TEXT escaping. */
     private function unescapeText($v)

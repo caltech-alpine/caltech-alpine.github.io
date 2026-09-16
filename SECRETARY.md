@@ -360,10 +360,16 @@ person holds all the access and then graduates.
       leave** — on the server, `getent group alpinewww` lists them.
 - [ ] **The VPN.** Every Caltech account has it; they just need to know it must
       be the **"Tunnel All"** profile. Tell them, or they will lose an afternoon.
-- [ ] **The Google Calendar.** They need permission to *make changes to events*
-      on the club calendar. Whoever owns it grants that in Google Calendar's
-      own sharing settings. **This is the one that gets forgotten**, and it is
-      the one that stops the club posting trips.
+- [ ] **The Google Calendar.** Since 2026-09-16 it is the calendar belonging to
+      the club's own Google account, **caltech.alpine@gmail.com**, so handing
+      over the account hands over the calendar. Either give them the account
+      credentials or, better, share the calendar to their own Google account
+      with *Make changes to events*. **This is the one that gets forgotten**,
+      and it is the one that stops the club posting trips.
+      ⚠ Whatever else changes, the calendar must stay **public** — Google
+      Calendar → Settings → *Access permissions* → *Make available to public*.
+      The site reads it over the anonymous ICS feed, so an accidentally private
+      calendar shows as an empty "Coming Up" and nothing else.
 - [ ] **The club email addresses.** Make sure they can read `alpine@caltech.edu`
       and `alpine-secretary@caltech.edu` — the site sends visitors to both.
 - [ ] **Slack.** Whatever is needed to send invites.

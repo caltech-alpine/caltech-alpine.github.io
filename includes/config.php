@@ -68,25 +68,36 @@ return array(
 
     /* ------------------------------------------------------------ calendar */
     /*  To add an event to the website, add it to this Google Calendar.
-        There is no second step. Type the title the way it should read on the
-        site; a leading [BRACKET] left over from the old activity-tag
-        convention is dropped, and nothing replaces it.                       */
+        There is no second step, and there is no title convention: whatever you
+        type is what the site prints, verbatim.
+
+        THE CALENDAR MOVED ON 2026-09-16, from the old
+        e13b4ff6...@group.calendar.google.com secondary calendar to the club
+        account's own calendar, caltech.alpine@gmail.com. The account is the
+        thing officers actually hand over, so the calendar now travels with it
+        rather than being a share hanging off somebody's personal Google
+        account. The id is the account address itself, which is why it carries
+        no @group. suffix - the URL shapes are otherwise identical.
+
+        Whichever id sits here, the calendar must be PUBLIC ("Make available to
+        public" in Google's sharing settings). If it is not, the ICS feed 404s
+        and the site shows an empty "Coming Up" with no other symptom.        */
     'calendar' => array(
-        'calendar_id' => 'e13b4ff623b227d4b2445fe2aadc6cb2cd18080f81f9c2edfcc51f3f9a58f673@group.calendar.google.com',
+        'calendar_id' => 'caltech.alpine@gmail.com',
 
         'ics_url'     => 'https://calendar.google.com/calendar/ical/'
-                       . 'e13b4ff623b227d4b2445fe2aadc6cb2cd18080f81f9c2edfcc51f3f9a58f673%40group.calendar.google.com'
+                       . 'caltech.alpine%40gmail.com'
                        . '/public/basic.ics',
 
         'embed_url'   => 'https://calendar.google.com/calendar/embed?src='
-                       . 'e13b4ff623b227d4b2445fe2aadc6cb2cd18080f81f9c2edfcc51f3f9a58f673%40group.calendar.google.com'
+                       . 'caltech.alpine%40gmail.com'
                        . '&ctz=America%2FLos_Angeles&mode=MONTH&showTitle=0&showPrint=0&showTabs=1&showCalendars=0',
 
         // "Subscribe" links members can add to their own calendar app.
         'subscribe_google' => 'https://calendar.google.com/calendar/render?cid='
-                       . 'e13b4ff623b227d4b2445fe2aadc6cb2cd18080f81f9c2edfcc51f3f9a58f673%40group.calendar.google.com',
+                       . 'caltech.alpine%40gmail.com',
         'subscribe_ical'   => 'webcal://calendar.google.com/calendar/ical/'
-                       . 'e13b4ff623b227d4b2445fe2aadc6cb2cd18080f81f9c2edfcc51f3f9a58f673%40group.calendar.google.com'
+                       . 'caltech.alpine%40gmail.com'
                        . '/public/basic.ics',
 
         'timezone'    => 'America/Los_Angeles',

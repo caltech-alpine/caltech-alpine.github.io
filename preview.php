@@ -222,8 +222,8 @@ require __DIR__ . '/includes/header.php';
     <h2 class="h2">Parser output</h2>
     <p class="lede mt-lg">
       Every event in the window, with the fields most likely to be wrong.
-      &ldquo;Shown as&rdquo; is the raw title with any leading <code>[bracket]</code>
-      removed.
+      &ldquo;Shown as&rdquo; is the title the site prints. It is the raw title
+      trimmed and nothing else, so the two columns should match.
     </p>
 
     <div class="mt-lg" style="overflow-x:auto">

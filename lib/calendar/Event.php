@@ -17,10 +17,10 @@ class AlpineEvent
     /** Stable id from the calendar (UID, plus the occurrence date for repeats). */
     public $uid = '';
 
-    /** Title exactly as typed in Google Calendar, e.g. "[RUN] Weekly trail run". */
+    /** The SUMMARY straight off the feed, before trimming. */
     public $rawTitle = '';
 
-    /** What visitors see. A leading [bracket], if any, is dropped. */
+    /** What visitors see: the same string, trimmed. Nothing is rewritten. */
     public $title = '';
 
     /**

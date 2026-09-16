@@ -297,11 +297,12 @@ class AlpineGoogleApiCalendarSource implements AlpineCalendarSource
         $e->cancelled = (isset($item['status']) && $item['status'] === 'cancelled');
         $e->location  = isset($item['location']) ? $item['location'] : '';
 
-        // Reuse the ICS parser's title/description handling so both sources agree.
+        // Reuse the ICS parser's description handling so both sources agree.
+        // The title needs no handling: it is printed exactly as typed.
         $helper = new IcsParser($tz->getName());
         $e->descriptionHtml = $helper->publicSafeHtml($desc);
         $e->descriptionText = $helper->publicHtmlToText($desc);
-        $title     = $helper->publicCleanTitle($summary);
+        $title     = trim($summary);
         $e->title  = ($title !== '') ? $title : 'Alpine Club event';
 
         return $e;
