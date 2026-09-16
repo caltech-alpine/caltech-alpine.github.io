@@ -10,7 +10,7 @@
                top of the same page already gives the club's name to a screen
                reader. A second copy is an announcement, not information. */ ?>
       <img class="site-footer__mark" src="<?= e(asset('images/' . cfg('site.logo_dark'))) ?>"
-           alt="" width="155" height="40" aria-hidden="true">
+           alt="" width="145" height="45" aria-hidden="true">
       <?php /* IDENTITY AND TWO ADDRESSES. This block tells somebody who has
                scrolled to the bottom of any page what site they are on and
                where to write; it is not a second About page, and it is not a

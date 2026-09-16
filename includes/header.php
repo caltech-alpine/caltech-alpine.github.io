@@ -210,7 +210,7 @@ $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
     <a class="brand" href="<?= e(url('index.php')) ?>">
       <?php if (cfg('site.logo_dark') && alpine_has_image(cfg('site.logo_dark'))): ?>
         <img class="brand__logo" src="<?= e(asset('images/' . cfg('site.logo_dark'))) ?>"
-             alt="<?= e(cfg('site.logo_alt')) ?>" width="154" height="44">
+             alt="<?= e(cfg('site.logo_alt')) ?>" width="158" height="49">
       <?php else: ?>
         <span class="brand__text">
           <span class="brand__caltech">Caltech</span>

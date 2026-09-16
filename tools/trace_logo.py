@@ -283,6 +283,98 @@ def n(v):
     return s if s else "0"
 
 
+# ------------------------------------------------------------ clear space --
+
+# Fraction of the artwork's SHORTER side left blank on every side. 0.06 is a
+# ring, not a frame: visible enough that the mark stops touching whatever it is
+# placed in, small enough that the logo does not look shrunken in a header.
+CLEAR_SPACE = 0.06
+
+# WHICH FILES GET IT, AND WHY THE FAVICONS DO NOT (Kyle, 2026-09-16).
+# The two marks and the four lockups are placed BY somebody -- dropped on a
+# slide, uploaded as an org avatar, set as a masthead -- and every one of those
+# contexts crops or abuts. Measured before this existed: the mark had 4.8% left
+# and right and 0.0% top and bottom, so it sat flush against two edges and
+# looked it.
+#
+# A favicon is the opposite case. It is drawn into a box the browser chose,
+# often 16 px, and every pixel spent on margin is taken off a mark that is
+# already at the edge of legibility -- the same reason the C was redrawn 46%
+# heavier on 2026-09-02. favicon-disc.svg is more emphatic still: its disc IS
+# the edge, full-bleed by construction, and padding it just shrinks the disc.
+# make_icons.py renders the home-screen rasters from favicon.svg and imposes
+# its own inset there, which is where that decision belongs.
+CLEAR_SPACE_FILES = {
+    "mark.svg", "mark-on-dark.svg",
+    "logo.svg", "logo-on-dark.svg",
+    "logo-with-rule.svg", "logo-with-rule-on-dark.svg",
+}
+
+
+def breathe(svg, out_name, square=False, frac=CLEAR_SPACE, probe=1024):
+    """Widen the viewBox so the artwork is not flush against its own edge.
+
+    NO PATH IS TOUCHED. Only the viewBox changes, from "0 0 w h" to a box that
+    is the artwork's real extent plus a margin. That matters for more than
+    tidiness: the paths are the traced drawing, and a padding pass that moved
+    them would put this script in the business of editing artwork.
+
+    THE EXTENT IS MEASURED, NOT ASSUMED. Rendering and reading the alpha
+    channel is the only way to get it that survives the lockup's nested
+    transforms and the disc variant's circle. Computing it from the path data
+    would mean writing a bezier bbox and applying the transforms by hand, and
+    a control point's bbox is not the curve's.
+
+    `square` keeps a square output square. A non-square viewBox is STRETCHED
+    rather than letterboxed by the renderers involved here (see
+    pad_to_square()), so a mark whose artwork is 1024x1022 must not be allowed
+    to leave as a 1024x1022 box.
+    """
+    if out_name not in CLEAR_SPACE_FILES:
+        return svg
+
+    try:
+        import cairosvg
+    except ImportError:
+        sys.exit("needs cairosvg to measure clear space: "
+                 "python -m pip install cairosvg\n"
+                 "  (tools/make_icons.py already requires it)")
+
+    m = re.search(r'viewBox="([-\d.]+) ([-\d.]+) ([-\d.]+) ([-\d.]+)"', svg)
+    if not m:
+        sys.exit("%s: no viewBox to pad" % out_name)
+    vx, vy, vw, vh = (float(g) for g in m.groups())
+
+    png = cairosvg.svg2png(bytestring=svg.encode("utf-8"),
+                           output_width=probe, background_color=None)
+    im = Image.open(io.BytesIO(png)).convert("RGBA")
+    pw, ph = im.size
+    # Threshold the alpha before measuring: anti-aliasing leaves a hairline of
+    # single-digit alpha around every edge, and getbbox() on the raw channel
+    # counts it, which would report a margin the eye cannot see.
+    box = im.getchannel("A").point(lambda v: 255 if v > 8 else 0).getbbox()
+    if box is None:
+        sys.exit("%s renders empty -- refusing to pad nothing" % out_name)
+
+    # Pixels back into user units.
+    kx, ky = vw / float(pw), vh / float(ph)
+    x0, y0 = vx + box[0] * kx, vy + box[1] * ky
+    x1, y1 = vx + box[2] * kx, vy + box[3] * ky
+    cw, ch = x1 - x0, y1 - y0
+
+    pad = frac * min(cw, ch)
+    x0, y0, cw, ch = x0 - pad, y0 - pad, cw + 2 * pad, ch + 2 * pad
+
+    if square and abs(cw - ch) > 0.01:
+        side = max(cw, ch)
+        x0 -= (side - cw) / 2.0
+        y0 -= (side - ch) / 2.0
+        cw = ch = side
+
+    return svg.replace(m.group(0), 'viewBox="%s %s %s %s"'
+                       % (n(x0), n(y0), n(cw), n(ch)), 1)
+
+
 # ------------------------------------------------------------------- check --
 
 def disagreement(mask, d, w, h):
@@ -523,6 +615,11 @@ def build(spec, check_only=False, gap=None):
                '     role="img" aria-label="Caltech Alpine Club">\n%s%s\n</svg>\n'
                % (header, w, h, style, "\n".join(body)))
 
+        # The mark is square and must stay square: make_icons.py renders it
+        # into a 512x512 raster, and a box that is not square comes out
+        # stretched rather than letterboxed.
+        svg = breathe(svg, out_name, square=bool(spec.get("square")))
+
         # IT HAS TO PARSE. These files are fetched by every visitor on every
         # page, and a malformed one fails where nothing here would notice: the
         # browser shows a broken image and make_icons.py renders from it. The
@@ -731,6 +828,11 @@ def build_lockup(spec, check_only=False, gap=None):
         svg = ('%s<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d"\n'
                '     role="img" aria-label="Caltech Alpine Club">\n%s\n</svg>\n'
                % (header, w, h, "\n".join(body)))
+
+        # A lockup is wide, and nothing renders it into a fixed square, so the
+        # padded box keeps the artwork's own proportions.
+        svg = breathe(svg, out_name)
+
         try:
             import xml.etree.ElementTree as ET
             ET.fromstring(svg)

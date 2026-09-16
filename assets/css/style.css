@@ -634,13 +634,21 @@ h1, h2, h3, h4 {
   margin-right: auto;
   padding-block: .55rem;
 }
-/* SIZED BY HEIGHT, width auto. The logo is a wide lockup (3.492:1), so fixing
+/* SIZED BY HEIGHT, width auto. The logo is a wide lockup (3.220:1), so fixing
    both dimensions would squash it, and fixing the width would make the type
    size depend on how much room the bar happens to have.
 
-   2.75rem is 44px, which puts "ALPINE CLUB" at a 13.6px cap height and
-   "CALTECH" at 14.6px. Measured off art/logo.png, not guessed: those lines are
-   30.9% and 33.3% of the artwork's height.
+   3.07rem is 49px OF BOX, AND THE BOX IS NOT THE ARTWORK (2026-09-16). The SVG
+   now carries 6% clear space, so its viewBox is 1053.04x327.04 around 1024x293
+   of drawing. At 49px of box the artwork is 43.9px -- the 44px this bar was
+   built around. That is why this number went up and nothing on screen got
+   bigger. Change one of the two without the other and the type shrinks by a
+   tenth in a way that reads as "the logo looks off" and not as a cause.
+
+   At that 44px of artwork, "ALPINE CLUB" has a 13.6px cap height and "CALTECH"
+   14.6px. Measured off art/logo.png, not guessed: those lines are 30.9% and
+   33.3% of the ARTWORK's height, which is the quantity clear space leaves
+   alone.
 
    THE SMALL-LINE CAVEAT IS GONE (2026-08-31). The previous drawing set
    "CALTECH" at 12.8% of the art, i.e. 5.6px in this bar -- texture rather than
@@ -652,7 +660,7 @@ h1, h2, h3, h4 {
    The colours live in the SVG, not here: it is loaded with <img>, so it cannot
    inherit anything from this stylesheet. That is why the dark bar gets
    logo-on-dark.svg rather than a filter. */
-.brand__logo { height: 2.75rem; width: auto; }
+.brand__logo { height: 3.07rem; width: auto; }
 /* The fallback when site.logo_dark is empty. Not rendered otherwise. */
 .brand__text { display: grid; line-height: 1.05; }
 .brand__caltech {
@@ -1601,8 +1609,12 @@ body.nav-open { overflow: hidden; }
 }
 
 /* The logo is a wide lockup, not a square mark, so it is sized by HEIGHT and
-   the width follows the artwork. Fixing both would squash it. */
-.site-footer__mark { height: 2.5rem; width: auto; margin-bottom: 1rem; }
+   the width follows the artwork. Fixing both would squash it.
+
+   2.79rem, not 2.5rem, for the reason spelled out at .brand__logo: the SVG's
+   box carries 6% clear space around the drawing, so it takes 2.79rem of box to
+   put 2.5rem of artwork here. */
+.site-footer__mark { height: 2.79rem; width: auto; margin-bottom: 1rem; }
 .site-footer__blurb { font-size: .94rem; line-height: 1.65; max-width: 34ch; }
 
 /* Contact details, spelled out. The footer is on every page, so this is where
