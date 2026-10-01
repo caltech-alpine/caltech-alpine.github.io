@@ -307,7 +307,6 @@ CLEAR_SPACE = 0.06
 CLEAR_SPACE_FILES = {
     "mark.svg", "mark-on-dark.svg",
     "logo.svg", "logo-on-dark.svg",
-    "logo-with-rule.svg", "logo-with-rule-on-dark.svg",
 }
 
 
@@ -483,10 +482,218 @@ def load(spec):
     return np.asarray(im), w, h
 
 
-def build(spec, check_only=False, gap=None):
+# ------------------------------------------------------------------ vector --
+
+# Parameters per SVG path command. Relative commands scale; absolute ones scale
+# and translate. Arc flags and rotation are left alone, radii scale.
+_ARGS = {"M": 2, "L": 2, "H": 1, "V": 1, "C": 6, "S": 4, "Q": 4, "T": 2,
+         "A": 7, "Z": 0}
+_TOKEN = re.compile(r"[A-Za-z]|[-+]?(?:\d*\.\d+|\d+\.?)(?:[eE][-+]?\d+)?")
+
+
+def _affine(t):
+    """(k, e, f) for an SVG transform that is a uniform scale plus a shift.
+
+    Anything with rotation or skew exits instead of being approximated: the
+    paths are the drawing, and a transform this cannot apply exactly would
+    quietly change it. Inkscape writes translate() for a moved group, which is
+    the case that actually occurs.
+    """
+    k, e, f = 1.0, 0.0, 0.0
+    for fn, args in re.findall(r"(\w+)\s*\(([^)]*)\)", t):
+        v = [float(x) for x in re.split(r"[\s,]+", args.strip()) if x]
+        if fn == "translate":
+            a, b, c = 1.0, v[0], (v[1] if len(v) > 1 else 0.0)
+        elif fn == "scale" and (len(v) == 1 or v[0] == v[1]):
+            a, b, c = v[0], 0.0, 0.0
+        elif fn == "matrix" and v[1] == 0 and v[2] == 0 and v[0] == v[3]:
+            a, b, c = v[0], v[4], v[5]
+        else:
+            sys.exit("transform %r is not a uniform scale + shift; flatten it "
+                     "in Inkscape (Path > Object to Path, then ungroup)" % t)
+        # Listed transforms apply right to left: p -> outer(inner(p)).
+        k, e, f = k * a, k * b + e, k * c + f
+    return k, e, f
+
+
+def _move_path(d, k, e, f, pts=None):
+    """Path data with p -> k*p + (e, f) applied, rounded like the traces.
+
+    `pts`, if given, collects every point in absolute output coordinates --
+    endpoints and control points -- which bounds the curve (a bezier lies in
+    its control hull), so a probe canvas sized from it cannot clip the art.
+    """
+    out, cmd, i = [], None, 0
+    tok = _TOKEN.findall(d)
+    first = True
+    cx = cy = sx = sy = 0.0                     # current point, subpath start
+    while i < len(tok):
+        if tok[i].isalpha():
+            cmd = tok[i]
+            i += 1
+            if cmd in "Zz":
+                out.append("Z")
+                cx, cy = sx, sy
+                continue
+        # An initial "m" is absolute by definition, and it is the one relative
+        # command a translation would get wrong.
+        c = "M" if (first and cmd == "m") else cmd
+        first = False
+        U, rel = c.upper(), c.islower()
+        vals = [float(x) for x in tok[i:i + _ARGS[U]]]
+        i += _ARGS[U]
+        if U == "A":
+            vals[0] *= k; vals[1] *= k
+            xy = [(5, 6)]
+        elif U == "H":
+            vals = [k * vals[0] + (0 if rel else e)]
+            cx = cx + vals[0] if rel else vals[0]
+            xy = []
+        elif U == "V":
+            vals = [k * vals[0] + (0 if rel else f)]
+            cy = cy + vals[0] if rel else vals[0]
+            xy = []
+        else:
+            xy = [(j, j + 1) for j in range(0, len(vals), 2)]
+        for a, b in xy:
+            vals[a] = k * vals[a] + (0 if rel else e)
+            vals[b] = k * vals[b] + (0 if rel else f)
+            if pts is not None:
+                pts.append((cx + vals[a], cy + vals[b]) if rel else (vals[a], vals[b]))
+        if xy:
+            a, b = xy[-1]
+            cx, cy = (cx + vals[a], cy + vals[b]) if rel else (vals[a], vals[b])
+        if pts is not None and not xy:
+            pts.append((cx, cy))
+        out.append(c + " ".join(n(v) for v in vals))
+        if U == "M":
+            sx, sy = cx, cy
+            # After a moveto, bare pairs are linetos of the moveto's own
+            # relativity -- the letter as WRITTEN, not the M it was read as.
+            cmd = "l" if cmd.islower() else "L"
+    return " ".join(out)
+
+
+def load_vector(spec):
+    """The mark as DRAWN IN VECTOR, fitted to the spec's square frame.
+
+    WHY A SECOND KIND OF SOURCE (Kyle, 2026-09-30). The pipeline was built for a
+    mark that arrives as a raster. Kyle then redrew it in Inkscape with exact
+    geometry -- a C that is two concentric circles, a mountain whose base IS the
+    C's outer circle -- and tracing a render of that would only add error to a
+    drawing that has none. So the paths are read as they are.
+
+    WHAT IS READ. Every visible <path>, with its groups' transforms applied; a
+    layer hidden with display:none (Inkscape's eye icon) is skipped, so a
+    scratch layer can stay in the file. Each path joins the spec layer whose
+    source colour is nearest its fill -- the same rule classify() uses on
+    pixels -- and an unfilled path is black, as SVG says.
+
+    WHAT IS DONE TO IT. One uniform scale and shift, so the artwork's real
+    extent fills the `width` square exactly as a trimmed, squared raster did.
+    Everything downstream -- clear space, the disc, the lockup's placement, the
+    home-screen rasters -- then works unchanged.
+    """
+    import xml.etree.ElementTree as ET
+    path = os.path.join(ART, spec["vector"])
+    if not os.path.exists(path):
+        sys.exit("missing vector artwork: %s" % path)
+
+    found = []
+
+    def walk(el, k, e, f):
+        tag = el.tag.rsplit("}", 1)[-1]
+        if tag in ("defs", "namedview", "metadata", "title", "desc"):
+            return
+        if re.search(r"display\s*:\s*none", el.get("style", "")) \
+                or el.get("display") == "none":
+            return
+        if el.get("transform"):
+            a, b, c = _affine(el.get("transform"))
+            k, e, f = k * a, k * b + e, k * c + f
+        if tag == "path" and el.get("d"):
+            m = re.search(r"(?:^|;)\s*fill\s*:\s*([^;]+)", el.get("style", ""))
+            fill = (m.group(1) if m else el.get("fill", "#000000")).strip()
+            if fill != "none":
+                found.append((palette_rgb(fill), _move_path(el.get("d"), k, e, f)))
+        for child in el:
+            walk(child, k, e, f)
+
+    walk(ET.parse(path).getroot(), 1.0, 0.0, 0.0)
+    if not found:
+        sys.exit("%s has no visible filled <path>" % path)
+
+    by_layer = {}
+    for rgb, d in found:
+        name, _, token = min(spec["layers"], key=lambda L: sum(
+            (p - q) ** 2 for p, q in zip(rgb, L[1])))
+        if token is not None:
+            by_layer.setdefault(name, []).append(d)
+
+    # The real extent, measured by rendering (see breathe() for why not from
+    # control points). The control-point box only sizes the probe canvas.
+    import cairosvg
+    pts = []
+    for ds in by_layer.values():
+        for d in ds:
+            _move_path(d, 1.0, 0.0, 0.0, pts)
+    lo = min(min(p) for p in pts)
+    hi = max(max(p) for p in pts)
+    lo, hi = lo - 0.1 * (hi - lo), hi + 0.1 * (hi - lo)   # arcs may bulge
+    span, probe = hi - lo, 4096
+    body = "".join('<path d="%s"/>' % d for ds in by_layer.values() for d in ds)
+    png = cairosvg.svg2png(bytestring=(
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="%s %s %s %s">%s</svg>'
+        % (lo, lo, span, span, body)).encode(), output_width=probe)
+    box = Image.open(io.BytesIO(png)).getchannel("A") \
+        .point(lambda v: 255 if v > 8 else 0).getbbox()
+    u = span / float(probe)
+    x0, y0, x1, y1 = (lo + box[0] * u, lo + box[1] * u,
+                      lo + box[2] * u, lo + box[3] * u)
+
+    w = spec["width"]
+    k = w / max(x1 - x0, y1 - y0)
+    e = -k * x0 + (w - k * (x1 - x0)) / 2.0
+    f = -k * y0 + (w - k * (y1 - y0)) / 2.0
+    traced = [(name, token, " ".join(_move_path(d, k, e, f)
+                                     for d in by_layer[name]))
+              for name, _, token in spec["layers"] if name in by_layer]
+    return traced, w, w
+
+
+def palette_rgb(css):
+    """#rgb / #rrggbb / black|white to a tuple. Inkscape writes hex."""
+    css = {"black": "#000000", "white": "#ffffff"}.get(css.lower(), css)
+    h = css.lstrip("#")
+    if len(h) == 3:
+        h = "".join(c * 2 for c in h)
+    if not re.fullmatch(r"[0-9a-fA-F]{6}", h):
+        sys.exit("fill %r: only hex colours are read from vector artwork" % css)
+    return tuple(int(h[j:j + 2], 16) for j in (0, 2, 4))
+
+
+def layers_of(spec, gap=None, label=""):
+    """[(name, token, d)] for a drawing, plus (w, h) and the worst fit.
+
+    ONE ENTRY POINT FOR BOTH KINDS OF SOURCE. A spec with `vector` is read as
+    paths (see load_vector()); anything else is traced from its raster. build()
+    and build_lockup() both come through here, so the favicon files and the
+    lockup cannot end up with two different marks.
+    """
+    if spec.get("vector"):
+        traced, w, h = load_vector(spec)
+        print("  %-13s %dx%d  (vector: read as drawn, nothing traced)%s"
+              % (spec["vector"], w, h, label))
+        for name, _, d in traced:
+            print("    %-7s %6d bytes  exact" % (name, len(d)))
+        return traced, w, h, 0.0
+    return trace_layers(spec, gap, label)
+
+
+def trace_layers(spec, gap=None, label=""):
     rgba, w, h = load(spec)
     masks = classify(rgba, spec["layers"])
-    print("  %-13s %dx%d" % (spec["src"], w, h))
+    print("  %-13s %dx%d%s" % (spec["src"], w, h, label))
 
     # `gap: (shrink, against, k)` -- see widen_gap(). k is in the pixels of THIS
     # spec's own frame, which `width` states, so it does not silently mean
@@ -516,6 +723,11 @@ def build(spec, check_only=False, gap=None):
                  ("%.2f%% off" % (100 * bad)) if bad is not None
                  else "fit unmeasured (cairosvg missing)"))
         traced.append((name, token, d))
+    return traced, w, h, worst
+
+
+def build(spec, check_only=False, gap=None):
+    traced, w, h, worst = layers_of(spec, gap)
 
     for out_name, overrides, header in spec["outputs"]:
         body = []
@@ -672,7 +884,8 @@ def build_lockup(spec, check_only=False, gap=None):
     masks = classify(rgba, spec["layers"])
     cut = spec["cut"]
     print("  %-13s %dx%d  (lockup: type from x>=%d, mark from %s)"
-          % (spec["src"], w, h, cut, spec["mark"]["src"]))
+          % (spec["src"], w, h, cut,
+             spec["mark"].get("vector") or spec["mark"]["src"]))
 
     # The rule: rows inked right across the lockup. Found rather than written
     # down, so a redrawn wordmark with a thicker or higher bar still works.
@@ -711,15 +924,7 @@ def build_lockup(spec, check_only=False, gap=None):
             m = (m | rule) if keep_rule else (m & ~rule)
         keep[name] = m
 
-    # The mark, traced from its own artwork by the same code as everything else.
-    mspec = spec["mark"]
-    mrgba, mw, mh = load(mspec)
-    mmasks = classify(mrgba, mspec["layers"])
-    if mspec.get("gap"):
-        shrink, against, k = mspec["gap"]
-        mmasks = widen_gap(mmasks, shrink, against, k if gap is None else gap)
-
-    traced_type, traced_mark = [], []
+    traced_type = []
     worst = 0.0
     for name, _, token in spec["layers"]:
         if token is None:
@@ -732,14 +937,11 @@ def build_lockup(spec, check_only=False, gap=None):
               % (name, keep[name].sum(), len(d),
                  ("%.2f%% off" % (100 * bad)) if bad is not None else "unmeasured"))
         traced_type.append((name, token, d))
-    for name, _, token in mspec["layers"]:
-        if token is None:
-            continue
-        d = trace(mmasks[name], mspec.get("turdsize", 8),
-                  mspec.get("alphamax", 1.0), mspec.get("opttolerance", 0.6))
-        print("    %-7s %8d px  %6d bytes                (mark)"
-              % (name, mmasks[name].sum(), len(d)))
-        traced_mark.append((name, token, d))
+
+    # The mark, from the same entry point the favicon files use, so the lockup's
+    # mark and the tab icon's cannot come from two different readings.
+    mspec = spec["mark"]
+    traced_mark, mw, mh, _ = layers_of(mspec, gap, label="  (the lockup's mark)")
 
     # PLACEMENT. The mark is a disc, so it is placed by its circumscribed circle
     # rather than its bounding box -- same reasoning as the favicon disc, and the
@@ -760,36 +962,6 @@ def build_lockup(spec, check_only=False, gap=None):
     print("    mark    disc %.0f px tall, x 0..%.0f, sitting on the rule at y=%d; "
           "type starts at x=%d, so the gap is %.0f px"
           % (diameter, diameter, ry0, cut, cut - diameter))
-
-    # HAND-DRAWN LAYERS REPLACE TRACED ONES, AFTER PLACEMENT. The lockup wants
-    # something from the mark the favicon must not have: a mountain that runs
-    # out to the right and down into the baseline rule, so the mark and the
-    # wordmark share a ground line. There is no drawing to trace that from and
-    # no rule to derive it by -- Kyle drew it -- so it lives in its own file and
-    # is swapped in here. See art/logo-mark-rock.svg's own header.
-    #
-    # ANNOUNCED ON EVERY RUN, not silently applied. The whole point of composing
-    # the lockup is that a new art/favicon.png updates it; a hand-drawn layer is
-    # the one part that does NOT track, so the run has to say which piece is
-    # pinned. Delete the file and the traced mountain comes back.
-    for name, src in (spec.get("hand") or {}).items():
-        path = os.path.join(ART, src)
-        if not os.path.exists(path):
-            print("    hand    %s: %s is missing, using the traced %s"
-                  % (name, src, name))
-            continue
-        held = io.open(path, encoding="utf-8").read()
-        m = re.search(r'<path\b[^>]*?\sd="([^"]*)"', held, re.S)
-        if not m:
-            sys.exit("art/%s has no <path d=...>: it is the hand-drawn %s layer "
-                     "for the lockup and cannot be empty. Delete it to fall "
-                     "back to the trace." % (src, name))
-        d = " ".join(m.group(1).split())
-        traced_mark = [(nm, tk, d if nm == name else dd)
-                       for nm, tk, dd in traced_mark]
-        print("    hand    %s comes from art/%s (%d bytes), NOT from the trace; "
-              "redrawing %s will not change it"
-              % (name, src, len(d), mspec["src"]))
 
     # `type_shift` nudges the WORDMARK only, never the mark. Taking the rule away
     # takes away the thing the type was sitting on, and the two lines then read
@@ -861,17 +1033,14 @@ HEADER_LOGO = """<!--
   trace with one token swapped.
 
   COMPOSED, NOT TRACED WHOLE. The type comes from art/logo.png and the mark from
-  art/favicon.png, so a redrawn mark updates this file by itself. See
+  art/mark.svg, so a redrawn mark updates this file by itself. See
   build_lockup() in tools/trace_logo.py.
 
-  NO BASELINE RULE, chosen over the version that has one on 2026-09-02. The
-  alternative is still generated, as logo-with-rule.svg, and the reasons are
-  written up beside it. The short form: this one's mark is the FAVICON's mark,
-  the same shape to within a rounding error, so the club has one mark instead of
-  two silhouettes. Nothing in this file is drawn by hand, so all of it follows
-  the next redraw.
+  NO BASELINE RULE. A ruled version existed from 2026-09-02 and was removed on
+  2026-09-30. This one's mark is the FAVICON's mark, exactly, so the club has
+  one mark instead of two silhouettes.
 
-  GENERATED. Do not edit this file. Edit art/logo.png (type) or art/favicon.png
+  GENERATED. Do not edit this file. Edit art/logo.png (type) or art/mark.svg
   (mark) and run `python tools/trace_logo.py`.
 
   THE NAME IS IN THE ARTWORK. Anywhere this is placed must not also print
@@ -902,37 +1071,6 @@ HEADER_LOGO_DARK = """<!--
 -->
 """
 
-HEADER_LOGO_RULE = """<!--
-  THE LOCKUP WITH A BASELINE RULE. THE ALTERNATE, NOT THE LOGO. The one to use
-  is logo.svg; this is kept because it is a real design and throwing it away
-  would mean redrawing it to get it back.
-
-  WHAT IT IS. The wordmark sits on a rule that runs the width of the lockup, and
-  the mark's mountain runs out to the right and down into that rule, so the two
-  share a ground line. A disc dropped into a horizontal lockup sits IN it; this
-  one sits ON it, which is the older brand form and has more movement in it.
-
-  WHY IT IS NOT THE LOGO (2026-09-02). Three reasons, in the order that decided
-  it. Its mountain is drawn by hand and is NOT the favicon's mountain: roughly
-  88% overlap, so the club would carry two silhouettes of one mark, and a
-  redrawn favicon would update one of them and not the other. The rule is a
-  hairline: clear on a poster, most of a pixel in a masthead, gone in print at
-  business-card size, so it is a detail that only exists at one scale. And it
-  puts a third horizontal under two lines of type that are already horizontal.
-
-  Its mountain comes from art/logo-mark-rock.svg and nothing else uses that
-  file. GENERATED; see logo.svg's header.
--->
-"""
-
-HEADER_LOGO_RULE_DARK = """<!--
-  THE RULED LOCKUP, FOR DARK BACKGROUNDS. The alternate's dark twin, and not the
-  masthead logo; that is logo-on-dark.svg. Same trace, with the mountain, the
-  rule and "ALPINE CLUB" in paper. See logo-with-rule.svg's header for why this
-  family is the alternate.
--->
-"""
-
 HEADER_FAVICON = """<!--
   Favicon: a sun behind one peak, in a disc. A SIMPLER MARK THAN logo.svg, on
   purpose, and it carries no text.
@@ -954,7 +1092,7 @@ HEADER_FAVICON = """<!--
   is still written alongside the class, so a consumer that applies no CSS gets
   the light colour rather than a default black.
 
-  GENERATED from art/favicon.png. See logo.svg's header.
+  GENERATED from art/mark.svg. See logo.svg's header.
   Regenerate the raster icons after any change: python tools/make_icons.py
 -->
 """
@@ -971,7 +1109,7 @@ HEADER_FAVICON_DARK = """<!--
   path lands on a paper mountain, and a browser that does neither still gets a
   transparent icon whose only weak case is a dark tab strip.
 
-  GENERATED from art/favicon.png, from the SAME trace as favicon.svg.
+  GENERATED from art/mark.svg, from the SAME trace as favicon.svg.
 -->
 """
 
@@ -1003,7 +1141,7 @@ HEADER_FAVICON_DISC = """<!--
   the sizes and the background it actually has to survive; a 512px view flatters
   every one of them equally and decides nothing.
 
-  GENERATED from art/favicon.png, from the SAME trace as favicon.svg.
+  GENERATED from art/mark.svg, from the SAME trace as favicon.svg.
   Raster master: assets/images/favicon-disc-512.png, tools/make_icons.py.
 -->
 """
@@ -1019,7 +1157,7 @@ HEADER_MARK = """<!--
 
   THE DARK-BACKGROUND TWIN IS mark-on-dark.svg. Same trace, mountain in paper.
 
-  GENERATED from art/favicon.png. Raster copies at mark-512.png and
+  GENERATED from art/mark.svg. Raster copies at mark-512.png and
   mark-on-dark-512.png, written by tools/make_icons.py.
 -->
 """
@@ -1028,7 +1166,7 @@ HEADER_MARK_DARK = """<!--
   THE BARE MARK ON TRANSPARENCY, FOR DARK BACKGROUNDS: the mountain is paper
   rather than ink. The C keeps the accent, which reads on both.
 
-  GENERATED from art/favicon.png, from the SAME trace as mark.svg.
+  GENERATED from art/mark.svg, from the SAME trace as mark.svg.
 -->
 """
 
@@ -1060,41 +1198,29 @@ LOGO = dict(
     # art/favicon.png and this follows it, which is the point.
     cut=309,
     rule_layer="figure",
-    # NO BASELINE (Kyle, 2026-09-02). See HEADER_LOGO_RULE for the comparison
-    # that settled it. Dropping the rule takes away what the wordmark was
+    # NO BASELINE (Kyle, 2026-09-02). Dropping the rule takes away what the wordmark was
     # sitting on, so the type is nudged up to sit level against a mark that
     # still runs the full height of the frame; the number is Kyle's, off the
     # variant he drew.
     keep_rule=False,
-    type_shift=(0, -10.608173),
+    #
+    # THE x OF 2.6 HOLDS THE GAP (2026-09-30). The vector C of art/mark.svg runs
+    # its upper tip out to the full circle, where the traced C stopped short, so
+    # the mark came out 24 px wider at 4000 px and the visible gap to the type
+    # fell from 154 to 144 px. 2.6 frame units puts the type back where the eye
+    # had it, measured off both renders, rather than moving the derived mark.
+    type_shift=(2.6, -10.608173),
     # Which of THIS spec's override keys each of the mark's layers listens to.
     # Without it the dark lockup ships an ink mountain on an ink ground.
     roles={"sun": "sun", "rock": "figure"},
-    # The one layer of the mark the lockup does not take from the trace. The
-    # favicon's mountain closes the disc; the lockup's runs out to the right and
-    # down into the baseline rule so the mark and the wordmark share a ground
-    # line. Kyle drew it, there is nothing to trace it from, and deleting the
-    # file falls back to the traced mountain. art/logo-mark-rock.svg says the
-    # rest, including how to reopen it in Inkscape.
-    #
-    # ONLY THE RULED ALTERNATE USES IT. The logo takes the mark as traced, which
-    # is most of why it is the logo: nothing in it is pinned by hand.
     mark=None,          # set to FAVICON below; it is defined after this one
 )
 
-# The alternate: the same composition with the baseline kept and the hand-drawn
-# mountain that runs down into it. Everything else is LOGO's, by construction,
-# so the two cannot drift on anything except what is listed here.
-LOGO_RULE = dict(
-    LOGO,
-    keep_rule=True,
-    type_shift=None,
-    hand={"rock": "logo-mark-rock.svg"},
-    outputs=[
-        ("logo-with-rule.svg",         {},                  HEADER_LOGO_RULE),
-        ("logo-with-rule-on-dark.svg", {"figure": "paper"}, HEADER_LOGO_RULE_DARK),
-    ],
-)
+# THE RULED ALTERNATE IS GONE (Kyle, 2026-09-30: "remove the underline
+# version. I don't like it."). It was the same composition with keep_rule=True
+# and a hand-drawn mountain, art/logo-mark-rock.svg, running down into the
+# rule; that mountain tracked nothing and no longer met the redrawn C. Both
+# are in git history before this date if it is ever wanted back.
 
 # FAVICON -- an open orange C-ring with a mountain breaking out of it, on a
 # white field that is keyed out.
@@ -1144,6 +1270,12 @@ LOGO_RULE = dict(
 # against what is actually on the canvas.
 FAVICON_SUN = (254, 93, 1)
 FAVICON = dict(
+    # THE MARK IS VECTOR NOW (Kyle, 2026-09-30). art/mark.svg is read as drawn
+    # and `src` is not opened while `vector` is set; the raster settings below
+    # (trim, gap, the layer key colours as pixel keys) describe the earlier
+    # drawing and apply again only if `vector` is removed. The layer colours
+    # still matter: they are what load_vector() matches each path's fill to.
+    vector="mark.svg",
     src="favicon.png",
     trim=(254, 254, 254),
     square=True,        # see pad_to_square(); make_icons.py forces a square
@@ -1201,12 +1333,11 @@ FAVICON = dict(
 # before it can be pointed at. Tying the knot here rather than reordering the
 # two specs keeps each one's comment block next to the drawing it describes.
 LOGO["mark"] = FAVICON
-LOGO_RULE["mark"] = FAVICON
 
 # A spec with a `mark` is composed by build_lockup(); everything else is traced
 # whole by build(). One dispatch, so adding a second composed lockup later needs
 # no new branch here.
-SOURCES = [LOGO, LOGO_RULE, FAVICON]
+SOURCES = [LOGO, FAVICON]
 
 
 def main():

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!--
+  THE MARK, AS DRAWN. Kyle, 2026-09-30, in Inkscape. The source of record for
+  every mark, favicon and lockup the site serves.
+
+  READ AS VECTOR, NOT TRACED (tools/trace_logo.py, load_vector()). The C is two
+  concentric circles and the mountain's base is the C's outer circle, so a
+  trace could only add error. Only VISIBLE paths are read: the hidden
+  "scratch" layer is ignored. Each path joins the layer nearest its fill,
+  orange to the alpenglow C and black or unfilled to the ink mountain. The
+  output colours come from assets/css/style.css, not from this file.
+
+  HOW TO CHANGE IT: open in Inkscape, edit, save, then run
+  python tools/trace_logo.py, tools/make_icons.py and tools/make_social.py.
+  Supersedes art/favicon.png, which is kept as the earlier drawing.
+-->
+
+<svg
+   viewBox="-27.75 -27.25 567 567"
+   role="img"
+   aria-label="Caltech Alpine Club"
+   version="1.1"
+   id="svg2"
+   sodipodi:docname="newest-logo.svg"
+   inkscape:version="1.4.2 (f4327f4, 2025-05-13)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="namedview2"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:zoom="2"
+     inkscape:cx="276"
+     inkscape:cy="292.75"
+     inkscape:window-width="1920"
+     inkscape:window-height="1094"
+     inkscape:window-x="-11"
+     inkscape:window-y="-11"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="g4" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer1"
+     inkscape:label="scratch"
+     style="display:none">
+    <circle
+       style="fill:none;stroke:#ff0000;stroke-width:100;stroke-dasharray:none"
+       id="path3-4"
+       cx="255.05443"
+       cy="248.55443"
+       r="214.80443" />
+    <path
+       fill="#14181a"
+       d="m 238.76384,525.09307 c -58.86,-5.12 -156.069888,16.56207 -196.109886,-30.92793 L 15.977902,457.32395 C 22.112982,450.16154 242.07838,197.20639 242.07838,197.20639 l 103.47,113.17 30.05,-34 130.58679,133.17856 c 0,0 -16.60661,39.62963 -29.54661,55.61963 -8.23,10.18 -25.06099,8.74428 -36.18099,17.01428 -47.31,35.2 -145.55373,47.79421 -201.69373,42.90421 z"
+       id="path2-2"
+       sodipodi:nodetypes="cccccccccc" />
+  </g>
+  <g
+     inkscape:groupmode="layer"
+     id="g4"
+     inkscape:label="final edit">
+    <g
+       id="g6"
+       transform="translate(19.54199,7.695285)">
+      <path
+         id="circle3"
+         style="baseline-shift:baseline;display:inline;overflow:visible;vector-effect:none;fill:#be512d;fill-opacity:1;enable-background:accumulate;stop-color:#000000"
+         d="M 255.05469,-16.25 C 109.39947,-16.25 -9.75,102.89947 -9.75,248.55469 c 0,56.51336 17.9362279,109.03633 48.398438,152.1582 C 57.830804,378.6401 82.289701,350.50292 107.18164,321.87109 96.330809,299.83687 90.25,274.96124 90.25,248.55469 90.25,156.94348 163.44348,83.75 255.05469,83.75 c 61.33094,0 114.40675,32.8048 142.79297,81.97852 l 84.31836,-52.92969 C 435.75727,35.642454 351.17814,-16.25 255.05469,-16.25 Z m 144.13867,345.25781 c -28.0334,50.48841 -81.82644,84.35155 -144.13867,84.35157 -50.17882,0 -94.83265,-21.95988 -124.95899,-56.87696 -18.13223,20.8572 -36.212992,41.65834 -52.388669,60.26953 44.705159,47.11298 107.660859,76.60742 177.347659,76.60743 83.2602,0 157.04946,-42.08534 201.34179,-106.01368 z"
+         sodipodi:nodetypes="ssccssccscsccscc" />
+      <path
+         id="path4"
+         d="m 242.07812,197.20703 c 0,0 -127.44025,146.55256 -191.021479,219.7168 -3.22e-4,3.7e-4 3.22e-4,0.002 0,0.002 48.670312,58.80956 122.148769,96.4336 203.998049,96.4336 95.93084,0 180.36373,-51.68336 226.83203,-128.58399 L 375.59766,276.377 l -30.04883,34 z" />
+    </g>
+  </g>
+</svg>

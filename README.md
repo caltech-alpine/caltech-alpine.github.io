@@ -362,9 +362,19 @@ The club logo is a sun behind a mountain range, followed by the club's name.
 drift out of step.
 
 ```
-art/logo.png      the logo, as drawn: sun, mountains, CALTECH / ALPINE CLUB
-art/favicon.png   an open orange C with a mountain breaking out of it, no words
+art/logo.png      the logo, as drawn: sun, mountains, CALTECH / ALPINE CLUB (only its TYPE is used)
+art/mark.svg      THE MARK: the open orange C and the mountain, drawn in Inkscape (2026-09-30)
+art/favicon.png   the earlier raster of the mark; unused while art/mark.svg exists
 ```
+
+**The mark is read as vector, not traced (2026-09-30).** Kyle redrew it in
+Inkscape with exact geometry: the C is two concentric circles, and the
+mountain's base is the C's outer circle. `load_vector()` in `trace_logo.py`
+reads its visible paths as they are, applies Inkscape's group transforms, sorts
+each path into the C or the mountain by its fill, and scales the result into the
+512 frame the rest of the pipeline expects. Hidden layers are skipped, so a
+scratch layer can stay in the file. To change the mark: edit `art/mark.svg` in
+Inkscape, save, then run `trace_logo.py`, `make_icons.py` and `make_social.py`.
 
 **The name is inside the logo.** Anywhere `logo.svg` or `logo-on-dark.svg` is
 placed must not also print "Caltech Alpine Club" as text beside it. The
@@ -390,13 +400,12 @@ over HTTP. Same reason `docs/` and `tools/` are not in there.
 
 | File | Built from | What it is |
 |---|---|---|
-| `logo.svg` | `art/logo.png` + `art/favicon.png` | **the logo.** Type from the first, mark from the second, no baseline rule. **For light backgrounds** |
+| `logo.svg` | `art/logo.png` + `art/mark.svg` | **the logo.** Type from the first, mark from the second, no baseline rule. **For light backgrounds** |
 | `logo-on-dark.svg` | the same two | the same, light type. Masthead and footer, which are ink |
-| `logo-with-rule.svg`, `logo-with-rule-on-dark.svg` | the same two **+ `art/logo-mark-rock.svg`** | **the alternate**, not the logo: wordmark on a baseline rule, with a hand-drawn mountain running down into it. Kept, not used — see below |
-| `favicon-disc.svg` | `art/favicon.png` | the mark unaltered, inside a white disc; transparent outside it. **Not the tab icon** — a good asset for a service that puts an avatar on dark chrome |
-| `favicon.svg` | `art/favicon.png` | **the tab icon.** The wordless mark, transparent, mountain flips on `prefers-color-scheme`. Also the source of every home-screen raster and the social card |
-| `favicon-on-dark.svg` | `art/favicon.png` | the same, transparent, dark colour baked in. Linked with `media="(prefers-color-scheme: dark)"` as belt and braces |
-| `mark.svg`, `mark-on-dark.svg` | `art/favicon.png` | the mark **on transparency**, for slides and print |
+| `favicon-disc.svg` | `art/mark.svg` | the mark unaltered, inside a white disc; transparent outside it. **Not the tab icon** — a good asset for a service that puts an avatar on dark chrome |
+| `favicon.svg` | `art/mark.svg` | **the tab icon.** The wordless mark, transparent, mountain flips on `prefers-color-scheme`. Also the source of every home-screen raster and the social card |
+| `favicon-on-dark.svg` | `art/mark.svg` | the same, transparent, dark colour baked in. Linked with `media="(prefers-color-scheme: dark)"` as belt and braces |
+| `mark.svg`, `mark-on-dark.svg` | `art/mark.svg` | the mark **on transparency**, for slides and print |
 | `favicon.ico` **(site root)** | `favicon.svg` | 16+32+48 in one file, each rendered at its own size, over a paper ground |
 | `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` | `favicon.svg` | home-screen rasters, `tools/make_icons.py` |
 | `mark-512.png`, `mark-on-dark-512.png` | `mark*.svg` | transparent rasters — what to hand somebody who asks for "the logo as a PNG" |
@@ -427,7 +436,7 @@ tool made it — and Kyle redrew the mark twice on 2026-09-02 alone. So
 `build_lockup()` now keeps only the **type and its rule** from `art/logo.png`,
 throws away everything left of `cut` (x = 309, the left edge of the leftmost
 letter of either colour — the orange C of CALTECH at 309, the black A of ALPINE
-at 312), and drops in the mark traced from `art/favicon.png`. One mark, one
+at 312), and drops in the mark from `art/mark.svg`. One mark, one
 place it is drawn, and the lockup follows it. **The mark half of `art/logo.png`
 is now dead pixels**; redraw that file only when the *type* changes.
 
@@ -440,23 +449,10 @@ letters. The mark is placed by its circumscribed circle, not its bounding box,
 at the full frame height so it sits on the rule exactly as the drawn mountain
 did.
 
-**Two lockups are generated, and the one without a baseline rule is the logo.**
-Kyle drew both on 2026-09-02. `logo.svg` is the mark beside the wordmark;
-`logo-with-rule.svg` puts the wordmark on a rule that runs the width of the
-lockup, with the mountain running out to the right and down into it so the two
-share a ground line. Three things decided it, in the order they mattered:
-
-1. **The logo's mark IS the favicon's mark** — measured, not asserted: IoU
-   0.9997 on the mountain and 1.0000 on the C, the residue being curve-fitting
-   noise. The ruled version's mountain is hand-drawn and overlaps the favicon's
-   by about **88 %**, so the club would carry two silhouettes of one mark and a
-   redrawn favicon would update one of them.
-2. **Nothing in the logo is pinned by hand**, so all of it follows the next
-   redraw. The alternate depends on `art/logo-mark-rock.svg`, which tracks
-   nothing.
-3. The rule is a hairline — clear on a poster, most of a pixel in a masthead,
-   gone in print at card size — and it stacks a third horizontal under two lines
-   of type that are already horizontal.
+**There is one lockup, with no baseline rule.** A ruled version, with the
+wordmark on a rule and a hand-drawn mountain (`art/logo-mark-rock.svg`) running
+down into it, was generated from 2026-09-02 as an alternate and **removed on
+2026-09-30** at Kyle's call. It is in git history if it is ever wanted back.
 
 Dropping the rule is a **subtraction, not declining to add**: it spans the whole
 width, so most of it already sits inside the `x >= cut` region and arrives with
@@ -464,19 +460,9 @@ the letters. Getting that backwards leaves the rule under the wordmark and
 removes only the stub under the mark, which renders as a *shorter* underline and
 looks deliberate. Removing it also takes away what the type was sitting on, so
 `type_shift` nudges the wordmark up to sit level against a mark that still runs
-the full frame height; it moves the type only, never the mark.
-
-**The alternate's mountain is the one hand-drawn thing here.** It lives in
-`art/logo-mark-rock.svg`, in the favicon's own `0 0 512 512` coordinate system —
-open it in Inkscape, edit, save, re-run `trace_logo.py`. **Delete it and the
-traced mountain comes back.** `trace_logo.py` prints on every run which layer is
-pinned and that redrawing `art/favicon.png` will not change it, because a
-hand-drawn piece inside a composed file is precisely the part that does not
-track. And the mark's **placement is computed from the trace, before the
-override is swapped in**: the circle the mark is placed by is the one the C
-describes, and that mountain deliberately runs outside it. Measure the override
-instead and the mark shrinks to fit its own overhang, moving the whole lockup
-every time somebody nudges a slope.
+the full frame height; it moves the type only, never the mark. Its x of 2.6
+(2026-09-30) holds the visible mark-to-type gap at 154 px in a 4000 px render,
+which the vector C, reaching out to the full circle, had narrowed to 144.
 
 One trap that mapping closed: the two drawings name the same role differently —
 the lockup's dark layer is `figure` because it is mostly letterforms, the mark's
