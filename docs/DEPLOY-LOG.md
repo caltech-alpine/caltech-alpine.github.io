@@ -9,7 +9,34 @@ rather than describing it.
 
 ---
 
-## 2026-09-16 (latest) - the new calendar, and clear space round the logo
+## 2026-10-01 (latest) - the redrawn mark
+
+**Who:** Claude, at Kyle's instruction ("upload the new logos to alpine club
+website. github and deployment").
+**Deployed:** `89068d6`, to **https://alpine.caltech.edu**. No failures.
+
+The mark Kyle redrew in Inkscape on 2026-09-30 (`art/mark.svg`, geometry
+identical to `Desktop/alpine-logos/newest-logo.svg`; only the comment header
+differs) is now read as vector, and every mark, favicon, lockup and raster is
+regenerated from it. The ruled lockup is gone. GitHub's checks passed before
+publishing. PHP is blocked on the laptop by Windows Application Control, so
+`check.php` and `test_roles.py` ran only in CI.
+
+```
+GitHub's checks on 89068d6 passed.
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-10-01-0127
+removed old backup docroot-2026-09-02-1550
+publishing...
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving 89068d6 - the commit just published.
+  ok   the home page loads and is ours.
+```
+
+Afterwards, fetched from the public address: `logo.svg`, `logo-on-dark.svg`,
+`favicon.svg` and `mark.svg` hash identical to the repo, and
+`logo-with-rule.svg` returns 404.
+
+## 2026-09-16 - the new calendar, and clear space round the logo
 
 **Who:** Claude, at Kyle's instruction (the new calendar's integrate-calendar
 panel pasted in, then "correct the logos to have a little image border buffer").
