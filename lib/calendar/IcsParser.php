@@ -15,7 +15,8 @@
  *    - timed events in UTC (...Z), in a named zone (TZID=), or floating
  *    - STATUS:CANCELLED
  *    - repeating events: RRULE, EXDATE, and single-instance edits
- *      (RECURRENCE-ID), expanded over a bounded window
+ *      (RECURRENCE-ID), expanded over a bounded window. An edited instance
+ *      with a NEW TITLE leaves the series and is listed as a one-off.
  *    - HTML that Google puts in descriptions, reduced to a safe subset
  *
  *  Deliberate limits, so the code stays readable:
@@ -227,9 +228,19 @@ class IcsParser
                 $overrides[$uid][$ovKey]['__consumed'] = true;
                 $edited = $this->buildEvent($ov);
                 if ($edited) {
-                    // An edited instance still belongs to the series.
-                    $edited->seriesId    = $uid;
-                    $edited->repeatLabel = $label;
+                    $edited->uid = $base->uid . '#' . $key;
+                    if ($edited->title === $base->title) {
+                        // Moved, re-described, relocated: still the weekly run.
+                        $edited->seriesId    = $uid;
+                        $edited->repeatLabel = $label;
+                    }
+                    /* A RENAMED occurrence is its own event (Kyle, 2026-10-07).
+                       "Special - Beginner Trail Run" on one Wednesday is a
+                       different thing from the trail run: no "Weekly on
+                       Wednesdays" tag, and it does not take the series' slot,
+                       so the next ordinary run is listed beside it. The title
+                       is the signal because it is the one field an officer
+                       changes on purpose when an occurrence is special. */
                     $out[] = $edited;
                 }
                 continue;

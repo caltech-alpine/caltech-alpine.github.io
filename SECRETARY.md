@@ -17,7 +17,10 @@ Everything else in this repository is machinery. You can ignore it.
 - The branch that counts is **`main`**. There is only one.
 - **Events are not on GitHub at all.** They come from the club's Google Calendar.
   Adding a trip means adding a calendar event, and the website updates itself
-  within five minutes.
+  within five minutes. A repeating event shows only its next date. To make one
+  date special, open that date in Google Calendar, give it a **new title**, and
+  save it as *This event* only: the site lists it on its own, beside the next
+  regular one.
 - When you save a change, GitHub **checks it automatically** and shows a green
   tick or a red X, then rebuilds a **preview** at
   <https://caltech-alpine.github.io> so you can look at it.

@@ -89,6 +89,11 @@ jobs:
       - name: Try next year's officer changes
         run: python3 tools/test_roles.py
 
+      # A repeating event with one renamed date must list that date on its own
+      # and still show the next regular one. Built from a fixture, no network.
+      - name: Check repeating events and their special dates
+        run: php tools/test_calendar.php
+
       # The documentation is the product here -- SECRETARY.md is followed
       # literally by somebody who was promised they would never have to search
       # this repository. A link into thin air breaks that promise, and renaming

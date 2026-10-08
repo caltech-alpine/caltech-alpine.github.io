@@ -97,6 +97,16 @@ including whether the old name and address survive anywhere. Puts the files back
 afterwards. 92 checks. Also runs in CI.
 
 ```bash
+php tools/test_calendar.php
+```
+
+A weekly event whose next date was renamed in Google Calendar, run through the
+real parser and the real "next one only" collapse: the renamed date must list on
+its own with no repeat tag, and the series must show its next regular date. A
+date that was only moved keeps its place in the series. No network. Also runs
+in CI.
+
+```bash
 python tools/check_docs.py
 ```
 
