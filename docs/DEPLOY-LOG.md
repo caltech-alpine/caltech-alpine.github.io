@@ -9,7 +9,41 @@ rather than describing it.
 
 ---
 
-## 2026-10-01 (latest) - the redrawn mark
+## 2026-10-07 (latest) - a renamed date leaves its series
+
+**Who:** Claude, at Kyle's instruction ("github and deploy").
+**Deployed:** `280a361`, to **https://alpine.caltech.edu**. No failures.
+
+Kyle renamed the Oct 14 Weekly Trail Run to "Special - Beginner Trail Run".
+Google's feed carries that as a RECURRENCE-ID copy, and the site used it, but
+kept it in the series: one card, tagged "Weekly on Wednesdays", and the Oct 21
+run hidden. A date with a new title is now its own event. CI ran the new
+`tools/test_calendar.php` green before publishing. PHP ran on the laptop this
+time (8.4 from winget).
+
+Push note: the active gh account was `kyle-hunady`, which gets a 403 on this
+repo. Pushed as `caltech-alpine` with a one-shot credential helper
+(`gh auth token --user caltech-alpine`), no config changed.
+
+Live homepage after the publish, read with `curl`:
+
+```
+Sat Oct 10  Alpine Club Fall Kickoff Hike to Josephine Peak
+Wed Oct 14  Special - Beginner Trail Run
+Thu Oct 15  Alpine Club Fall Kickoff/Social!
+Wed Oct 21  Weekly Trail Run            Weekly on Wednesdays
+```
+
+```
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-10-07-2222
+publishing...
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving 280a361 - the commit just published.
+  ok   the home page loads and is ours.
+done.
+```
+
+## 2026-10-01 - the redrawn mark
 
 **Who:** Claude, at Kyle's instruction ("upload the new logos to alpine club
 website. github and deployment").
