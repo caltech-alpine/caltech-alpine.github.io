@@ -28,11 +28,13 @@
 # against the other two files and complains about anything that does not match.
 person_id,role_id,until,title_held
 zach-auvil,president,,
-haakon-ervik,treasurer,,
+haakon-ervik,treasurer,2026,
+max-freeman,treasurer,,
 kyle-hunady,secretary,,
 forrest-mccann,gear,,
 holly-krynicki,partnerships,,
-elise-sledge,climbing,,
+elise-sledge,climbing,2026,
+jj-kao,climbing,,
 jarek-kwiecinski,hiking,,
 max-freeman,hiking,,
 julian-schmitt,trail_running,,
