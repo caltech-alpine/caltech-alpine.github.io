@@ -9,7 +9,27 @@ rather than describing it.
 
 ---
 
-## 2026-10-07 (latest) - a renamed date leaves its series
+## 2026-10-27 (latest) - officer changes
+
+**Who:** Claude, at Kyle's instruction ("you can publish for me").
+**Deployed:** `bbe5458`, to **https://alpine.caltech.edu**. No failures.
+
+Max Freeman added Treasurer (keeps Hiking). JJ Kao is the new Climbing
+Commodore, with no headshot yet. Haakon Ervik and Elise Sledge got `until 2026`
+and moved to Past officers. Data-only edit to `data/assignments.csv` and
+`data/people.csv`. CI was green before publishing. Pushed as `caltech-alpine`
+with the same one-shot credential helper. Ran `tools/publish.bat` from the laptop.
+
+```
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-10-27-1255
+removed old backup docroot-2026-09-02-1711
+publishing...
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving bbe5458 - the commit just published.
+  ok   the home page loads and is ours.
+```
+
+## 2026-10-07 - a renamed date leaves its series
 
 **Who:** Claude, at Kyle's instruction ("github and deploy").
 **Deployed:** `280a361`, to **https://alpine.caltech.edu**. No failures.
