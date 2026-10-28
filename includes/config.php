@@ -173,8 +173,11 @@ return array(
         'slack'        => '',
 
 
-        /* General equipment: booked through the Caltech Y's own system. */
-        'gear_rental'  => 'https://www.caltechy.org/rentals',
+        /* General equipment: booked through the Caltech Y's own system. The
+           booking site itself, not caltechy.org/rentals: that Wix page only
+           describes the system and links here, and it was reported broken
+           (2026-10-27). go.caltechy.org verified 200, "Rental Equipment". */
+        'gear_rental'  => 'https://go.caltechy.org/',
 
         /* Specialist club gear (trad racks, ice tools, packrafts): the reservation
            form IS the booking route. The Google Form itself, not the page that
