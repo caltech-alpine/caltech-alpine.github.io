@@ -9,7 +9,27 @@ rather than describing it.
 
 ---
 
-## 2026-10-27 (latest) - officer changes
+## 2026-10-27 (latest) - gear rental link
+
+**Who:** Claude, at Kyle's instruction ("fix the gear link ... and publish").
+**Deployed:** `48c2d01`, to **https://alpine.caltech.edu**. No failures.
+
+The "Rent from the Caltech Y" button on the Gear page now goes to
+`https://go.caltechy.org/`, the Y's booking system, instead of
+`caltechy.org/rentals`, the Wix page that describes it and was reported broken.
+One line in `includes/config.php`. CI was green before publishing, and
+`go.php?to=gear_rental` returned 302 to the new address afterwards.
+
+```
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-10-27-1837
+removed old backup docroot-2026-09-02-1720
+publishing...
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving 48c2d01 - the commit just published.
+  ok   the home page loads and is ours.
+```
+
+## 2026-10-27 - officer changes
 
 **Who:** Claude, at Kyle's instruction ("you can publish for me").
 **Deployed:** `bbe5458`, to **https://alpine.caltech.edu**. No failures.
