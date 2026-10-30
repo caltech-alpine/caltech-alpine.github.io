@@ -56,7 +56,6 @@ return array(
         'children' => array(
             array('label' => 'What we do', 'href' => 'about.php#what'),
             array('label' => 'Officers',   'href' => 'about.php#officers'),
-            array('label' => 'Contact',    'href' => 'about.php#contact'),
         ),
     ),
 
@@ -67,6 +66,16 @@ return array(
             array('label' => 'Sponsorship', 'href' => 'support.php#sponsor'),
             array('label' => 'Donate',      'href' => 'support.php#donate'),
         ),
+    ),
+
+    /* CONTACT is top-level although it is only a section of About. It used to
+       be a sub-item there, and since the header shows no sub-items, a visitor
+       had to guess that "About" hides an email address. It is the one anchor
+       people arrive looking for, so it gets its own word in the menu. It stays
+       a section rather than a page: one address list, written once. */
+    array(
+        'label' => 'Contact',
+        'href'  => 'about.php#contact',
     ),
 
 );

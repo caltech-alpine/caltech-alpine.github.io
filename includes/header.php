@@ -221,7 +221,7 @@ $ogImage = alpine_has_image('social.jpg') ? 'images/social.jpg'
 
     <nav class="nav" aria-label="Main">
       <ul class="nav__list">
-        <?php /* Four plain links, no dropdowns. Every sub-item was an anchor
+        <?php /* Plain links, no dropdowns. Every sub-item was an anchor
                  inside a short page, so a hover-and-aim menu stood in front of
                  something a scroll reaches anyway. The deep links still exist
                  in the footer, where people expect to find them and no

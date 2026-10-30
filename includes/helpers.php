@@ -174,11 +174,16 @@ function alpine_data_errors()
 
 /**
  * True when a link should be marked as the current page.
- * Compares file names so query strings and anchors do not matter.
+ * Compares file names so query strings do not matter. A link to a section
+ * (about.php#contact) is never the current page, or About and Contact would
+ * both light up on about.php.
  */
 function alpine_is_current($href, $currentPage)
 {
-    $href = strtok(ltrim($href, '/'), '#?');
+    if (strpos($href, '#') !== false) {
+        return false;
+    }
+    $href = strtok(ltrim($href, '/'), '?');
     return ($href !== '' && $href === $currentPage);
 }
 
