@@ -9,7 +9,33 @@ rather than describing it.
 
 ---
 
-## 2026-10-27 (latest) - gear rental link
+## 2026-10-30 (latest) - JJ Kao headshot, Contact in the main menu
+
+**Who:** Claude, at Kyle's instruction ("github and publish").
+**Deployed:** `2221bc2`, to **https://alpine.caltech.edu**. One failure, below.
+
+JJ Kao's headshot added (raw crop in `assets/images/officers/raw/`, served copy
+made by `tools/prepare_officers.py`). Contact moved from an About sub-item to a
+top-level menu item, since the header shows no sub-items; it still points at
+`about.php#contact`. Checked at the 1060 px breakpoint: six links plus Join fit
+on one line. Afterwards the live About page listed Contact in the menu, with
+only About marked current, and `jj-kao.jpg` returned 200.
+
+**Failure:** the first `git push` was denied (403), because the active gh
+account is `kyle-hunady`. Pushed as `caltech-alpine` with the one-shot
+credential helper. Waited for CI to go green, then ran `tools/publish.bat`.
+
+```
+GitHub's checks on 2221bc2 passed.
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-10-30-1024
+removed old backup docroot-2026-09-16-1628
+publishing...
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving 2221bc2 - the commit just published.
+  ok   the home page loads and is ours.
+```
+
+## 2026-10-27 - gear rental link
 
 **Who:** Claude, at Kyle's instruction ("fix the gear link ... and publish").
 **Deployed:** `48c2d01`, to **https://alpine.caltech.edu**. No failures.
