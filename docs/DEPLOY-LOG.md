@@ -9,7 +9,7 @@ rather than describing it.
 
 ---
 
-## 2026-10-30 (latest) - JJ Kao headshot, Contact in the main menu
+## 2026-10-30 - JJ Kao headshot, Contact in the main menu
 
 **Who:** Claude, at Kyle's instruction ("github and publish").
 **Deployed:** `2221bc2`, to **https://alpine.caltech.edu**. One failure, below.
