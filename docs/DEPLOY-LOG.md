@@ -9,6 +9,29 @@ rather than describing it.
 
 ---
 
+## 2026-11-02 (latest) - hiking job title reverted
+
+**Who:** Claude, at Kyle's instruction ("revert jarek to hiking / backpacking
+coordinator. publish.").
+**Deployed:** `66ea1ae`, to **https://alpine.caltech.edu**. No failures.
+
+`git revert 11bef26`: the `hiking` role in `data/roles.csv` is "Hiking and
+Backpacking Trip Coordinator" again, not "Hiking Himbo". The title belongs to
+the role, so it changed for both holders (Jarek and Max). Pushed as
+`caltech-alpine` with the one-shot credential helper, waited for CI to go
+green, then ran `tools/publish.bat`. Afterwards the live About page read
+"Hiking and Backpacking Trip Coordinator".
+
+```
+GitHub's checks on 66ea1ae passed.
+backed up the current site to /srv/www.alpine.caltech.edu/www/backups/docroot-2026-11-02-0851
+removed old backup docroot-2026-10-01-0127
+publishing...
+checking https://alpine.caltech.edu ...
+  ok   https://alpine.caltech.edu is serving 66ea1ae - the commit just published.
+  ok   the home page loads and is ours.
+```
+
 ## 2026-10-30 - JJ Kao headshot, Contact in the main menu
 
 **Who:** Claude, at Kyle's instruction ("github and publish").
